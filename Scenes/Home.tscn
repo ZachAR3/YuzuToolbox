@@ -1,0 +1,198 @@
+[gd_scene load_steps=9 format=3 uid="uid://c7wdbnvnydnxk"]
+
+[ext_resource type="Theme" uid="uid://cnnid0n04kfr7" path="res://Themes/DarkTheme.tres" id="1_c22a4"]
+[ext_resource type="Script" path="res://Scripts/Home.cs" id="1_p51ic"]
+
+[sub_resource type="Gradient" id="Gradient_awkjf"]
+offsets = PackedFloat32Array(0, 0.520958, 1)
+colors = PackedColorArray(0.129412, 0.129412, 0.129412, 1, 0.136446, 0.131926, 0.0846704, 1, 0.129412, 0.129412, 0.129412, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_le02a"]
+gradient = SubResource("Gradient_awkjf")
+
+[sub_resource type="Gradient" id="Gradient_2l4hk"]
+offsets = PackedFloat32Array(0.219355, 1)
+colors = PackedColorArray(0.0431373, 0.0431373, 0.0431373, 1, 0.992157, 0.847059, 0.0352941, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_q43eo"]
+gradient = SubResource("Gradient_2l4hk")
+
+[sub_resource type="Gradient" id="Gradient_ytxn0"]
+offsets = PackedFloat32Array(0, 0.556886, 1)
+colors = PackedColorArray(0.509804, 0.411765, 0.286275, 1, 0.992157, 0.847059, 0.0352941, 1, 0.509804, 0.411765, 0.286275, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_k5kpi"]
+gradient = SubResource("Gradient_ytxn0")
+
+[node name="Home" type="Control" node_paths=PackedStringArray("_versionButton", "_locationButton", "_downloadButton", "_downloadProgressBar", "_downloadUpdateTimer", "_errorPopup", "_errorLabel", "_latestReleaseRequester", "_downloadRequester")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme = ExtResource("1_c22a4")
+script = ExtResource("1_p51ic")
+_versionButton = NodePath("FlowContainer/VersionSelectionButton")
+_locationButton = NodePath("FlowContainer/LocationButton")
+_downloadButton = NodePath("Footer/HBoxContainer/VBoxContainer/DownloadButton")
+_downloadProgressBar = NodePath("Footer/HBoxContainer/VBoxContainer/DownloadProgress")
+_downloadUpdateTimer = NodePath("Footer/HBoxContainer/VBoxContainer/DownloadUpdater")
+_errorPopup = NodePath("ErrorPopup")
+_errorLabel = NodePath("ErrorPopup/ErrorLabel")
+_latestReleaseRequester = NodePath("ReleaseRequester")
+_downloadRequester = NodePath("DownloadRequester")
+_pineappleLatestUrl = "https://api.github.com/repos/pineappleEA/pineapple-src/releases/latest"
+_pineappleDownloadBaseUrl = "https://github.com/pineappleEA/pineapple-src/releases/download/EA-"
+metadata/_edit_use_anchors_ = true
+
+[node name="BG" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("GradientTexture1D_le02a")
+metadata/_edit_use_anchors_ = true
+
+[node name="Header" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 0.111111
+grow_horizontal = 2
+texture = SubResource("GradientTexture2D_q43eo")
+metadata/_edit_use_anchors_ = true
+
+[node name="Label" type="Label" parent="Header"]
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = -40.5
+offset_bottom = 40.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 77
+text = "PineappleEA"
+horizontal_alignment = 1
+
+[node name="FlowContainer" type="GridContainer" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.150926
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+columns = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="VersionSelectionLabel" type="Label" parent="FlowContainer"]
+layout_mode = 2
+text = "Versions:"
+
+[node name="VersionSelectionButton" type="OptionButton" parent="FlowContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+alignment = 1
+
+[node name="LocationLabel" type="Label" parent="FlowContainer"]
+layout_mode = 2
+text = "File location:"
+
+[node name="LocationButton" type="Button" parent="FlowContainer"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Footer" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.848148
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+texture = SubResource("GradientTexture1D_k5kpi")
+metadata/_edit_use_anchors_ = true
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Footer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="LeftMargin" type="Control" parent="Footer/HBoxContainer"]
+custom_minimum_size = Vector2(10, 0)
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Footer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+metadata/_edit_use_anchors_ = true
+
+[node name="TopMargin" type="Control" parent="Footer/HBoxContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+
+[node name="DownloadProgress" type="ProgressBar" parent="Footer/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="DividerMargin" type="Control" parent="Footer/HBoxContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+
+[node name="DownloadButton" type="Button" parent="Footer/HBoxContainer/VBoxContainer"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "Download
+"
+
+[node name="DownloadUpdater" type="Timer" parent="Footer/HBoxContainer/VBoxContainer"]
+wait_time = 0.1
+
+[node name="BottomMargin" type="Control" parent="Footer/HBoxContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+
+[node name="RightMargin" type="Control" parent="Footer/HBoxContainer"]
+custom_minimum_size = Vector2(10, 0)
+layout_mode = 2
+
+[node name="ReleaseRequester" type="HTTPRequest" parent="."]
+
+[node name="DownloadRequester" type="HTTPRequest" parent="."]
+use_threads = true
+
+[node name="ErrorPopup" type="PopupPanel" parent="."]
+initial_position = 1
+size = Vector2i(600, 300)
+
+[node name="ErrorLabel" type="Label" parent="ErrorPopup"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 596.0
+offset_bottom = 296.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 20
+text = "Error:"
+metadata/_edit_use_anchors_ = true

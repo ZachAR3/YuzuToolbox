@@ -1,0 +1,30 @@
+[gd_resource type="Theme" load_steps=6 format=3 uid="uid://cnnid0n04kfr7"]
+
+[ext_resource type="StyleBox" uid="uid://cp83rblw07yd6" path="res://Themes/Styleboxes/Focus.tres" id="1_3k78v"]
+[ext_resource type="StyleBox" uid="uid://c8qvncfium48h" path="res://Themes/Styleboxes/Normal.tres" id="2_1k0p6"]
+[ext_resource type="StyleBox" uid="uid://flpqy852m2xt" path="res://Themes/Styleboxes/Pressed.tres" id="3_8s7qi"]
+[ext_resource type="FontFile" uid="uid://bs747wsxnk330" path="res://Fonts/Primary.TTF" id="4_ovalc"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a8yj4"]
+bg_color = Color(0.129412, 0.129412, 0.129412, 1)
+
+[resource]
+default_font = ExtResource("4_ovalc")
+default_font_size = 40
+Button/styles/focus = ExtResource("1_3k78v")
+Button/styles/hover = ExtResource("1_3k78v")
+Button/styles/normal = ExtResource("2_1k0p6")
+Button/styles/pressed = ExtResource("3_8s7qi")
+ItemList/styles/focus = ExtResource("1_3k78v")
+ItemList/styles/selected = ExtResource("3_8s7qi")
+ItemList/styles/selected_focus = ExtResource("3_8s7qi")
+Label/colors/font_outline_color = Color(0.992157, 0.847059, 0.0352941, 1)
+OptionButton/styles/focus = ExtResource("1_3k78v")
+OptionButton/styles/hover = ExtResource("1_3k78v")
+OptionButton/styles/normal = ExtResource("2_1k0p6")
+OptionButton/styles/pressed = ExtResource("3_8s7qi")
+Panel/styles/panel = SubResource("StyleBoxFlat_a8yj4")
+ProgressBar/colors/font_color = Color(0, 0, 0, 1)
+ProgressBar/fonts/font = ExtResource("4_ovalc")
+ProgressBar/styles/background = ExtResource("2_1k0p6")
+ProgressBar/styles/fill = ExtResource("3_8s7qi")
