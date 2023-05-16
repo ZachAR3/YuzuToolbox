@@ -6,3 +6,6 @@ A simple tool to download and update early access builds of yuzu from the [Pinea
 - Windows support.
 - Better UI and scaling.
 - Automatic desktop entry for shortcuts updating / generation.
+- Add a light theme.
+
+![](https://github.com/ZachAR3/PineappleEA-GUI/blob/main/Demo.png?raw=true)
