@@ -10,8 +10,6 @@ using ProgressBar = Godot.ProgressBar;
 
 public partial class Home : Control
 {
-	const String _appImage = "Yuzu.AppImage";
-	
 	[Export()] private OptionButton _versionButton;
 	[Export()] private Godot.Button _locationButton;
 	[Export()] private Godot.Button _downloadButton;
@@ -24,16 +22,30 @@ public partial class Home : Control
 	[Export()] private String _pineappleLatestUrl;
 	[Export()] private String _pineappleDownloadBaseUrl;
 	[Export()] private string _yuzuBaseString = "Yuzu-EA-";
-	[Export()] private string _yuzuExtensionString = ".AppImage";
+	[Export()] private string _saveName;
 	[Export()] private int _previousVersionsToAdd = 10;
 
 	private FileChooserDialog _fileChooser;
 	private ResourceSaveManager _saveManager;
 	private SettingsResource _settings;
+	private String _osUsed;
+	private string _yuzuExtensionString;
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
+		_osUsed = "Windows"; //OS.GetName();
+		if (_osUsed == "Linux")
+		{
+			_saveName += ".AppImage";
+			_yuzuExtensionString = ".AppImage";
+		}
+		else
+		{
+			_saveName += ".zip";
+			_yuzuExtensionString = ".zip";
+		}
+		
 		_saveManager = new ResourceSaveManager();
 		GetSettings();
 		_settings.SaveDirectory = _settings.SaveDirectory;
@@ -64,8 +76,8 @@ public partial class Home : Control
 		int version = _versionButton.GetItemText(versionIndex).ToInt();
 		_settings.InstalledVersion = version;
 		_downloadButton.Text = "Downloading...";
-		_downloadRequester.DownloadFile = _settings.SaveDirectory + "/" + _appImage;
-		_downloadRequester.Request(_pineappleDownloadBaseUrl + version + "/Linux-" + _yuzuBaseString + version + _yuzuExtensionString);
+		_downloadRequester.DownloadFile = _settings.SaveDirectory + "/" + _saveName;
+		_downloadRequester.Request(_pineappleDownloadBaseUrl + version + "/" + _osUsed + "-" + _yuzuBaseString + version + _yuzuExtensionString);
 		_downloadUpdateTimer.Start();
 	}
 
@@ -142,13 +154,16 @@ public partial class Home : Control
 
 	private int GetLatestVersion(String rawVersionData)
 	{
-		int versionIndex = rawVersionData.Find(_yuzuBaseString);
+		string searchName = _osUsed + "-" + _yuzuBaseString;
+		int versionIndex = rawVersionData.Find(searchName);
+		//GD.Print(versionIndex);
 
 		// Using our starting index subtract the index of our extension from it and add 1 to get the length of the version
-		int versionLength =  rawVersionData.Find(_yuzuExtensionString) - versionIndex -_yuzuExtensionString.Length + 1;
+		int versionLength =  rawVersionData.Find(_yuzuExtensionString) -versionIndex -searchName.Length;
+		//GD.Print(versionLength);
 		
 		// Return version by starting at our start index (accounting for our search string) and going the previously determined length
-		return rawVersionData.Substring(versionIndex + _yuzuBaseString.Length, versionLength).ToInt();
+		return rawVersionData.Substring(versionIndex + searchName.Length, versionLength).ToInt();
 	}
 
 
@@ -163,7 +178,7 @@ public partial class Home : Control
 			}
 			else
 			{
-				ErrorPopup("Error loading settings, please delete and regenerate.");
+				ErrorPopup("Error loading settings, please delete and regenerate settings file.");
 			}
 		}
 		else
@@ -182,7 +197,7 @@ public partial class Home : Control
 
 			foreach (var file in previousSave.GetFiles())
 			{
-				if (file.GetExtension() == "AppImage")
+				if (file.GetExtension() == "AppImage" || file.GetBaseName() == "exe")
 				{
 					return _settings.SaveDirectory + "/" + file;
 				}

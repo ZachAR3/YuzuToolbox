@@ -46,6 +46,7 @@ _latestReleaseRequester = NodePath("ReleaseRequester")
 _downloadRequester = NodePath("DownloadRequester")
 _pineappleLatestUrl = "https://api.github.com/repos/pineappleEA/pineapple-src/releases/latest"
 _pineappleDownloadBaseUrl = "https://github.com/pineappleEA/pineapple-src/releases/download/EA-"
+_saveName = "Yuzu"
 metadata/_edit_use_anchors_ = true
 
 [node name="BG" type="TextureRect" parent="."]
