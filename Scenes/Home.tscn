@@ -24,7 +24,7 @@ colors = PackedColorArray(0.509804, 0.411765, 0.286275, 1, 0.992157, 0.847059, 0
 [sub_resource type="GradientTexture1D" id="GradientTexture1D_k5kpi"]
 gradient = SubResource("Gradient_ytxn0")
 
-[node name="Home" type="Control" node_paths=PackedStringArray("_versionButton", "_locationButton", "_downloadButton", "_downloadProgressBar", "_downloadUpdateTimer", "_errorPopup", "_errorLabel", "_latestReleaseRequester", "_downloadRequester")]
+[node name="Home" type="Control" node_paths=PackedStringArray("_versionButton", "_locationButton", "_downloadButton", "_autoExtractButton", "_downloadProgressBar", "_downloadUpdateTimer", "_errorPopup", "_errorLabel", "_latestReleaseRequester", "_downloadRequester")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -38,6 +38,7 @@ script = ExtResource("1_p51ic")
 _versionButton = NodePath("FlowContainer/VersionSelectionButton")
 _locationButton = NodePath("FlowContainer/LocationButton")
 _downloadButton = NodePath("Footer/HBoxContainer/VBoxContainer/DownloadButton")
+_autoExtractButton = NodePath("FlowContainer/ExtractButton")
 _downloadProgressBar = NodePath("Footer/HBoxContainer/VBoxContainer/DownloadProgress")
 _downloadUpdateTimer = NodePath("Footer/HBoxContainer/VBoxContainer/DownloadUpdater")
 _errorPopup = NodePath("ErrorPopup")
@@ -47,6 +48,7 @@ _downloadRequester = NodePath("DownloadRequester")
 _pineappleLatestUrl = "https://api.github.com/repos/pineappleEA/pineapple-src/releases/latest"
 _pineappleDownloadBaseUrl = "https://github.com/pineappleEA/pineapple-src/releases/download/EA-"
 _saveName = "Yuzu"
+_themes = Array[Theme]([ExtResource("1_c22a4")])
 metadata/_edit_use_anchors_ = true
 
 [node name="BG" type="TextureRect" parent="."]
@@ -111,6 +113,18 @@ text = "File location:"
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="ExtractLabel" type="Label" parent="FlowContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+text = "Auto extract:"
+
+[node name="ExtractButton" type="CheckBox" parent="FlowContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+button_pressed = true
+text = "(Windows only) WARNING WILL DELETE ALL DATA IN SAVE DIRECTORY!"
+alignment = 1
 
 [node name="Footer" type="TextureRect" parent="."]
 layout_mode = 1
@@ -188,8 +202,8 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 4.0
 offset_top = 4.0
-offset_right = 596.0
-offset_bottom = 296.0
+offset_right = -4.0
+offset_bottom = -4.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3

@@ -1,11 +1,17 @@
 using Godot;
 using System;
+using Mono.Posix;
 using System.IO;
 using System.Net.Mime;
+using System.Security.AccessControl;
 using System.Text;
+using Gdk;
+using Godot.Collections;
 using Gtk;
+using Mono.Unix;
 using FileAccess = Godot.FileAccess;
 using ProgressBar = Godot.ProgressBar;
+using Window = Godot.Window;
 
 
 public partial class Home : Control
@@ -13,6 +19,7 @@ public partial class Home : Control
 	[Export()] private OptionButton _versionButton;
 	[Export()] private Godot.Button _locationButton;
 	[Export()] private Godot.Button _downloadButton;
+	[Export()] private Godot.CheckBox _autoExtractButton;
 	[Export()] private ProgressBar _downloadProgressBar;
 	[Export()] private Timer _downloadUpdateTimer;
 	[Export()] private Popup _errorPopup;
@@ -21,24 +28,29 @@ public partial class Home : Control
 	[Export()] private HttpRequest _downloadRequester;
 	[Export()] private String _pineappleLatestUrl;
 	[Export()] private String _pineappleDownloadBaseUrl;
+	[Export()] private String _windowsFolderName = "yuzu-windows-msvc-early-access";
 	[Export()] private string _yuzuBaseString = "Yuzu-EA-";
 	[Export()] private string _saveName;
 	[Export()] private int _previousVersionsToAdd = 10;
+	[Export()] private Array<Theme> _themes;
 
 	private FileChooserDialog _fileChooser;
 	private ResourceSaveManager _saveManager;
 	private SettingsResource _settings;
 	private String _osUsed;
 	private string _yuzuExtensionString;
+	private Theme _currentTheme;
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-		_osUsed = OS.GetName();
+		_currentTheme = _themes[0];
+		_osUsed = "Windows"; //OS.GetName();
 		if (_osUsed == "Linux")
 		{
 			_saveName += ".AppImage";
 			_yuzuExtensionString = ".AppImage";
+			_autoExtractButton.Disabled = true;
 		}
 		else
 		{
@@ -48,20 +60,28 @@ public partial class Home : Control
 		
 		_saveManager = new ResourceSaveManager();
 		GetSettings();
-		_settings.SaveDirectory = _settings.SaveDirectory;
 		_locationButton.Text = _settings.SaveDirectory;
 		
 		// Call a request to get the latest versions and connect it to our GetNewVersions function
 		_latestReleaseRequester.RequestCompleted += AddVersions;
 		_latestReleaseRequester.Request(_pineappleLatestUrl);
 
+		_downloadButton.Disabled = true;
 		_downloadButton.Pressed += InstallSelectedVersion;
 		_locationButton.Pressed += OpenFileChooser;
 		_downloadRequester.RequestCompleted += VersionDownloadCompleted;
 		_downloadUpdateTimer.Timeout += UpdateDownloadBar;
+		Resized += WindowResized;
 	}
 
 
+	private void WindowResized()
+	{
+		float scaleRatio = (float)GetWindow().Size.X / 1920;
+		_currentTheme.DefaultFontSize = Mathf.Clamp((int)(scaleRatio * 40), 20, 50);
+	}
+	
+	
 	private void InstallSelectedVersion()
 	{
 		DeleteOldVersion();
@@ -76,8 +96,8 @@ public partial class Home : Control
 		int version = _versionButton.GetItemText(versionIndex).ToInt();
 		_settings.InstalledVersion = version;
 		_downloadButton.Text = "Downloading...";
-		_downloadRequester.DownloadFile = _settings.SaveDirectory + "/" + _saveName;
-		_downloadRequester.Request(_pineappleDownloadBaseUrl + version + "/" + _osUsed + "-" + _yuzuBaseString + version + _yuzuExtensionString);
+		_downloadRequester.DownloadFile = $@"{_settings.SaveDirectory}/{_saveName}";
+		_downloadRequester.Request($@"{_pineappleDownloadBaseUrl}{version}/{_osUsed}-{_yuzuBaseString}{version}{_yuzuExtensionString}");
 		_downloadUpdateTimer.Start();
 	}
 
@@ -93,6 +113,7 @@ public partial class Home : Control
 			_downloadButton.Text = "Successfully Downloaded!";
 			
 			AddInstalledVersion();
+			UnpackAndSetPermissions();
 		}
 		else
 		{
@@ -124,6 +145,8 @@ public partial class Home : Control
 			{
 				AddInstalledVersion();
 			}
+
+			_downloadButton.Disabled = false;
 		}
 		else
 		{
@@ -154,7 +177,7 @@ public partial class Home : Control
 
 	private int GetLatestVersion(String rawVersionData)
 	{
-		string searchName = _osUsed + "-" + _yuzuBaseString;
+		string searchName = $@"{_osUsed}-{_yuzuBaseString}";
 		int versionIndex = rawVersionData.Find(searchName);
 		//GD.Print(versionIndex);
 
@@ -167,6 +190,31 @@ public partial class Home : Control
 	}
 
 
+	private void UnpackAndSetPermissions()
+	{
+		string yuzuPath = GetExistingVersion();
+		if (_osUsed == "Linux")
+		{
+			var yuzuFile = new Mono.Unix.UnixFileInfo(yuzuPath)
+			{
+				FileAccessPermissions = FileAccessPermissions.UserReadWriteExecute
+			};
+		}
+		else if (_osUsed == "Windows")
+		{
+			if (_autoExtractButton.ButtonPressed)
+			{
+				System.IO.Compression.ZipFile.ExtractToDirectory(yuzuPath, _settings.SaveDirectory);
+				String yuzuWindowsDirectory = $@"{_settings.SaveDirectory}/{_windowsFolderName}";
+				if (Directory.Exists(yuzuWindowsDirectory))
+				{
+					MoveFilesAndDirs(yuzuWindowsDirectory, _settings.SaveDirectory);
+				}
+			}
+		}
+	}
+
+	
 	private void GetSettings()
 	{
 		if (ResourceSaveManager.SaveExists())
@@ -197,9 +245,9 @@ public partial class Home : Control
 
 			foreach (var file in previousSave.GetFiles())
 			{
-				if (file.GetExtension() == "AppImage" || file.GetBaseName() == "exe")
+				if (file.GetExtension() == "AppImage" || file.GetExtension() == "zip")
 				{
-					return _settings.SaveDirectory + "/" + file;
+					return $@"{_settings.SaveDirectory}/{file}";
 				}
 			}
 		}	
@@ -210,17 +258,7 @@ public partial class Home : Control
 
 	private void DeleteOldVersion()
 	{
-		var existingVersionLocation = GetExistingVersion();
-		if (existingVersionLocation == "")
-		{
-			return;
-		}
-		
-		var deleteError = DirAccess.RemoveAbsolute(existingVersionLocation);
-		if (deleteError != Error.Ok)
-		{
-			ErrorPopup("Error deleting old version, file not found.");
-		}
+		DeleteDirectoryContents(_settings.SaveDirectory);
 	}
 	
 
@@ -262,9 +300,66 @@ public partial class Home : Control
 		Application.Quit();
 	}
 
+
+	static void MoveFilesAndDirs(string sourceDirectory, string targetDirectory)
+	{
+		// Create the target directory if it doesn't exist
+		if (!Directory.Exists(targetDirectory))
+		{
+			Directory.CreateDirectory(targetDirectory);
+		}
+
+		// Get all files and directories from the source directory
+		string[] files = Directory.GetFiles(sourceDirectory);
+		string[] directories = Directory.GetDirectories(sourceDirectory);
+
+		// Move files to the target directory
+		foreach (string file in files)
+		{
+			string fileName = Path.GetFileName(file);
+			string targetPath = Path.Combine(targetDirectory, fileName);
+			File.Move(file, targetPath);
+		}
+
+		// Move directories to the target directory
+		foreach (string directory in directories)
+		{
+			string directoryName = Path.GetFileName(directory);
+			string targetPath = Path.Combine(targetDirectory, directoryName);
+			Directory.Move(directory, targetPath);
+		}
+
+		// Optional: Remove the source directory if it is empty
+		if (Directory.GetFiles(sourceDirectory).Length == 0 && Directory.GetDirectories(sourceDirectory).Length == 0)
+		{
+			Directory.Delete(sourceDirectory);
+		}
+	}
+	
+	
+	
+	static void DeleteDirectoryContents(string directoryPath)
+	{
+		// Delete all files within the directory
+		string[] files = Directory.GetFiles(directoryPath);
+		foreach (string file in files)
+		{
+			File.Delete(file);
+		}
+
+		// Delete all subdirectories within the directory
+		string[] directories = Directory.GetDirectories(directoryPath);
+		foreach (string directory in directories)
+		{
+			DeleteDirectoryContents(directory); // Recursively delete subdirectory contents
+			Directory.Delete(directory);
+		}
+	}
+	
+
 	private void ErrorPopup(String error)
 	{
-		_errorLabel.Text = "Error:" + error;
+		_errorLabel.Text = $@"Error:{error}";
 		_errorPopup.Popup();
 	}
 }
