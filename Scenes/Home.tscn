@@ -122,7 +122,6 @@ text = "Auto extract:"
 [node name="ExtractButton" type="CheckBox" parent="FlowContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-button_pressed = true
 text = "(Windows only) WARNING WILL DELETE ALL DATA IN SAVE DIRECTORY!"
 alignment = 1
 

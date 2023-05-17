@@ -45,7 +45,7 @@ public partial class Home : Control
 	public override void _Ready()
 	{
 		_currentTheme = _themes[0];
-		_osUsed = "Windows"; //OS.GetName();
+		_osUsed = OS.GetName();
 		if (_osUsed == "Linux")
 		{
 			_saveName += ".AppImage";
