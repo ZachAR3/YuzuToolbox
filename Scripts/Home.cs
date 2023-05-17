@@ -34,7 +34,7 @@ public partial class Home : Control
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-		_osUsed = "Windows"; //OS.GetName();
+		_osUsed = OS.GetName();
 		if (_osUsed == "Linux")
 		{
 			_saveName += ".AppImage";
