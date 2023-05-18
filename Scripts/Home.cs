@@ -118,7 +118,9 @@ public partial class Home : Control
 			int versionIndex = _versionButton.Selected;
 			version = _versionButton.GetItemText(versionIndex).ToInt();
 		}
-		
+
+		_downloadButton.Disabled = true;
+		_locationButton.Disabled = true;
 		_settings.InstalledVersion = version;
 		_downloadButton.Text = "Downloading...";
 		_downloadRequester.DownloadFile = $@"{_settings.SaveDirectory}/{_saveName}";
@@ -130,6 +132,8 @@ public partial class Home : Control
 	private void VersionDownloadCompleted(long result, long responseCode, string[] headers, byte[] body)
 	{
 		_downloadUpdateTimer.Stop();
+		_downloadButton.Disabled = false;
+		_locationButton.Disabled = false;
 		if (result == (int)HttpRequest.Result.Success)
 		{
 			_saveManager._settings = _settings;
