@@ -2,7 +2,6 @@
 A simple tool to download and update early access builds of yuzu from the [PineappleEA](https://github.com/pineappleEA/pineapple-src "PineappleEA") Github repo. This tool is currently quite basic, but does support updating with overwrites of previous versions, saved location handling and lets you install backwards of up to 10 versions.
 
 # To-do
-- Light theme #5
 - UI overhaul #3
 - Shortcut creator #4
 
