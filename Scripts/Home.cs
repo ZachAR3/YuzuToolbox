@@ -23,6 +23,8 @@ public partial class Home : Control
 	[Export()] private Godot.Button _downloadButton;
 	[Export()] private Godot.CheckBox _autoExtractButton;
 	[Export()] private ProgressBar _downloadProgressBar;
+	[Export()] private Godot.CheckBox _customVersionCheckBox;
+	[Export()] private SpinBox _customVersionSpinBox;
 	[Export()] private Timer _downloadUpdateTimer;
 	[Export()] private Popup _errorPopup;
 	[Export()] private Godot.Label _errorLabel;
@@ -74,19 +76,31 @@ public partial class Home : Control
 		_locationButton.Pressed += OpenFileChooser;
 		_downloadRequester.RequestCompleted += VersionDownloadCompleted;
 		_downloadUpdateTimer.Timeout += UpdateDownloadBar;
+		
 		Resized += WindowResized;
+
+		_customVersionCheckBox.Toggled += CustomVersionSpinBoxEditable;
+		_customVersionSpinBox.Editable = false;
 	}
 
 
 	private void WindowResized()
 	{
 		float scaleRatio = (float)GetWindow().Size.X / 1920;
-		_currentTheme.DefaultFontSize = Mathf.Clamp((int)(scaleRatio * 40), 20, 50);
+		_currentTheme.DefaultFontSize = Mathf.Clamp((int)(scaleRatio * 35), 20, 50);
+	}
+
+
+	private void CustomVersionSpinBoxEditable(bool editable)
+	{
+		_customVersionSpinBox.Editable = editable;
+		_versionButton.Disabled = editable;
 	}
 	
 	
 	private void InstallSelectedVersion()
 	{
+		int version;
 		DeleteOldVersion();
 		
 		// Set old install (if it exists) to not be disabled anymore.
@@ -94,9 +108,17 @@ public partial class Home : Control
 		{
 			_versionButton.SetItemDisabled(_versionButton.GetItemIndex(_settings.InstalledVersion), false);
 		}
+
+		if (_customVersionCheckBox.ButtonPressed)
+		{
+			version = (int)_customVersionSpinBox.Value;
+		}
+		else
+		{
+			int versionIndex = _versionButton.Selected;
+			version = _versionButton.GetItemText(versionIndex).ToInt();
+		}
 		
-		int versionIndex = _versionButton.Selected;
-		int version = _versionButton.GetItemText(versionIndex).ToInt();
 		_settings.InstalledVersion = version;
 		_downloadButton.Text = "Downloading...";
 		_downloadRequester.DownloadFile = $@"{_settings.SaveDirectory}/{_saveName}";
@@ -136,6 +158,7 @@ public partial class Home : Control
 		if (result == (int)HttpRequest.Result.Success)
 		{
 			int latestVersion = GetLatestVersion(Encoding.UTF8.GetString(body));
+			_customVersionSpinBox.Value = latestVersion;
 
 			//Add a version item for the latest and the dictated amount of previous versions.
 			for (int previousIndex = 0; previousIndex < _previousVersionsToAdd; previousIndex++)
@@ -162,6 +185,7 @@ public partial class Home : Control
 	{
 		var installedVersion = _settings.InstalledVersion;
 		var selectedIndex = _versionButton.GetItemIndex(installedVersion);
+		_customVersionSpinBox.Value = installedVersion;
 				
 		// Checks if the item was already added, if so sets it as current, otherwise adds a new item entry for it.
 		if (selectedIndex > 0)
