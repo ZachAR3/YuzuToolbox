@@ -1,16 +1,13 @@
 using Godot;
 using System;
-using Mono.Posix;
+using System.Diagnostics;
 using System.IO;
-using System.Net.Mime;
-using System.Security.AccessControl;
 using System.Text;
-using Gdk;
 using Godot.Collections;
 using Gtk;
 using Mono.Unix;
-using CheckButton = Gtk.CheckButton;
 using FileAccess = Godot.FileAccess;
+using Image = Gtk.Image;
 using ProgressBar = Godot.ProgressBar;
 using Window = Godot.Window;
 
@@ -19,9 +16,11 @@ public partial class Home : Control
 {
 	[Export()] private float _appVersion = 1.6f;
 
+	[Export()] private Godot.Image _icon;
 	[Export()] private TextureRect _darkBg;
 	[Export()] private TextureRect _lightBg;
 	[Export()] private OptionButton _versionButton;
+	[Export()] private Godot.CheckBox _createShortcutButton;
 	[Export()] private Godot.Button _locationButton;
 	[Export()] private Godot.Button _downloadButton;
 	[Export()] private Godot.CheckBox _autoExtractButton;
@@ -59,8 +58,9 @@ public partial class Home : Control
 			_yuzuExtensionString = ".AppImage";
 			_autoExtractButton.Disabled = true;
 		}
-		else
+		else if (_osUsed == "Windows")
 		{
+			_createShortcutButton.Disabled = true;
 			_saveName += ".zip";
 			_yuzuExtensionString = ".zip";
 		}
@@ -161,6 +161,10 @@ public partial class Home : Control
 			
 			AddInstalledVersion();
 			UnpackAndSetPermissions();
+			if (_createShortcutButton.ButtonPressed)
+			{
+				CreateShortcut();
+			}
 		}
 		else
 		{
@@ -172,6 +176,71 @@ public partial class Home : Control
 	private void UpdateDownloadBar()
 	{
 		_downloadProgressBar.Value = (float)_downloadRequester.GetDownloadedBytes()/_downloadRequester.GetBodySize() * 100;
+	}
+
+
+	private void CreateShortcut()
+	{
+		String shortcutName = "pineapple-gui.desktop";
+		String iconPath = $@"{_settings.SaveDirectory}/Icon.png";
+		
+		if (_osUsed == "Linux")
+		{
+			_icon.SavePng(iconPath);
+			string shortcutContent = $@"[Desktop Entry]
+Comment[en_IN]=
+Comment=
+Exec={GetExistingVersion()}
+GenericName[en_IN]=
+GenericName=
+Icon={iconPath}
+MimeType=
+Name=Yuzu-EA
+Path=
+StartupNotify=true
+Terminal=false
+TerminalOptions=
+Type=Application
+";
+
+			if (Directory.Exists("/usr/share/applications/"))
+			{
+				string shortcutPath = $@"/usr/share/applications/{shortcutName}";
+				
+				if (File.Exists(shortcutPath))
+				{
+					try
+					{
+						File.Delete(shortcutPath);
+					}
+					catch (Exception ex)
+					{
+						ErrorPopup("Unable to delete previous shortcut...");
+					}
+				}
+
+				try
+				{
+					File.WriteAllText(shortcutPath, shortcutContent);
+				}
+				catch (Exception ex)
+				{
+					ErrorPopup($@"missing privileges to write shortcut, placing instead at :{_settings.SaveDirectory}");
+					shortcutPath = $@"{_settings.SaveDirectory}/{shortcutName}";
+					File.WriteAllText(shortcutPath, shortcutContent);
+				}
+
+				var shortcutFile = new Mono.Unix.UnixFileInfo(shortcutPath)
+				{
+					FileAccessPermissions = FileAccessPermissions.UserReadWriteExecute
+				};
+
+			}
+		}
+		else if (_osUsed == "Windows")
+		{
+			
+		}
 	}
 	
 

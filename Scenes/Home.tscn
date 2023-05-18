@@ -1,8 +1,9 @@
-[gd_scene load_steps=12 format=3 uid="uid://c7wdbnvnydnxk"]
+[gd_scene load_steps=13 format=3 uid="uid://c7wdbnvnydnxk"]
 
 [ext_resource type="Theme" uid="uid://cnnid0n04kfr7" path="res://Themes/DarkTheme.tres" id="1_c22a4"]
 [ext_resource type="Script" path="res://Scripts/Home.cs" id="1_p51ic"]
 [ext_resource type="Theme" uid="uid://dky537toysr34" path="res://Themes/LightTheme.tres" id="3_a1ctt"]
+[ext_resource type="Image" uid="uid://dt3aq1jm2e2ds" path="res://Icon.png" id="3_ltbvi"]
 
 [sub_resource type="Gradient" id="Gradient_awkjf"]
 interpolation_mode = 2
@@ -35,7 +36,7 @@ colors = PackedColorArray(0.509804, 0.411765, 0.286275, 1, 0.992157, 0.847059, 0
 [sub_resource type="GradientTexture1D" id="GradientTexture1D_k5kpi"]
 gradient = SubResource("Gradient_ytxn0")
 
-[node name="Home" type="Control" node_paths=PackedStringArray("_darkBg", "_lightBg", "_versionButton", "_locationButton", "_downloadButton", "_autoExtractButton", "_downloadProgressBar", "_customVersionCheckBox", "_customVersionSpinBox", "_downloadUpdateTimer", "_enableLightTheme", "_errorPopup", "_errorLabel", "_latestReleaseRequester", "_downloadRequester")]
+[node name="Home" type="Control" node_paths=PackedStringArray("_darkBg", "_lightBg", "_versionButton", "_createShortcutButton", "_locationButton", "_downloadButton", "_autoExtractButton", "_downloadProgressBar", "_customVersionCheckBox", "_customVersionSpinBox", "_downloadUpdateTimer", "_enableLightTheme", "_errorPopup", "_errorLabel", "_latestReleaseRequester", "_downloadRequester")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -46,9 +47,11 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 theme = ExtResource("1_c22a4")
 script = ExtResource("1_p51ic")
+_icon = ExtResource("3_ltbvi")
 _darkBg = NodePath("DarkBG")
 _lightBg = NodePath("LightBG")
 _versionButton = NodePath("FlowContainer/VersionSelectionButton")
+_createShortcutButton = NodePath("FlowContainer/CreateShortcutButton")
 _locationButton = NodePath("FlowContainer/LocationButton")
 _downloadButton = NodePath("Footer/HBoxContainer/VBoxContainer/DownloadButton")
 _autoExtractButton = NodePath("FlowContainer/ExtractButton")
@@ -193,6 +196,15 @@ text = "Auto extract:"
 [node name="ExtractButton" type="CheckBox" parent="FlowContainer"]
 layout_mode = 2
 text = "(Windows only) WARNING WILL DELETE ALL DATA IN SAVE DIRECTORY!"
+alignment = 1
+
+[node name="CreateShortcutLabel" type="Label" parent="FlowContainer"]
+layout_mode = 2
+text = "Create shortcut:  "
+
+[node name="CreateShortcutButton" type="CheckBox" parent="FlowContainer"]
+layout_mode = 2
+text = "Note:(Requires elevated permissions. Linux only)"
 alignment = 1
 
 [node name="Footer" type="TextureRect" parent="."]
