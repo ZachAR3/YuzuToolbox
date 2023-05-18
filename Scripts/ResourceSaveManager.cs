@@ -5,7 +5,7 @@ public partial class ResourceSaveManager : Resource
 {
     public const String SaveGameBasePath = "user://InternalSave";
     
-    [Export()] public float Version = 2f;
+    [Export()] public float Version;
     [Export()] public SettingsResource _settings;
 
     public void WriteSave()

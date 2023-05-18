@@ -1,18 +1,29 @@
-[gd_scene load_steps=9 format=3 uid="uid://c7wdbnvnydnxk"]
+[gd_scene load_steps=12 format=3 uid="uid://c7wdbnvnydnxk"]
 
 [ext_resource type="Theme" uid="uid://cnnid0n04kfr7" path="res://Themes/DarkTheme.tres" id="1_c22a4"]
 [ext_resource type="Script" path="res://Scripts/Home.cs" id="1_p51ic"]
+[ext_resource type="Theme" uid="uid://dky537toysr34" path="res://Themes/LightTheme.tres" id="3_a1ctt"]
 
 [sub_resource type="Gradient" id="Gradient_awkjf"]
-offsets = PackedFloat32Array(0, 0.520958, 1)
-colors = PackedColorArray(0.129412, 0.129412, 0.129412, 1, 0.136446, 0.131926, 0.0846704, 1, 0.129412, 0.129412, 0.129412, 1)
+interpolation_mode = 2
+offsets = PackedFloat32Array(0, 0.460227, 1)
+colors = PackedColorArray(0.129412, 0.129412, 0.129412, 1, 0.236142, 0.217842, 0.0125573, 1, 0.129412, 0.129412, 0.129412, 1)
 
-[sub_resource type="GradientTexture1D" id="GradientTexture1D_le02a"]
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_jfc3p"]
 gradient = SubResource("Gradient_awkjf")
 
+[sub_resource type="Gradient" id="Gradient_an2lc"]
+interpolation_mode = 2
+offsets = PackedFloat32Array(0, 0.471591, 1)
+colors = PackedColorArray(0.724643, 0.724643, 0.724643, 1, 1, 0.980728, 0.710675, 1, 0.650128, 0.650128, 0.650128, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_le02a"]
+gradient = SubResource("Gradient_an2lc")
+
 [sub_resource type="Gradient" id="Gradient_2l4hk"]
-offsets = PackedFloat32Array(0.219355, 1)
-colors = PackedColorArray(0.0431373, 0.0431373, 0.0431373, 1, 0.992157, 0.847059, 0.0352941, 1)
+interpolation_mode = 2
+offsets = PackedFloat32Array(0.00193798, 0.575581, 1)
+colors = PackedColorArray(0.936622, 0.805652, 1.92523e-06, 1, 0.343475, 0.290846, 1.44392e-07, 1, 0.992157, 0.847059, 0.0352941, 1)
 
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_q43eo"]
 gradient = SubResource("Gradient_2l4hk")
@@ -24,7 +35,7 @@ colors = PackedColorArray(0.509804, 0.411765, 0.286275, 1, 0.992157, 0.847059, 0
 [sub_resource type="GradientTexture1D" id="GradientTexture1D_k5kpi"]
 gradient = SubResource("Gradient_ytxn0")
 
-[node name="Home" type="Control" node_paths=PackedStringArray("_versionButton", "_locationButton", "_downloadButton", "_autoExtractButton", "_downloadProgressBar", "_customVersionCheckBox", "_customVersionSpinBox", "_downloadUpdateTimer", "_errorPopup", "_errorLabel", "_latestReleaseRequester", "_downloadRequester")]
+[node name="Home" type="Control" node_paths=PackedStringArray("_darkBg", "_lightBg", "_versionButton", "_locationButton", "_downloadButton", "_autoExtractButton", "_downloadProgressBar", "_customVersionCheckBox", "_customVersionSpinBox", "_downloadUpdateTimer", "_enableLightTheme", "_errorPopup", "_errorLabel", "_latestReleaseRequester", "_downloadRequester")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -35,6 +46,8 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 theme = ExtResource("1_c22a4")
 script = ExtResource("1_p51ic")
+_darkBg = NodePath("DarkBG")
+_lightBg = NodePath("LightBG")
 _versionButton = NodePath("FlowContainer/VersionSelectionButton")
 _locationButton = NodePath("FlowContainer/LocationButton")
 _downloadButton = NodePath("Footer/HBoxContainer/VBoxContainer/DownloadButton")
@@ -43,6 +56,7 @@ _downloadProgressBar = NodePath("Footer/HBoxContainer/VBoxContainer/DownloadProg
 _customVersionCheckBox = NodePath("FlowContainer/CustomVersion/CustomVersionCheckBox")
 _customVersionSpinBox = NodePath("FlowContainer/CustomVersion/CustomVersionSpinBox")
 _downloadUpdateTimer = NodePath("Footer/HBoxContainer/VBoxContainer/DownloadUpdater")
+_enableLightTheme = NodePath("Header/TextureRect/LightMode")
 _errorPopup = NodePath("ErrorPopup")
 _errorLabel = NodePath("ErrorPopup/ErrorLabel")
 _latestReleaseRequester = NodePath("ReleaseRequester")
@@ -51,10 +65,21 @@ _pineappleLatestUrl = "https://api.github.com/repos/pineappleEA/pineapple-src/re
 _pineappleDownloadBaseUrl = "https://github.com/pineappleEA/pineapple-src/releases/download/EA-"
 _saveName = "Yuzu"
 _previousVersionsToAdd = 20
-_themes = Array[Theme]([ExtResource("1_c22a4")])
+_themes = Array[Theme]([ExtResource("1_c22a4"), ExtResource("3_a1ctt")])
 metadata/_edit_use_anchors_ = true
 
-[node name="BG" type="TextureRect" parent="."]
+[node name="DarkBG" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("GradientTexture1D_jfc3p")
+metadata/_edit_use_anchors_ = true
+
+[node name="LightBG" type="TextureRect" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -86,6 +111,29 @@ grow_vertical = 2
 theme_override_font_sizes/font_size = 77
 text = "PineappleEA"
 horizontal_alignment = 1
+
+[node name="TextureRect" type="ColorRect" parent="Header"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.878125
+anchor_right = 1.0
+anchor_bottom = 0.441667
+grow_horizontal = 0
+color = Color(0.6, 0.517647, 0, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="LightMode" type="CheckBox" parent="Header/TextureRect"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = -0.00213675
+anchor_right = 1.00214
+anchor_bottom = 1.0
+offset_left = 0.5
+offset_right = -0.499985
+grow_horizontal = 2
+grow_vertical = 2
+text = "Light Mode:"
+metadata/_edit_use_anchors_ = true
 
 [node name="FlowContainer" type="GridContainer" parent="."]
 layout_mode = 1

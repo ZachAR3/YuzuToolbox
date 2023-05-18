@@ -9,6 +9,7 @@ using Gdk;
 using Godot.Collections;
 using Gtk;
 using Mono.Unix;
+using CheckButton = Gtk.CheckButton;
 using FileAccess = Godot.FileAccess;
 using ProgressBar = Godot.ProgressBar;
 using Window = Godot.Window;
@@ -16,8 +17,10 @@ using Window = Godot.Window;
 
 public partial class Home : Control
 {
-	[Export()] private float _appVersion = 1f;
-	
+	[Export()] private float _appVersion = 1.6f;
+
+	[Export()] private TextureRect _darkBg;
+	[Export()] private TextureRect _lightBg;
 	[Export()] private OptionButton _versionButton;
 	[Export()] private Godot.Button _locationButton;
 	[Export()] private Godot.Button _downloadButton;
@@ -26,6 +29,7 @@ public partial class Home : Control
 	[Export()] private Godot.CheckBox _customVersionCheckBox;
 	[Export()] private SpinBox _customVersionSpinBox;
 	[Export()] private Timer _downloadUpdateTimer;
+	[Export()] private CheckBox _enableLightTheme;
 	[Export()] private Popup _errorPopup;
 	[Export()] private Godot.Label _errorLabel;
 	[Export()] private HttpRequest _latestReleaseRequester;
@@ -48,7 +52,6 @@ public partial class Home : Control
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-		_currentTheme = _themes[0];
 		_osUsed = OS.GetName();
 		if (_osUsed == "Linux")
 		{
@@ -81,6 +84,21 @@ public partial class Home : Control
 
 		_customVersionCheckBox.Toggled += CustomVersionSpinBoxEditable;
 		_customVersionSpinBox.Editable = false;
+
+		_enableLightTheme.Toggled += SetTheme;
+	}
+
+
+	private void SetTheme(bool enableLight)
+	{
+		_lightBg.Visible = enableLight;
+		_darkBg.Visible = !enableLight;
+		_currentTheme = enableLight ? _themes[1] : _themes[0];
+		_enableLightTheme.ButtonPressed = enableLight;
+		_settings.LightModeEnabled = enableLight;
+		_saveManager._settings = _settings;
+		_saveManager.WriteSave();
+		Theme = _currentTheme;
 	}
 
 
@@ -259,7 +277,6 @@ public partial class Home : Control
 				_saveManager.WriteSave();
 			}
 			_settings = lastSave._settings;
-
 		}
 		else
 		{
@@ -267,6 +284,8 @@ public partial class Home : Control
 			_saveManager._settings = _settings;
 			_saveManager.WriteSave();
 		}
+		SetTheme(_settings.LightModeEnabled);
+
 	}
 
 	private String GetExistingVersion()
