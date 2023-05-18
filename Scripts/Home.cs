@@ -16,6 +16,8 @@ using Window = Godot.Window;
 
 public partial class Home : Control
 {
+	[Export()] private float _appVersion = 1f;
+	
 	[Export()] private OptionButton _versionButton;
 	[Export()] private Godot.Button _locationButton;
 	[Export()] private Godot.Button _downloadButton;
@@ -59,6 +61,7 @@ public partial class Home : Control
 		}
 		
 		_saveManager = new ResourceSaveManager();
+		_saveManager.Version = _appVersion;
 		GetSettings();
 		_locationButton.Text = _settings.SaveDirectory;
 		
@@ -150,7 +153,7 @@ public partial class Home : Control
 		}
 		else
 		{
-			ErrorPopup("Failed to get latest versions error code: " + responseCode);
+			CallDeferred("ErrorPopup", "Failed to get latest versions error code: " + responseCode);
 		}
 	}
 
@@ -220,14 +223,15 @@ public partial class Home : Control
 		if (ResourceSaveManager.SaveExists())
 		{
 			var lastSave = (ResourceSaveManager)ResourceSaveManager.LoadSaveGame();
-			if (lastSave != null)
+			
+			if (lastSave.Version != _appVersion)
 			{
-				_settings = lastSave._settings;
+				CallDeferred("ErrorPopup", $@"Error loading settings, version mismatch detected. Settings have been regenerated.");
+				_saveManager._settings = new SettingsResource();
+				_saveManager.WriteSave();
 			}
-			else
-			{
-				ErrorPopup("Error loading settings, please delete and regenerate settings file.");
-			}
+			_settings = lastSave._settings;
+
 		}
 		else
 		{
@@ -258,7 +262,31 @@ public partial class Home : Control
 
 	private void DeleteOldVersion()
 	{
-		DeleteDirectoryContents(_settings.SaveDirectory);
+		var oldVersion = GetExistingVersion();
+		
+		if (_osUsed == "Linux")
+		{
+			if (oldVersion != "")
+			{
+				File.Delete(oldVersion);
+			}
+		}
+		
+		else if (_osUsed == "Windows")
+		{
+			if (_autoExtractButton.ButtonPressed)
+			{
+				DeleteDirectoryContents(_settings.SaveDirectory);
+			}
+			else
+			{
+				if (oldVersion != "")
+				{
+					File.Delete(oldVersion);
+				}
+			}
+		}
+
 	}
 	
 
@@ -360,6 +388,8 @@ public partial class Home : Control
 	private void ErrorPopup(String error)
 	{
 		_errorLabel.Text = $@"Error:{error}";
-		_errorPopup.Popup();
+		_errorPopup.Visible = true;
+		_errorPopup.InitialPosition = Window.WindowInitialPosition.Absolute;
+		_errorPopup.PopupCentered();
 	}
 }

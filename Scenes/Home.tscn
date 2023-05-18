@@ -186,27 +186,27 @@ layout_mode = 2
 custom_minimum_size = Vector2(10, 0)
 layout_mode = 2
 
-[node name="ReleaseRequester" type="HTTPRequest" parent="."]
-
-[node name="DownloadRequester" type="HTTPRequest" parent="."]
-use_threads = true
-
 [node name="ErrorPopup" type="PopupPanel" parent="."]
-initial_position = 1
+initial_position = 2
 size = Vector2i(600, 300)
+always_on_top = true
 
 [node name="ErrorLabel" type="Label" parent="ErrorPopup"]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 4.0
-offset_top = 4.0
-offset_right = -4.0
-offset_bottom = -4.0
+anchors_preset = -1
+anchor_left = 0.00666667
+anchor_top = 0.0133333
+anchor_right = 0.993333
+anchor_bottom = 0.986667
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_font_sizes/font_size = 20
 text = "Error:"
+autowrap_mode = 3
 metadata/_edit_use_anchors_ = true
+
+[node name="ReleaseRequester" type="HTTPRequest" parent="."]
+
+[node name="DownloadRequester" type="HTTPRequest" parent="."]
+use_threads = true

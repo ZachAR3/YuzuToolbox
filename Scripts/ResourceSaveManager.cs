@@ -3,9 +3,9 @@ using System;
 
 public partial class ResourceSaveManager : Resource
 {
-    private const String SaveGameBasePath = "user://InternalSave";
+    public const String SaveGameBasePath = "user://InternalSave";
     
-    [Export()] private float _version = 1f;
+    [Export()] public float Version = 2f;
     [Export()] public SettingsResource _settings;
 
     public void WriteSave()
