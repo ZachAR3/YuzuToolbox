@@ -14,7 +14,8 @@ using Window = Godot.Window;
 
 public partial class Home : Control
 {
-	[Export()] private float _appVersion = 1.7f;
+	[Export()] private float _appVersion = 1.8f;
+	[Export()] private float _settingsVersion = 1.7f;
 
 	[Export()] private Godot.Image _icon;
 	[Export()] private ColorRect _header;
@@ -335,7 +336,7 @@ Categories=Game;Emulator;Qt;
 		{
 			var lastSave = (ResourceSaveManager)ResourceSaveManager.LoadSaveGame();
 			
-			if (lastSave.Version != _appVersion)
+			if (lastSave.Version != _settingsVersion)
 			{
 				CallDeferred("ErrorPopup", $@"Error loading settings, version mismatch detected. Settings have been regenerated.");
 				_saveManager._settings = new SettingsResource();
