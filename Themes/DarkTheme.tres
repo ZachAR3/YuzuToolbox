@@ -4,6 +4,7 @@
 [ext_resource type="StyleBox" uid="uid://c8qvncfium48h" path="res://Themes/Styleboxes/DarkNormal.tres" id="2_1k0p6"]
 [ext_resource type="StyleBox" uid="uid://flpqy852m2xt" path="res://Themes/Styleboxes/DarkPressed.tres" id="3_8s7qi"]
 [ext_resource type="FontFile" uid="uid://bs747wsxnk330" path="res://Fonts/Primary.TTF" id="4_ovalc"]
+[ext_resource type="StyleBox" uid="uid://b6x6lhw2bbxix" path="res://Themes/Styleboxes/DarkTransparent.tres" id="4_rkgl7"]
 
 [sub_resource type="Image" id="Image_p43ip"]
 data = {
@@ -59,37 +60,16 @@ content_margin_top = 4.0
 content_margin_right = 4.0
 content_margin_bottom = 4.0
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3mc8r"]
-content_margin_left = 4.0
-content_margin_top = 4.0
-content_margin_right = 4.0
-content_margin_bottom = 4.0
-bg_color = Color(1, 1, 1, 0.75)
-draw_center = false
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
-corner_detail = 5
-expand_margin_left = 2.0
-expand_margin_top = 2.0
-expand_margin_right = 2.0
-expand_margin_bottom = 2.0
-
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a8yj4"]
 bg_color = Color(0.129412, 0.129412, 0.129412, 1)
 
 [resource]
 default_font = ExtResource("4_ovalc")
 default_font_size = 35
-Button/styles/focus = ExtResource("1_3k78v")
-Button/styles/hover = ExtResource("1_3k78v")
+Button/styles/focus = ExtResource("3_8s7qi")
+Button/styles/hover = ExtResource("3_8s7qi")
 Button/styles/normal = ExtResource("2_1k0p6")
-Button/styles/pressed = ExtResource("3_8s7qi")
+Button/styles/pressed = ExtResource("1_3k78v")
 CheckBox/colors/font_color = Color(0.875, 0.875, 0.875, 1)
 CheckBox/colors/font_disabled_color = Color(0.875, 0.875, 0.875, 0.5)
 CheckBox/colors/font_focus_color = Color(0.95, 0.95, 0.95, 1)
@@ -109,19 +89,19 @@ CheckBox/icons/radio_unchecked_disabled = SubResource("ImageTexture_ntieb")
 CheckBox/icons/unchecked = SubResource("ImageTexture_suckm")
 CheckBox/icons/unchecked_disabled = SubResource("ImageTexture_suckm")
 CheckBox/styles/disabled = SubResource("StyleBoxEmpty_iu3he")
-CheckBox/styles/focus = SubResource("StyleBoxFlat_3mc8r")
-CheckBox/styles/hover = SubResource("StyleBoxEmpty_iu3he")
+CheckBox/styles/focus = ExtResource("3_8s7qi")
+CheckBox/styles/hover = ExtResource("3_8s7qi")
 CheckBox/styles/hover_pressed = SubResource("StyleBoxEmpty_iu3he")
-CheckBox/styles/normal = SubResource("StyleBoxEmpty_iu3he")
-CheckBox/styles/pressed = SubResource("StyleBoxEmpty_iu3he")
+CheckBox/styles/normal = ExtResource("4_rkgl7")
+CheckBox/styles/pressed = ExtResource("1_3k78v")
 ItemList/styles/focus = ExtResource("1_3k78v")
 ItemList/styles/selected = ExtResource("3_8s7qi")
 ItemList/styles/selected_focus = ExtResource("3_8s7qi")
 Label/colors/font_outline_color = Color(0.992157, 0.847059, 0.0352941, 1)
-OptionButton/styles/focus = ExtResource("1_3k78v")
-OptionButton/styles/hover = ExtResource("1_3k78v")
+OptionButton/styles/focus = ExtResource("3_8s7qi")
+OptionButton/styles/hover = ExtResource("3_8s7qi")
 OptionButton/styles/normal = ExtResource("2_1k0p6")
-OptionButton/styles/pressed = ExtResource("3_8s7qi")
+OptionButton/styles/pressed = ExtResource("1_3k78v")
 Panel/styles/panel = SubResource("StyleBoxFlat_a8yj4")
 ProgressBar/colors/font_color = Color(0, 0, 0, 1)
 ProgressBar/fonts/font = ExtResource("4_ovalc")

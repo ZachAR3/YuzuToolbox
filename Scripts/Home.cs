@@ -17,6 +17,7 @@ public partial class Home : Control
 	[Export()] private float _appVersion = 1.7f;
 
 	[Export()] private Godot.Image _icon;
+	[Export()] private ColorRect _header;
 	[Export()] private TextureRect _darkBg;
 	[Export()] private TextureRect _lightBg;
 	[Export()] private OptionButton _versionButton;
@@ -94,6 +95,7 @@ public partial class Home : Control
 		_lightBg.Visible = enableLight;
 		_darkBg.Visible = !enableLight;
 		_currentTheme = enableLight ? _themes[1] : _themes[0];
+		_header.Color = enableLight ? new Godot.Color(0.78823530673981f, 0.78823530673981f, 0.77647060155869f, 0.58039218187332f) : new Godot.Color(0.21176470816135f, 0.21176470816135f, 0.21176470816135f);
 		_enableLightTheme.ButtonPressed = enableLight;
 		_settings.LightModeEnabled = enableLight;
 		_saveManager._settings = _settings;
