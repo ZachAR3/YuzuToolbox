@@ -18,14 +18,20 @@ public partial class Home : Control
 	[Export()] private float _settingsVersion = 1.7f;
 	
 	[Export()] private Godot.Image _icon;
+	[Export()] private AudioStreamPlayer _backgroundAudio;
 	[Export()] private ColorRect _header;
+	[Export()] private ColorRect _footer;
 	[Export()] private Godot.Label _headerLabel;
 	[Export()] private TextureRect _darkBg;
 	[Export()] private TextureRect _lightBg;
+	[Export()] private Godot.VSeparator _headerSeparator;
 	[Export()] private OptionButton _versionButton;
 	[Export()] private CheckBox _createShortcutButton;
 	[Export()] private Godot.Button _locationButton;
 	[Export()] private Godot.Button _downloadButton;
+	[Export()] private Panel _downloadWindow;
+	[Export()] private ColorRect _downloadWindowApp;
+	[Export()] private Godot.Label _downloadLabel;
 	[Export()] private CheckBox _autoExtractButton;
 	[Export()] private ProgressBar _downloadProgressBar;
 	[Export()] private CheckBox _customVersionCheckBox;
@@ -34,6 +40,7 @@ public partial class Home : Control
 	[Export()] private CheckBox _enableLightTheme;
 	[Export()] private Popup _errorPopup;
 	[Export()] private Godot.Label _errorLabel;
+	[Export()] private Godot.Label _lastVersionLabel; 
 	[Export()] private HttpRequest _latestReleaseRequester;
 	[Export()] private HttpRequest _downloadRequester;
 	[Export()] private String _pineappleLatestUrl;
@@ -43,6 +50,7 @@ public partial class Home : Control
 	[Export()] private string _saveName;
 	[Export()] private int _previousVersionsToAdd = 10;
 	[Export()] private Array<Theme> _themes;
+	[Export()] private Array<StyleBoxLine> _themesSeparator;
 
 	private FileChooserDialog _fileChooser;
 	private ResourceSaveManager _saveManager;
@@ -81,6 +89,7 @@ public partial class Home : Control
 		_locationButton.Pressed += OpenFileChooser;
 		_downloadRequester.RequestCompleted += VersionDownloadCompleted;
 		_downloadUpdateTimer.Timeout += UpdateDownloadBar;
+		_downloadWindow.Visible = false;
 		
 		Resized += WindowResized;
 
@@ -95,8 +104,10 @@ public partial class Home : Control
 	{
 		_lightBg.Visible = enableLight;
 		_darkBg.Visible = !enableLight;
+		// _headerSeparator.AddThemeStyleboxOverride("separator", enableLight ? _themesSeparator[0] : _themesSeparator[1]);
 		_currentTheme = enableLight ? _themes[1] : _themes[0];
-		_header.Color = enableLight ? new Godot.Color(0.78823530673981f, 0.78823530673981f, 0.77647060155869f, 0.58039218187332f) : new Godot.Color(0.21176470816135f, 0.21176470816135f, 0.21176470816135f);
+		_header.Color = enableLight ? new Godot.Color(0.74117648601532f, 0.76470589637756f, 0.78039216995239f) : new Godot.Color(0.16862745583057f, 0.1803921610117f, 0.18823529779911f);
+		_downloadWindowApp.Color = enableLight ? new Godot.Color(0.74117648601532f, 0.76470589637756f, 0.78039216995239f) : new Godot.Color(0.16862745583057f, 0.1803921610117f, 0.18823529779911f);
 		_enableLightTheme.ButtonPressed = enableLight;
 		_settings.LightModeEnabled = enableLight;
 		_saveManager._settings = _settings;
@@ -144,7 +155,8 @@ public partial class Home : Control
 		_downloadButton.Disabled = true;
 		_locationButton.Disabled = true;
 		_settings.InstalledVersion = version;
-		_downloadButton.Text = "Downloading...";
+		_downloadLabel.Text = "Downloading...";
+		_downloadWindow.Visible = true;
 		_downloadRequester.DownloadFile = $@"{_settings.SaveDirectory}/{_saveName}";
 		_downloadRequester.Request($@"{_pineappleDownloadBaseUrl}{version}/{_osUsed}-{_yuzuBaseString}{version}{_yuzuExtensionString}");
 		_downloadUpdateTimer.Start();
@@ -161,14 +173,16 @@ public partial class Home : Control
 			_saveManager._settings = _settings;
 			_saveManager.WriteSave();
 			_downloadProgressBar.Value = 100;
-			_downloadButton.Text = "Successfully Downloaded!";
+			_downloadLabel.Text = "Successfully Downloaded!";
 			
 			AddInstalledVersion();
 			UnpackAndSetPermissions();
 			if (_createShortcutButton.ButtonPressed)
 			{
+				_downloadWindow.Visible = false;
 				CreateShortcut();
 			}
+			_downloadWindow.Visible = false;
 		}
 		else
 		{
@@ -248,6 +262,7 @@ Categories=Game;Emulator;Qt;
 		{
 			int latestVersion = GetLatestVersion(Encoding.UTF8.GetString(body));
 			_customVersionSpinBox.Value = latestVersion;
+			_lastVersionLabel.Text = $"Last: {latestVersion.ToString()}";
 
 			//Add a version item for the latest and the dictated amount of previous versions.
 			for (int previousIndex = 0; previousIndex < _previousVersionsToAdd; previousIndex++)
@@ -506,4 +521,12 @@ Categories=Game;Emulator;Qt;
 		_errorPopup.InitialPosition = Window.WindowInitialPosition.Absolute;
 		_errorPopup.PopupCentered();
 	}
+	
+	private void ToggledMusicButton(bool button_pressed)
+	{
+		if(button_pressed) {_backgroundAudio.VolumeDb = -(20.0f * (1.0f - 0.5f) + 80.0f * 0.5f);}
+		else {_backgroundAudio.VolumeDb = -20;}
+	}
 }
+
+
