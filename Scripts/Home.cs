@@ -16,18 +16,19 @@ public partial class Home : Control
 {
 	[Export()] private float _appVersion = 1.8f;
 	[Export()] private float _settingsVersion = 1.7f;
-
+	
 	[Export()] private Godot.Image _icon;
 	[Export()] private ColorRect _header;
+	[Export()] private Godot.Label _headerLabel;
 	[Export()] private TextureRect _darkBg;
 	[Export()] private TextureRect _lightBg;
 	[Export()] private OptionButton _versionButton;
-	[Export()] private Godot.CheckBox _createShortcutButton;
+	[Export()] private CheckBox _createShortcutButton;
 	[Export()] private Godot.Button _locationButton;
 	[Export()] private Godot.Button _downloadButton;
-	[Export()] private Godot.CheckBox _autoExtractButton;
+	[Export()] private CheckBox _autoExtractButton;
 	[Export()] private ProgressBar _downloadProgressBar;
-	[Export()] private Godot.CheckBox _customVersionCheckBox;
+	[Export()] private CheckBox _customVersionCheckBox;
 	[Export()] private SpinBox _customVersionSpinBox;
 	[Export()] private Timer _downloadUpdateTimer;
 	[Export()] private CheckBox _enableLightTheme;
@@ -49,8 +50,7 @@ public partial class Home : Control
 	private String _osUsed;
 	private string _yuzuExtensionString;
 	private Theme _currentTheme;
-
-	// Called when the node enters the scene tree for the first time.
+	
 	public override void _Ready()
 	{
 		_osUsed = OS.GetName();
@@ -68,7 +68,7 @@ public partial class Home : Control
 		}
 		
 		_saveManager = new ResourceSaveManager();
-		_saveManager.Version = _appVersion;
+		_saveManager.Version = _settingsVersion;
 		GetSettings();
 		_locationButton.Text = _settings.SaveDirectory;
 		
@@ -108,6 +108,7 @@ public partial class Home : Control
 	private void WindowResized()
 	{
 		float scaleRatio = (float)GetWindow().Size.X / 1920;
+		_headerLabel.AddThemeFontSizeOverride("font_size", (int)(scaleRatio * 76));
 		_currentTheme.DefaultFontSize = Mathf.Clamp((int)(scaleRatio * 35), 20, 50);
 	}
 

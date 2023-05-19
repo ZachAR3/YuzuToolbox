@@ -28,7 +28,7 @@ colors = PackedColorArray(0.427451, 0.372549, 0, 0.054902, 0.870588, 0.698039, 0
 [sub_resource type="GradientTexture1D" id="GradientTexture1D_k5kpi"]
 gradient = SubResource("Gradient_ytxn0")
 
-[node name="Home" type="Control" node_paths=PackedStringArray("_header", "_darkBg", "_lightBg", "_versionButton", "_createShortcutButton", "_locationButton", "_downloadButton", "_autoExtractButton", "_downloadProgressBar", "_customVersionCheckBox", "_customVersionSpinBox", "_downloadUpdateTimer", "_enableLightTheme", "_errorPopup", "_errorLabel", "_latestReleaseRequester", "_downloadRequester")]
+[node name="Home" type="Control" node_paths=PackedStringArray("_header", "_headerLabel", "_darkBg", "_lightBg", "_versionButton", "_createShortcutButton", "_locationButton", "_downloadButton", "_autoExtractButton", "_downloadProgressBar", "_customVersionCheckBox", "_customVersionSpinBox", "_downloadUpdateTimer", "_enableLightTheme", "_errorPopup", "_errorLabel", "_latestReleaseRequester", "_downloadRequester")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -41,6 +41,7 @@ theme = ExtResource("1_c22a4")
 script = ExtResource("1_p51ic")
 _icon = ExtResource("3_ltbvi")
 _header = NodePath("Header")
+_headerLabel = NodePath("Header/HeaderLabel")
 _darkBg = NodePath("DarkBG")
 _lightBg = NodePath("LightBG")
 _versionButton = NodePath("ControlsContainer/VersionSelectionButton")
@@ -52,7 +53,7 @@ _downloadProgressBar = NodePath("Footer/HBoxContainer/VBoxContainer/DownloadProg
 _customVersionCheckBox = NodePath("ControlsContainer/CustomVersion/CustomVersionCheckBox")
 _customVersionSpinBox = NodePath("ControlsContainer/CustomVersion/CustomVersionSpinBox")
 _downloadUpdateTimer = NodePath("Footer/HBoxContainer/VBoxContainer/DownloadUpdater")
-_enableLightTheme = NodePath("Header/LightModeBG/LightMode")
+_enableLightTheme = NodePath("Header/LightMode")
 _errorPopup = NodePath("ErrorPopup")
 _errorLabel = NodePath("ErrorPopup/ErrorLabel")
 _latestReleaseRequester = NodePath("ReleaseRequester")
@@ -94,7 +95,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.211765, 0.211765, 0.211765, 1)
 
-[node name="Label" type="Label" parent="Header"]
+[node name="HeaderLabel" type="Label" parent="Header"]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.0630208
@@ -103,39 +104,26 @@ anchor_right = 1.0
 anchor_bottom = 0.833334
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_font_sizes/font_size = 77
+theme_override_font_sizes/font_size = 76
 text = "PineappleEA"
 metadata/_edit_use_anchors_ = true
 
-[node name="LightModeBG" type="ColorRect" parent="Header"]
+[node name="LightMode" type="CheckBox" parent="Header"]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.878125
+anchor_left = 0.859896
 anchor_right = 1.0
-anchor_bottom = 0.441667
+anchor_bottom = 0.500001
 grow_horizontal = 0
-color = Color(0.384314, 0.396078, 0.380392, 1)
-metadata/_edit_use_anchors_ = true
-
-[node name="LightMode" type="CheckBox" parent="Header/LightModeBG"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = -0.00213675
-anchor_right = 1.00214
-anchor_bottom = 1.0
-offset_left = 0.5
-offset_right = -0.499985
-grow_horizontal = 2
-grow_vertical = 2
 text = "Light Mode:"
 metadata/_edit_use_anchors_ = true
 
 [node name="Icon" type="TextureRect" parent="Header"]
 layout_mode = 1
 anchors_preset = -1
-anchor_top = 0.0833329
+anchor_top = 0.0833334
 anchor_right = 0.0520833
-anchor_bottom = 0.916667
+anchor_bottom = 0.916668
 grow_vertical = 2
 texture = ExtResource("5_4ib1e")
 metadata/_edit_use_anchors_ = true
