@@ -195,7 +195,7 @@ text = "Auto extract:"
 
 [node name="ExtractButton" type="CheckBox" parent="FlowContainer"]
 layout_mode = 2
-text = "(Windows only) WARNING WILL DELETE ALL DATA IN SAVE DIRECTORY!"
+text = "(Windows only) WARNING WILL DELETE ALL DATA IN YUZU DIRECTORY"
 alignment = 1
 
 [node name="CreateShortcutLabel" type="Label" parent="FlowContainer"]
@@ -204,7 +204,7 @@ text = "Create shortcut:  "
 
 [node name="CreateShortcutButton" type="CheckBox" parent="FlowContainer"]
 layout_mode = 2
-text = "Note:(Requires elevated permissions. Linux only)"
+text = "(Linux only) Creates a start menu shortcut for yuzu-ea"
 alignment = 1
 
 [node name="Footer" type="TextureRect" parent="."]
