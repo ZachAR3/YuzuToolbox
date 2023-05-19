@@ -14,7 +14,7 @@ using Window = Godot.Window;
 
 public partial class Home : Control
 {
-	[Export()] private float _appVersion = 1.6f;
+	[Export()] private float _appVersion = 1.7f;
 
 	[Export()] private Godot.Image _icon;
 	[Export()] private TextureRect _darkBg;
@@ -181,18 +181,17 @@ public partial class Home : Control
 
 	private void CreateShortcut()
 	{
-		String shortcutName = "pineapple-gui.desktop";
+		String shortcutName = "yuzu-ea.desktop";
 		String iconPath = $@"{_settings.SaveDirectory}/Icon.png";
 		
 		if (_osUsed == "Linux")
 		{
 			_icon.SavePng(iconPath);
-			string shortcutContent = $@"[Desktop Entry]
-Comment[en_IN]=
-Comment=
+			string shortcutContent = $@"
+[Desktop Entry]
+Comment=Nintendo Switch video game console emulator
 Exec={GetExistingVersion()}
-GenericName[en_IN]=
-GenericName=
+GenericName=Switch Emulator
 Icon={iconPath}
 MimeType=
 Name=Yuzu-EA
@@ -201,40 +200,35 @@ StartupNotify=true
 Terminal=false
 TerminalOptions=
 Type=Application
+Keywords=Nintendo;Switch;
+Categories=Game;Emulator;Qt;
 ";
 
 			if (Directory.Exists("/usr/share/applications/"))
 			{
 				string shortcutPath = $@"/usr/share/applications/{shortcutName}";
-				
-				if (File.Exists(shortcutPath))
-				{
-					try
-					{
-						File.Delete(shortcutPath);
-					}
-					catch (Exception ex)
-					{
-						ErrorPopup("Unable to delete previous shortcut...");
-					}
-				}
 
 				try
 				{
-					File.WriteAllText(shortcutPath, shortcutContent);
+					string tempShortcutPath = $@"{_settings.SaveDirectory}/{shortcutName}";
+					File.WriteAllText(tempShortcutPath, shortcutContent);
+					ProcessStartInfo startInfo = new ProcessStartInfo
+					{
+						FileName = "pkexec",
+						Arguments = $"mv {tempShortcutPath} {shortcutPath}",
+						UseShellExecute = false
+					};
+
+					Process process = new Process { StartInfo = startInfo };
+					process.Start();
+					process.WaitForExit();
 				}
-				catch (Exception ex)
+				catch (Exception shortcutError)
 				{
-					ErrorPopup($@"missing privileges to write shortcut, placing instead at :{_settings.SaveDirectory}");
+					ErrorPopup($@"Error creating shortcut, creating new at {shortcutPath}. Error:{shortcutError}");
 					shortcutPath = $@"{_settings.SaveDirectory}/{shortcutName}";
 					File.WriteAllText(shortcutPath, shortcutContent);
 				}
-
-				var shortcutFile = new Mono.Unix.UnixFileInfo(shortcutPath)
-				{
-					FileAccessPermissions = FileAccessPermissions.UserReadWriteExecute
-				};
-
 			}
 		}
 		else if (_osUsed == "Windows")
