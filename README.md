@@ -3,6 +3,5 @@ A simple tool to download and update early access builds of yuzu from the [Pinea
 
 # To-do
 - UI overhaul #3
-- Shortcut creator #4
 
 ![](https://github.com/ZachAR3/PineappleEA-GUI/blob/main/Demo.png?raw=true)
