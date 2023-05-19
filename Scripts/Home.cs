@@ -14,7 +14,7 @@ using Window = Godot.Window;
 
 public partial class Home : Control
 {
-	[Export()] private float _appVersion = 1.8f;
+	[Export()] private float _appVersion = 1.81f;
 	[Export()] private float _settingsVersion = 1.7f;
 	
 	[Export()] private Godot.Image _icon;
@@ -53,6 +53,8 @@ public partial class Home : Control
 	
 	public override void _Ready()
 	{
+		// Sets minimum window size to prevent text clipping and UI breaking at smaller scales.
+		DisplayServer.WindowSetMinSize(new Vector2I(1024,576));
 		_osUsed = OS.GetName();
 		if (_osUsed == "Linux")
 		{
