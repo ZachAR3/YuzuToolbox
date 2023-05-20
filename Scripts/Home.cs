@@ -51,6 +51,8 @@ public partial class Home : Control
 	[Export()] private int _previousVersionsToAdd = 10;
 	[Export()] private Array<Theme> _themes;
 	[Export()] private Array<StyleBoxLine> _themesSeparator;
+	[Export()] private TextureRect _warningIcon1;
+	[Export()] private TextureRect _warningIcon2;
 
 	private FileChooserDialog _fileChooser;
 	private ResourceSaveManager _saveManager;
@@ -97,14 +99,17 @@ public partial class Home : Control
 		_customVersionSpinBox.Editable = false;
 
 		_enableLightTheme.Toggled += SetTheme;
-	}
 
+		_downloadButton.GrabFocus();
+		
+		_warningIcon1.Visible = false;
+		_warningIcon2.Visible = false;
+	}
 
 	private void SetTheme(bool enableLight)
 	{
 		_lightBg.Visible = enableLight;
 		_darkBg.Visible = !enableLight;
-		// _headerSeparator.AddThemeStyleboxOverride("separator", enableLight ? _themesSeparator[0] : _themesSeparator[1]);
 		_currentTheme = enableLight ? _themes[1] : _themes[0];
 		_header.Color = enableLight ? new Godot.Color(0.74117648601532f, 0.76470589637756f, 0.78039216995239f) : new Godot.Color(0.16862745583057f, 0.1803921610117f, 0.18823529779911f);
 		_downloadWindowApp.Color = enableLight ? new Godot.Color(0.74117648601532f, 0.76470589637756f, 0.78039216995239f) : new Godot.Color(0.16862745583057f, 0.1803921610117f, 0.18823529779911f);
@@ -157,6 +162,7 @@ public partial class Home : Control
 		_settings.InstalledVersion = version;
 		_downloadLabel.Text = "Downloading...";
 		_downloadWindow.Visible = true;
+		_downloadLabel.GrabFocus();
 		_downloadRequester.DownloadFile = $@"{_settings.SaveDirectory}/{_saveName}";
 		_downloadRequester.Request($@"{_pineappleDownloadBaseUrl}{version}/{_osUsed}-{_yuzuBaseString}{version}{_yuzuExtensionString}");
 		_downloadUpdateTimer.Start();
@@ -262,7 +268,7 @@ Categories=Game;Emulator;Qt;
 		{
 			int latestVersion = GetLatestVersion(Encoding.UTF8.GetString(body));
 			_customVersionSpinBox.Value = latestVersion;
-			_lastVersionLabel.Text = $"Last: {latestVersion.ToString()}";
+			_lastVersionLabel.Text = $"Latest: {latestVersion.ToString()}";
 
 			//Add a version item for the latest and the dictated amount of previous versions.
 			for (int previousIndex = 0; previousIndex < _previousVersionsToAdd; previousIndex++)
@@ -522,10 +528,21 @@ Categories=Game;Emulator;Qt;
 		_errorPopup.PopupCentered();
 	}
 	
-	private void ToggledMusicButton(bool button_pressed)
+	private void ToggledMusicButton(bool ButtonPressed)
 	{
-		if(button_pressed) {_backgroundAudio.VolumeDb = -(20.0f * (1.0f - 0.5f) + 80.0f * 0.5f);}
+		if(ButtonPressed) {_backgroundAudio.VolumeDb = -(20.0f * (1.0f - 0.5f) + 80.0f * 0.5f);}
 		else {_backgroundAudio.VolumeDb = -20;}
+	}
+
+	private void ClearInstallationFolder()
+	{
+		DeleteDirectoryContents(_settings.SaveDirectory);
+	}
+
+	private void ExtractWindowsToggled(bool ButtonPressed)
+	{
+		_warningIcon1.Visible = ButtonPressed;
+		_warningIcon2.Visible = ButtonPressed;
 	}
 }
 

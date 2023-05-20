@@ -13,12 +13,16 @@ config_version=5
 config/name="YuzuEAUpdateManager"
 run/main_scene="res://Scenes/Home.tscn"
 config/features=PackedStringArray("4.0", "C#", "Forward Plus")
+boot_splash/bg_color=Color(0.0431373, 0.0470588, 0.0509804, 1)
+boot_splash/image="res://PineappleIcon.png"
 config/icon="res://PineappleIcon.png"
+boot_splash/minimum_display_time=3000
 
 [display]
 
-window/size/mode=2
-window/size/initial_position_type=2
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/extend_to_title=true
 
 [dotnet]
 
