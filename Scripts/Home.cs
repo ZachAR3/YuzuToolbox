@@ -243,8 +243,8 @@ Categories=Game;Emulator;Qt;
 				}
 				catch (Exception shortcutError)
 				{
-					ErrorPopup($@"Error creating shortcut, creating new at {shortcutPath}. Error:{shortcutError}");
 					shortcutPath = $@"{_settings.SaveDirectory}/{linuxShortcutName}";
+					ErrorPopup($@"Error creating shortcut, creating new at {shortcutPath}. Error:{shortcutError}");
 					File.WriteAllText(shortcutPath, shortcutContent);
 				}
 			}
@@ -258,14 +258,24 @@ Categories=Game;Emulator;Qt;
 			{
 				Path = GetExistingVersion()
 			};
-			
 
-			if (!Directory.Exists(yuzuStartMenuPath))
+
+			try
 			{
-				Directory.CreateDirectory(yuzuStartMenuPath);
+				if (!Directory.Exists(yuzuStartMenuPath))
+				{
+					Directory.CreateDirectory(yuzuStartMenuPath);
+				}
+				
+				windowsShortcut.Save(yuzuShortcutPath);
+			}
+			catch (Exception shortcutError)
+			{
+				yuzuShortcutPath = $@"{_settings.SaveDirectory}/{windowsShortcutName}";
+				ErrorPopup($@"cannot create shortcut, ensure app is running as admin. Placing instead at {yuzuShortcutPath}");
+				windowsShortcut.Save(yuzuShortcutPath);
 			}
 			
-			windowsShortcut.Save(yuzuShortcutPath);
 		}
 	}
 	

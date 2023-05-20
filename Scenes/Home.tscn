@@ -190,11 +190,11 @@ alignment = 1
 
 [node name="CreateShortcutLabel" type="Label" parent="ControlsContainer"]
 layout_mode = 2
-text = "Create start shortcut:"
+text = "Shortcut creation"
 
 [node name="CreateShortcutButton" type="CheckBox" parent="ControlsContainer"]
 layout_mode = 2
-text = "Creates a start menu shortcut for yuzu-ea (requires auto unpack on windows)"
+text = "Creates a start menu shortcut for yuzu-ea (requires auto unpack and admin on windows)"
 alignment = 1
 
 [node name="Footer" type="TextureRect" parent="."]
