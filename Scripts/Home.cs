@@ -429,7 +429,6 @@ Categories=Game;Emulator;Qt;
 
 	private void OpenFileChooser()
 	{
-		Application.Init();
 		try
 		{
 			Application.Init();

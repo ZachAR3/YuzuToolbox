@@ -51,6 +51,7 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 theme = ExtResource("1_c22a4")
 script = ExtResource("1_p51ic")
+_appVersion = 1.9
 _icon = ExtResource("3_ltbvi")
 _backgroundAudio = NodePath("BackgroundAudio")
 _header = NodePath("Header")
