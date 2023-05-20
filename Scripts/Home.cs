@@ -6,15 +6,14 @@ using System.Text;
 using Godot.Collections;
 using Gtk;
 using Mono.Unix;
-using FileAccess = Godot.FileAccess;
-using Image = Gtk.Image;
 using ProgressBar = Godot.ProgressBar;
 using Window = Godot.Window;
+using WindowsShortcutFactory;
 
 
 public partial class Home : Control
 {
-	[Export()] private float _appVersion = 1.9f;
+	[Export()] private float _appVersion = 2f;
 	[Export()] private float _settingsVersion = 1.7f;
 	
 	[Export()] private Godot.Image _icon;
@@ -64,9 +63,9 @@ public partial class Home : Control
 		}
 		else if (_osUsed == "Windows")
 		{
-			_createShortcutButton.Disabled = true;
 			_saveName += ".zip";
 			_yuzuExtensionString = ".zip";
+			_createShortcutButton.Disabled = true;
 		}
 		
 		_saveManager = new ResourceSaveManager();
@@ -90,6 +89,14 @@ public partial class Home : Control
 		_customVersionSpinBox.Editable = false;
 
 		_enableLightTheme.Toggled += SetTheme;
+		_autoExtractButton.Toggled += AutoExtractToggled;
+	}
+
+
+
+	private void AutoExtractToggled(bool enabled)
+	{
+		_createShortcutButton.Disabled = !enabled;
 	}
 
 
@@ -111,7 +118,7 @@ public partial class Home : Control
 	{
 		float scaleRatio = (float)GetWindow().Size.X / 1920;
 		_headerLabel.AddThemeFontSizeOverride("font_size", (int)(scaleRatio * 76));
-		_currentTheme.DefaultFontSize = Mathf.Clamp((int)(scaleRatio * 35), 20, 50);
+		_currentTheme.DefaultFontSize = Mathf.Clamp((int)(scaleRatio * 35), 15, 50);
 	}
 
 
@@ -143,6 +150,8 @@ public partial class Home : Control
 			version = _versionButton.GetItemText(versionIndex).ToInt();
 		}
 
+		_customVersionCheckBox.Disabled = true;
+		_versionButton.Disabled = true;
 		_downloadButton.Disabled = true;
 		_locationButton.Disabled = true;
 		_settings.InstalledVersion = version;
@@ -156,8 +165,10 @@ public partial class Home : Control
 	private void VersionDownloadCompleted(long result, long responseCode, string[] headers, byte[] body)
 	{
 		_downloadUpdateTimer.Stop();
+		_customVersionCheckBox.Disabled = false;
 		_downloadButton.Disabled = false;
 		_locationButton.Disabled = false;
+		_versionButton.Disabled = false;
 		if (result == (int)HttpRequest.Result.Success)
 		{
 			_saveManager._settings = _settings;
@@ -187,7 +198,8 @@ public partial class Home : Control
 
 	private void CreateShortcut()
 	{
-		String shortcutName = "yuzu-ea.desktop";
+		String linuxShortcutName = "yuzu-ea.desktop";
+		String windowsShortcutName = "yuzu-ea.lnk";
 		String iconPath = $@"{_settings.SaveDirectory}/Icon.png";
 		
 		if (_osUsed == "Linux")
@@ -212,11 +224,11 @@ Categories=Game;Emulator;Qt;
 
 			if (Directory.Exists("/usr/share/applications/"))
 			{
-				string shortcutPath = $@"/usr/share/applications/{shortcutName}";
+				string shortcutPath = $@"/usr/share/applications/{linuxShortcutName}";
 
 				try
 				{
-					string tempShortcutPath = $@"{_settings.SaveDirectory}/{shortcutName}";
+					string tempShortcutPath = $@"{_settings.SaveDirectory}/{linuxShortcutName}";
 					File.WriteAllText(tempShortcutPath, shortcutContent);
 					ProcessStartInfo startInfo = new ProcessStartInfo
 					{
@@ -232,14 +244,28 @@ Categories=Game;Emulator;Qt;
 				catch (Exception shortcutError)
 				{
 					ErrorPopup($@"Error creating shortcut, creating new at {shortcutPath}. Error:{shortcutError}");
-					shortcutPath = $@"{_settings.SaveDirectory}/{shortcutName}";
+					shortcutPath = $@"{_settings.SaveDirectory}/{linuxShortcutName}";
 					File.WriteAllText(shortcutPath, shortcutContent);
 				}
 			}
 		}
 		else if (_osUsed == "Windows")
 		{
+			string commonStartMenuPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.CommonStartMenu);
+			string yuzuStartMenuPath = Path.Combine(commonStartMenuPath, "Programs", "yuzu-ea");
+			string yuzuShortcutPath = Path.Combine(yuzuStartMenuPath, windowsShortcutName);
+			var windowsShortcut = new WindowsShortcut
+			{
+				Path = GetExistingVersion()
+			};
 			
+
+			if (!Directory.Exists(yuzuStartMenuPath))
+			{
+				Directory.CreateDirectory(yuzuStartMenuPath);
+			}
+			
+			windowsShortcut.Save(yuzuShortcutPath);
 		}
 	}
 	
@@ -257,7 +283,7 @@ Categories=Game;Emulator;Qt;
 				_versionButton.AddItem((latestVersion-previousIndex).ToString(), latestVersion-previousIndex);
 			}
 
-			//Checks if there is already a version installed, and if so adds it to the list
+			//Checks if there is already a version installed, and if so adds it.
 			if (_settings.InstalledVersion != -1)
 			{
 				AddInstalledVersion();
@@ -277,9 +303,9 @@ Categories=Game;Emulator;Qt;
 		var installedVersion = _settings.InstalledVersion;
 		var selectedIndex = _versionButton.GetItemIndex(installedVersion);
 		_customVersionSpinBox.Value = installedVersion;
-				
+
 		// Checks if the item was already added, if so sets it as current, otherwise adds a new item entry for it.
-		if (selectedIndex > 0)
+		if (selectedIndex >= 0)
 		{
 			_versionButton.Selected = selectedIndex;
 		}
@@ -297,12 +323,10 @@ Categories=Game;Emulator;Qt;
 	{
 		string searchName = $@"{_osUsed}-{_yuzuBaseString}";
 		int versionIndex = rawVersionData.Find(searchName);
-		//GD.Print(versionIndex);
 
 		// Using our starting index subtract the index of our extension from it and add 1 to get the length of the version
 		int versionLength =  rawVersionData.Find(_yuzuExtensionString) -versionIndex -searchName.Length;
-		//GD.Print(versionLength);
-		
+
 		// Return version by starting at our start index (accounting for our search string) and going the previously determined length
 		return rawVersionData.Substring(versionIndex + searchName.Length, versionLength).ToInt();
 	}
@@ -310,7 +334,7 @@ Categories=Game;Emulator;Qt;
 
 	private void UnpackAndSetPermissions()
 	{
-		string yuzuPath = GetExistingVersion();
+		string yuzuPath = $@"{_settings.SaveDirectory}/{_saveName}";
 		if (_osUsed == "Linux")
 		{
 			var yuzuFile = new Mono.Unix.UnixFileInfo(yuzuPath)
@@ -365,7 +389,7 @@ Categories=Game;Emulator;Qt;
 
 			foreach (var file in previousSave.GetFiles())
 			{
-				if (file.GetExtension() == "AppImage" || file.GetExtension() == "zip")
+				if (file.GetExtension() == "AppImage" || file.GetBaseName() == "yuzu")
 				{
 					return $@"{_settings.SaveDirectory}/{file}";
 				}
@@ -480,7 +504,7 @@ Categories=Game;Emulator;Qt;
 			Directory.Move(directory, targetPath);
 		}
 
-		// Optional: Remove the source directory if it is empty
+		// Remove the source directory if it is empty
 		if (Directory.GetFiles(sourceDirectory).Length == 0 && Directory.GetDirectories(sourceDirectory).Length == 0)
 		{
 			Directory.Delete(sourceDirectory);

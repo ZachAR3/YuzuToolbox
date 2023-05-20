@@ -39,7 +39,6 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 theme = ExtResource("1_c22a4")
 script = ExtResource("1_p51ic")
-_appVersion = 1.9
 _icon = ExtResource("3_ltbvi")
 _header = NodePath("Header")
 _headerLabel = NodePath("Header/HeaderLabel")
@@ -172,7 +171,7 @@ rounded = true
 
 [node name="LocationLabel" type="Label" parent="ControlsContainer"]
 layout_mode = 2
-text = "File location:"
+text = "Install directory:"
 
 [node name="LocationButton" type="Button" parent="ControlsContainer"]
 custom_minimum_size = Vector2(100, 0)
@@ -182,7 +181,7 @@ size_flags_horizontal = 3
 [node name="ExtractLabel" type="Label" parent="ControlsContainer"]
 layout_mode = 2
 size_flags_horizontal = 0
-text = "Auto extract:"
+text = "Auto unpack:"
 
 [node name="ExtractButton" type="CheckBox" parent="ControlsContainer"]
 layout_mode = 2
@@ -191,11 +190,11 @@ alignment = 1
 
 [node name="CreateShortcutLabel" type="Label" parent="ControlsContainer"]
 layout_mode = 2
-text = "Create shortcut:  "
+text = "Create start shortcut:"
 
 [node name="CreateShortcutButton" type="CheckBox" parent="ControlsContainer"]
 layout_mode = 2
-text = "(Linux only) Creates a start menu shortcut for yuzu-ea"
+text = "Creates a start menu shortcut for yuzu-ea (requires auto unpack on windows)"
 alignment = 1
 
 [node name="Footer" type="TextureRect" parent="."]
