@@ -67,7 +67,7 @@ public partial class Home : Control
 	{
 		// Sets minimum window size to prevent text clipping and UI breaking at smaller scales.
 		DisplayServer.WindowSetMinSize(new Vector2I(1024, 576));
-		_osUsed = "Windows"; //OS.GetName();
+		_osUsed = OS.GetName();
 		if (_osUsed == "Linux")
 		{
 			_saveName += ".AppImage";
