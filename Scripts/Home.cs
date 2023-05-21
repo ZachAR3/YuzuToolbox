@@ -160,7 +160,7 @@ public partial class Home : Control
 
 	private void WindowResized()
 	{
-		float scaleRatio = (float)GetWindow().Size.X / 1920;
+		float scaleRatio = (((float)GetWindow().Size.X / 1920) + ((float)GetWindow().Size.Y / 1080)) / 2;
 		_headerLabel.AddThemeFontSizeOverride("font_size", (int)(scaleRatio * 76));
 		_latestVersionLabel.AddThemeFontSizeOverride("font_size", (int)(scaleRatio * 32));
 		_currentTheme.DefaultFontSize = Mathf.Clamp((int)(scaleRatio * 35), 20, 50);
