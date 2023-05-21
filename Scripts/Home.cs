@@ -20,7 +20,6 @@ public partial class Home : Control
 	[Export()] private Godot.Image _icon;
 	[Export()] private AudioStreamPlayer _backgroundAudio;
 	[Export()] private ColorRect _header;
-	[Export()] private ColorRect _footer;
 	[Export()] private Godot.Label _headerLabel;
 	[Export()] private TextureRect _darkBg;
 	[Export()] private TextureRect _lightBg;
@@ -32,7 +31,7 @@ public partial class Home : Control
 	[Export()] private Panel _downloadWindow;
 	[Export()] private ColorRect _downloadWindowApp;
 	[Export()] private Godot.Label _downloadLabel;
-	[Export()] private CheckBox _autoExtractButton;
+	[Export()] private CheckBox _autoUnpackButton;
 	[Export()] private ProgressBar _downloadProgressBar;
 	[Export()] private CheckBox _customVersionCheckBox;
 	[Export()] private SpinBox _customVersionSpinBox;
@@ -40,7 +39,7 @@ public partial class Home : Control
 	[Export()] private CheckBox _enableLightTheme;
 	[Export()] private Popup _errorPopup;
 	[Export()] private Godot.Label _errorLabel;
-	[Export()] private Godot.Label _lastVersionLabel; 
+	[Export()] private Godot.Label _latestVersionLabel; 
 	[Export()] private HttpRequest _latestReleaseRequester;
 	[Export()] private HttpRequest _downloadRequester;
 	[Export()] private String _pineappleLatestUrl;
@@ -51,8 +50,8 @@ public partial class Home : Control
 	[Export()] private int _previousVersionsToAdd = 10;
 	[Export()] private Array<Theme> _themes;
 	[Export()] private Array<StyleBoxLine> _themesSeparator;
-	[Export()] private TextureRect _warningIcon1;
-	[Export()] private TextureRect _warningIcon2;
+	[Export()] private TextureRect _extractWarning;
+	[Export()] private TextureRect _downloadWarning;
 
 	private FileChooserDialog _fileChooser;
 	private ResourceSaveManager _saveManager;
@@ -70,7 +69,7 @@ public partial class Home : Control
 		{
 			_saveName += ".AppImage";
 			_yuzuExtensionString = ".AppImage";
-			_autoExtractButton.Disabled = true;
+			_autoUnpackButton.Disabled = true;
 		}
 		else if (_osUsed == "Windows")
 		{
@@ -103,9 +102,10 @@ public partial class Home : Control
 		_enableLightTheme.Toggled += SetTheme;
 
 		_downloadButton.GrabFocus();
-		
-		_warningIcon1.Visible = false;
-		_warningIcon2.Visible = false;
+
+		_autoUnpackButton.Toggled += AutoUnpackToggled;
+		_extractWarning.Visible = false;
+		_downloadWarning.Visible = false;
 	}
 
 	private void SetTheme(bool enableLight)
@@ -127,6 +127,7 @@ public partial class Home : Control
 	{
 		float scaleRatio = (float)GetWindow().Size.X / 1920;
 		_headerLabel.AddThemeFontSizeOverride("font_size", (int)(scaleRatio * 76));
+		_latestVersionLabel.AddThemeFontSizeOverride("font_size", (int)(scaleRatio * 32));
 		_currentTheme.DefaultFontSize = Mathf.Clamp((int)(scaleRatio * 35), 20, 50);
 	}
 
@@ -270,7 +271,7 @@ Categories=Game;Emulator;Qt;
 		{
 			int latestVersion = GetLatestVersion(Encoding.UTF8.GetString(body));
 			_customVersionSpinBox.Value = latestVersion;
-			_lastVersionLabel.Text = $"Latest: {latestVersion.ToString()}";
+			_latestVersionLabel.Text = $"Latest: {latestVersion.ToString()}";
 
 			//Add a version item for the latest and the dictated amount of previous versions.
 			for (int previousIndex = 0; previousIndex < _previousVersionsToAdd; previousIndex++)
@@ -341,7 +342,7 @@ Categories=Game;Emulator;Qt;
 		}
 		else if (_osUsed == "Windows")
 		{
-			if (_autoExtractButton.ButtonPressed)
+			if (_autoUnpackButton.ButtonPressed)
 			{
 				System.IO.Compression.ZipFile.ExtractToDirectory(yuzuPath, _settings.SaveDirectory);
 				String yuzuWindowsDirectory = $@"{_settings.SaveDirectory}/{_windowsFolderName}";
@@ -411,7 +412,7 @@ Categories=Game;Emulator;Qt;
 		
 		else if (_osUsed == "Windows")
 		{
-			if (_autoExtractButton.ButtonPressed)
+			if (_autoUnpackButton.ButtonPressed)
 			{
 				DeleteDirectoryContents(_settings.SaveDirectory);
 			}
@@ -537,9 +538,9 @@ Categories=Game;Emulator;Qt;
 		_errorPopup.PopupCentered();
 	}
 	
-	private void ToggledMusicButton(bool ButtonPressed)
+	private void ToggledMusicButton(bool musicEnabled)
 	{
-		if(ButtonPressed) {_backgroundAudio.VolumeDb = -(20.0f * (1.0f - 0.5f) + 80.0f * 0.5f);}
+		if(musicEnabled) {_backgroundAudio.VolumeDb = -(20.0f * (1.0f - 0.5f) + 80.0f * 0.5f);}
 		else {_backgroundAudio.VolumeDb = -20;}
 	}
 
@@ -548,10 +549,10 @@ Categories=Game;Emulator;Qt;
 		DeleteDirectoryContents(_settings.SaveDirectory);
 	}
 
-	private void ExtractWindowsToggled(bool ButtonPressed)
+	private void AutoUnpackToggled(bool unpackEnabled)
 	{
-		_warningIcon1.Visible = ButtonPressed;
-		_warningIcon2.Visible = ButtonPressed;
+		_downloadWarning.Visible = unpackEnabled;
+		_extractWarning.Visible = unpackEnabled;
 	}
 }
 

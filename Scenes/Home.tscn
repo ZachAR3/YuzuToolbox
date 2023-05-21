@@ -41,10 +41,11 @@ bg_color = Color(0.184314, 0.196078, 0.203922, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jo4ax"]
 bg_color = Color(0.168627, 0.180392, 0.188235, 0.529412)
 
-[node name="Home" type="Control" node_paths=PackedStringArray("_backgroundAudio", "_header", "_footer", "_headerLabel", "_darkBg", "_lightBg", "_headerSeparator", "_versionButton", "_createShortcutButton", "_locationButton", "_downloadButton", "_downloadWindow", "_downloadWindowApp", "_downloadLabel", "_autoExtractButton", "_downloadProgressBar", "_customVersionCheckBox", "_customVersionSpinBox", "_downloadUpdateTimer", "_enableLightTheme", "_errorPopup", "_errorLabel", "_lastVersionLabel", "_latestReleaseRequester", "_downloadRequester", "_warningIcon1", "_warningIcon2")]
+[node name="Home" type="Control" node_paths=PackedStringArray("_backgroundAudio", "_header", "_headerLabel", "_darkBg", "_lightBg", "_headerSeparator", "_versionButton", "_createShortcutButton", "_locationButton", "_downloadButton", "_downloadWindow", "_downloadWindowApp", "_downloadLabel", "_autoUnpackButton", "_downloadProgressBar", "_customVersionCheckBox", "_customVersionSpinBox", "_downloadUpdateTimer", "_enableLightTheme", "_errorPopup", "_errorLabel", "_latestVersionLabel", "_latestReleaseRequester", "_downloadRequester", "_extractWarning", "_downloadWarning")]
 layout_mode = 3
-anchor_right = 0.999132
-anchor_bottom = 0.998457
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 4
@@ -55,7 +56,6 @@ _appVersion = 1.9
 _icon = ExtResource("3_ltbvi")
 _backgroundAudio = NodePath("BackgroundAudio")
 _header = NodePath("Header")
-_footer = NodePath("Footer")
 _headerLabel = NodePath("Header/HeaderLabels/HeaderLabel")
 _darkBg = NodePath("DarkBG")
 _lightBg = NodePath("LightBG")
@@ -63,19 +63,19 @@ _headerSeparator = NodePath("Header/HeaderLabels/VSeparator")
 _versionButton = NodePath("ControlsContainer/VersionSelectionButton")
 _createShortcutButton = NodePath("ControlsContainer/CreateShortcutButton")
 _locationButton = NodePath("ControlsContainer/LocationButton")
-_downloadButton = NodePath("ButtonContainer/DownloadButton")
+_downloadButton = NodePath("DownloadContainer/DownloadButton")
 _downloadWindow = NodePath("DownloadWindow")
 _downloadWindowApp = NodePath("DownloadWindow/Window")
 _downloadLabel = NodePath("DownloadWindow/Window/DownloadLabelBox")
-_autoExtractButton = NodePath("ControlsContainer/ExtractButton")
+_autoUnpackButton = NodePath("ControlsContainer/ExtractButton")
 _downloadProgressBar = NodePath("DownloadWindow/Window/DownloadProgress")
 _customVersionCheckBox = NodePath("ControlsContainer/CustomVersion/CustomVersionCheckBox")
 _customVersionSpinBox = NodePath("ControlsContainer/CustomVersion/CustomVersionSpinBox")
-_downloadUpdateTimer = NodePath("Footer/HBoxContainer/VBoxContainer/DownloadUpdater")
+_downloadUpdateTimer = NodePath("DownloadWindow/Window/DownloadProgressUpdater")
 _enableLightTheme = NodePath("Header/Option/LightMode")
 _errorPopup = NodePath("ErrorPopup")
 _errorLabel = NodePath("ErrorPopup/ErrorLabel")
-_lastVersionLabel = NodePath("Header/HeaderLabels/LastVersion")
+_latestVersionLabel = NodePath("Header/HeaderLabels/LastestVersion")
 _latestReleaseRequester = NodePath("ReleaseRequester")
 _downloadRequester = NodePath("DownloadRequester")
 _pineappleLatestUrl = "https://api.github.com/repos/pineappleEA/pineapple-src/releases/latest"
@@ -84,8 +84,8 @@ _saveName = "Yuzu"
 _previousVersionsToAdd = 20
 _themes = Array[Theme]([ExtResource("1_c22a4"), ExtResource("3_a1ctt")])
 _themesSeparator = Array[StyleBoxLine]([ExtResource("5_qxukt"), ExtResource("7_iauax")])
-_warningIcon1 = NodePath("ControlsContainer/ExtractLabel/WarningTexture")
-_warningIcon2 = NodePath("ButtonContainer/DownloadButton/WarningTexture")
+_extractWarning = NodePath("ControlsContainer/ExtractLabel/ExtractWarning")
+_downloadWarning = NodePath("DownloadContainer/DownloadButton/DownloadWarning")
 metadata/_edit_use_anchors_ = true
 
 [node name="DarkBG" type="TextureRect" parent="."]
@@ -155,7 +155,7 @@ vertical_alignment = 3
 [node name="VSeparator" type="VSeparator" parent="Header/HeaderLabels"]
 layout_mode = 2
 
-[node name="LastVersion" type="Label" parent="Header/HeaderLabels"]
+[node name="LastestVersion" type="Label" parent="Header/HeaderLabels"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("7_jk62c")
 theme_override_font_sizes/font_size = 32
@@ -198,17 +198,17 @@ text = "Mute"
 [node name="ControlsContainer" type="GridContainer" parent="."]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.03
-anchor_top = 0.5
-anchor_right = 0.975
-anchor_bottom = 0.501
-offset_left = -0.530003
-offset_top = -107.5
-offset_right = -1.22498
-offset_bottom = 107.853
+anchor_left = 0.0994792
+anchor_top = 0.214537
+anchor_right = 0.9
+anchor_bottom = 0.414537
+offset_top = 70.7
+offset_bottom = -70.7
 grow_horizontal = 2
 grow_vertical = 2
 columns = 2
+metadata/_edit_group_ = true
+metadata/_edit_use_anchors_ = true
 
 [node name="VersionSelectionLabel" type="Label" parent="ControlsContainer"]
 layout_mode = 2
@@ -256,7 +256,7 @@ layout_mode = 2
 size_flags_horizontal = 0
 text = "Auto extract:"
 
-[node name="WarningTexture" type="TextureRect" parent="ControlsContainer/ExtractLabel"]
+[node name="ExtractWarning" type="TextureRect" parent="ControlsContainer/ExtractLabel"]
 layout_mode = 2
 anchor_left = 1.19383
 anchor_top = 0.179487
@@ -288,21 +288,19 @@ text = "(Linux only) Creates a start menu shortcut for yuzu-ea"
 alignment = 1
 text_overrun_behavior = 4
 
-[node name="ButtonContainer" type="VBoxContainer" parent="."]
+[node name="DownloadContainer" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.222415
-anchor_top = 0.758887
-anchor_right = 0.778454
-anchor_bottom = 0.938176
-offset_top = 7.0
-offset_bottom = -7.0
+anchor_left = 0.2
+anchor_top = 0.580778
+anchor_right = 0.833333
+anchor_bottom = 0.745222
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 18
 metadata/_edit_use_anchors_ = true
 
-[node name="DownloadButton" type="Button" parent="ButtonContainer"]
+[node name="DownloadButton" type="Button" parent="DownloadContainer"]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -312,7 +310,7 @@ focus_previous = NodePath(".")
 text = "Download
 "
 
-[node name="WarningTexture" type="TextureRect" parent="ButtonContainer/DownloadButton"]
+[node name="DownloadWarning" type="TextureRect" parent="DownloadContainer/DownloadButton"]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = -0.0625098
@@ -325,66 +323,13 @@ texture = ExtResource("10_f00sk")
 expand_mode = 1
 metadata/_edit_use_anchors_ = true
 
-[node name="ClearButton" type="Button" parent="ButtonContainer"]
+[node name="ClearButton" type="Button" parent="DownloadContainer"]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 focus_mode = 0
 text = "Clear Installation Folder"
-
-[node name="Footer" type="ColorRect" parent="."]
-visible = false
-layout_mode = 1
-anchors_preset = -1
-anchor_top = 0.853704
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = -38.3465
-grow_horizontal = 2
-grow_vertical = 0
-color = Color(0.168627, 0.180392, 0.188235, 1)
-
-[node name="HBoxContainer" type="HBoxContainer" parent="Footer"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 4.0
-offset_top = 4.0
-offset_right = 96.0
-offset_bottom = 96.0
-grow_horizontal = 2
-grow_vertical = 2
-alignment = 1
-
-[node name="LeftMargin" type="Control" parent="Footer/HBoxContainer"]
-custom_minimum_size = Vector2(10, 0)
-layout_mode = 2
-
-[node name="VBoxContainer" type="VBoxContainer" parent="Footer/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-metadata/_edit_use_anchors_ = true
-
-[node name="TopMargin" type="Control" parent="Footer/HBoxContainer/VBoxContainer"]
-custom_minimum_size = Vector2(0, 10)
-layout_mode = 2
-
-[node name="DividerMargin" type="Control" parent="Footer/HBoxContainer/VBoxContainer"]
-custom_minimum_size = Vector2(0, 10)
-layout_mode = 2
-
-[node name="DownloadUpdater" type="Timer" parent="Footer/HBoxContainer/VBoxContainer"]
-wait_time = 0.1
-
-[node name="BottomMargin" type="Control" parent="Footer/HBoxContainer/VBoxContainer"]
-custom_minimum_size = Vector2(0, 10)
-layout_mode = 2
-
-[node name="RightMargin" type="Control" parent="Footer/HBoxContainer"]
-custom_minimum_size = Vector2(10, 0)
-layout_mode = 2
 
 [node name="ErrorPopup" type="PopupPanel" parent="."]
 initial_position = 2
@@ -475,7 +420,11 @@ grow_horizontal = 2
 grow_vertical = 0
 size_flags_horizontal = 3
 size_flags_vertical = 3
+rounded = true
+
+[node name="DownloadProgressUpdater" type="Timer" parent="DownloadWindow/Window"]
+wait_time = 0.1
 
 [connection signal="toggled" from="Header/Option/MuteButton" to="." method="ToggledMusicButton"]
-[connection signal="toggled" from="ControlsContainer/ExtractButton" to="." method="ExtractWindowsToggled"]
-[connection signal="pressed" from="ButtonContainer/ClearButton" to="." method="ClearInstallationFolder"]
+[connection signal="toggled" from="ControlsContainer/CreateShortcutButton" to="." method="AutoUnpackToggled"]
+[connection signal="pressed" from="DownloadContainer/ClearButton" to="." method="ClearInstallationFolder"]
