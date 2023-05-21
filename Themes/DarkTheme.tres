@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=20 format=3 uid="uid://cnnid0n04kfr7"]
+[gd_resource type="Theme" load_steps=21 format=3 uid="uid://cnnid0n04kfr7"]
 
 [ext_resource type="StyleBox" uid="uid://cp83rblw07yd6" path="res://Themes/Styleboxes/DarkFocus.tres" id="1_3k78v"]
 [ext_resource type="StyleBox" uid="uid://c8qvncfium48h" path="res://Themes/Styleboxes/DarkNormal.tres" id="2_1k0p6"]
@@ -67,6 +67,8 @@ content_margin_bottom = 4.0
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a8yj4"]
 bg_color = Color(0.129412, 0.129412, 0.129412, 1)
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_i8uxs"]
+
 [resource]
 default_font = ExtResource("4_ovalc")
 default_font_size = 35
@@ -113,4 +115,8 @@ ProgressBar/colors/font_color = Color(0, 0, 0, 1)
 ProgressBar/fonts/font = ExtResource("4_ovalc")
 ProgressBar/styles/background = ExtResource("7_28pic")
 ProgressBar/styles/fill = ExtResource("8_nrl0a")
+TabContainer/styles/panel = SubResource("StyleBoxEmpty_i8uxs")
+TabContainer/styles/tab_disabled = ExtResource("5_f45k2")
+TabContainer/styles/tab_selected = ExtResource("3_8s7qi")
+TabContainer/styles/tab_unselected = ExtResource("2_1k0p6")
 VSeparator/styles/separator = ExtResource("9_wfmuo")

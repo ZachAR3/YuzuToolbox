@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=20 format=3 uid="uid://dky537toysr34"]
+[gd_resource type="Theme" load_steps=22 format=3 uid="uid://dky537toysr34"]
 
 [ext_resource type="StyleBox" uid="uid://vlr1yex4wojy" path="res://Themes/Styleboxes/LightFocus.tres" id="1_8v17i"]
 [ext_resource type="StyleBox" uid="uid://blb2snsxt2fi" path="res://Themes/Styleboxes/LightNormal.tres" id="2_3crai"]
@@ -6,6 +6,7 @@
 [ext_resource type="FontFile" uid="uid://bs747wsxnk330" path="res://Fonts/Primary.TTF" id="4_b371y"]
 [ext_resource type="StyleBox" uid="uid://bd534yfoxfc6x" path="res://Themes/Styleboxes/LightNormalLoadbar.tres" id="5_haxb1"]
 [ext_resource type="StyleBox" uid="uid://e4urf7jlgsqv" path="res://Themes/Styleboxes/DarkLoadingLoadbar.tres" id="6_khrqj"]
+[ext_resource type="StyleBox" uid="uid://cu00el1bpwh3q" path="res://Themes/Styleboxes/LightDisabled.tres" id="7_dn0p5"]
 [ext_resource type="StyleBox" uid="uid://ct4a4b2lcwimn" path="res://Themes/Styleboxes/LightVSeparator.tres" id="7_tu21u"]
 
 [sub_resource type="Image" id="Image_gjt7e"]
@@ -86,6 +87,8 @@ expand_margin_bottom = 2.0
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a8yj4"]
 bg_color = Color(1, 1, 1, 1)
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_qkau6"]
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5jsxt"]
 bg_color = Color(0.886275, 0.886275, 0.886275, 1)
 
@@ -153,6 +156,14 @@ ProgressBar/colors/font_color = Color(0, 0, 0, 1)
 ProgressBar/fonts/font = ExtResource("4_b371y")
 ProgressBar/styles/background = ExtResource("5_haxb1")
 ProgressBar/styles/fill = ExtResource("6_khrqj")
+TabContainer/colors/drop_mark_color = Color(0, 0, 0, 1)
+TabContainer/colors/font_disabled_color = Color(0, 0, 0, 0.501961)
+TabContainer/colors/font_selected_color = Color(0, 0, 0, 1)
+TabContainer/colors/font_unselected_color = Color(0, 0, 0, 1)
+TabContainer/styles/panel = SubResource("StyleBoxEmpty_qkau6")
+TabContainer/styles/tab_disabled = ExtResource("7_dn0p5")
+TabContainer/styles/tab_selected = ExtResource("3_rq4t7")
+TabContainer/styles/tab_unselected = ExtResource("2_3crai")
 TextEdit/colors/font_color = Color(0, 0, 0, 1)
 TextEdit/styles/focus = ExtResource("1_8v17i")
 TextEdit/styles/normal = ExtResource("2_3crai")

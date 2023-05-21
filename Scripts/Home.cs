@@ -14,8 +14,8 @@ using Environment = System.Environment;
 
 public partial class Home : Control
 {
-	[Export()] private float _appVersion = 2.1f;
-	[Export()] private float _settingsVersion = 1.7f;
+	[Export()] private float _appVersion = 2.2f;
+	[Export()] private float _settingsVersion = 1.9f;
 
 	[Export()] private Godot.Image _icon;
 	[Export()] private AudioStreamPlayer _backgroundAudio;
