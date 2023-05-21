@@ -577,6 +577,8 @@ Categories=Game;Emulator;Qt;
 
 	private void AutoUnpackToggled(bool unpackEnabled)
 	{
+		// If unpack is toggled off, ensures the create shortcut button is also disabled and turns off.
+		_createShortcutButton.ButtonPressed = unpackEnabled && _createShortcutButton.ButtonPressed;
 		_createShortcutButton.Disabled = !unpackEnabled;
 		_downloadWarning.Visible = unpackEnabled;
 		_extractWarning.Visible = unpackEnabled;
