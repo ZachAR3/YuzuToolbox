@@ -13,19 +13,24 @@ using WindowsShortcutFactory;
 
 public partial class Home : Control
 {
-	[Export()] private float _appVersion = 2f;
+	[Export()] private float _appVersion = 2.1f;
 	[Export()] private float _settingsVersion = 1.7f;
 	
 	[Export()] private Godot.Image _icon;
+	[Export()] private AudioStreamPlayer _backgroundAudio;
 	[Export()] private ColorRect _header;
 	[Export()] private Godot.Label _headerLabel;
 	[Export()] private TextureRect _darkBg;
 	[Export()] private TextureRect _lightBg;
+	[Export()] private Godot.VSeparator _headerSeparator;
 	[Export()] private OptionButton _versionButton;
 	[Export()] private CheckBox _createShortcutButton;
 	[Export()] private Godot.Button _locationButton;
 	[Export()] private Godot.Button _downloadButton;
-	[Export()] private CheckBox _autoExtractButton;
+	[Export()] private Panel _downloadWindow;
+	[Export()] private ColorRect _downloadWindowApp;
+	[Export()] private Godot.Label _downloadLabel;
+	[Export()] private CheckBox _autoUnpackButton;
 	[Export()] private ProgressBar _downloadProgressBar;
 	[Export()] private CheckBox _customVersionCheckBox;
 	[Export()] private SpinBox _customVersionSpinBox;
@@ -33,6 +38,7 @@ public partial class Home : Control
 	[Export()] private CheckBox _enableLightTheme;
 	[Export()] private Popup _errorPopup;
 	[Export()] private Godot.Label _errorLabel;
+	[Export()] private Godot.Label _latestVersionLabel; 
 	[Export()] private HttpRequest _latestReleaseRequester;
 	[Export()] private HttpRequest _downloadRequester;
 	[Export()] private String _pineappleLatestUrl;
@@ -42,6 +48,9 @@ public partial class Home : Control
 	[Export()] private string _saveName;
 	[Export()] private int _previousVersionsToAdd = 10;
 	[Export()] private Array<Theme> _themes;
+	[Export()] private Array<StyleBoxLine> _themesSeparator;
+	[Export()] private TextureRect _extractWarning;
+	[Export()] private TextureRect _downloadWarning;
 
 	private FileChooserDialog _fileChooser;
 	private ResourceSaveManager _saveManager;
@@ -59,7 +68,7 @@ public partial class Home : Control
 		{
 			_saveName += ".AppImage";
 			_yuzuExtensionString = ".AppImage";
-			_autoExtractButton.Disabled = true;
+			_autoUnpackButton.Disabled = true;
 		}
 		else if (_osUsed == "Windows")
 		{
@@ -82,6 +91,7 @@ public partial class Home : Control
 		_locationButton.Pressed += OpenFileChooser;
 		_downloadRequester.RequestCompleted += VersionDownloadCompleted;
 		_downloadUpdateTimer.Timeout += UpdateDownloadBar;
+		_downloadWindow.Visible = false;
 		
 		Resized += WindowResized;
 
@@ -89,23 +99,21 @@ public partial class Home : Control
 		_customVersionSpinBox.Editable = false;
 
 		_enableLightTheme.Toggled += SetTheme;
-		_autoExtractButton.Toggled += AutoExtractToggled;
+
+		_downloadButton.GrabFocus();
+
+		_autoUnpackButton.Toggled += AutoUnpackToggled;
+		_extractWarning.Visible = false;
+		_downloadWarning.Visible = false;
 	}
-
-
-
-	private void AutoExtractToggled(bool enabled)
-	{
-		_createShortcutButton.Disabled = !enabled;
-	}
-
 
 	private void SetTheme(bool enableLight)
 	{
 		_lightBg.Visible = enableLight;
 		_darkBg.Visible = !enableLight;
 		_currentTheme = enableLight ? _themes[1] : _themes[0];
-		_header.Color = enableLight ? new Godot.Color(0.78823530673981f, 0.78823530673981f, 0.77647060155869f, 0.58039218187332f) : new Godot.Color(0.21176470816135f, 0.21176470816135f, 0.21176470816135f);
+		_header.Color = enableLight ? new Godot.Color(0.74117648601532f, 0.76470589637756f, 0.78039216995239f) : new Godot.Color(0.16862745583057f, 0.1803921610117f, 0.18823529779911f);
+		_downloadWindowApp.Color = enableLight ? new Godot.Color(0.74117648601532f, 0.76470589637756f, 0.78039216995239f) : new Godot.Color(0.16862745583057f, 0.1803921610117f, 0.18823529779911f);
 		_enableLightTheme.ButtonPressed = enableLight;
 		_settings.LightModeEnabled = enableLight;
 		_saveManager._settings = _settings;
@@ -118,7 +126,8 @@ public partial class Home : Control
 	{
 		float scaleRatio = (float)GetWindow().Size.X / 1920;
 		_headerLabel.AddThemeFontSizeOverride("font_size", (int)(scaleRatio * 76));
-		_currentTheme.DefaultFontSize = Mathf.Clamp((int)(scaleRatio * 35), 15, 50);
+		_latestVersionLabel.AddThemeFontSizeOverride("font_size", (int)(scaleRatio * 32));
+		_currentTheme.DefaultFontSize = Mathf.Clamp((int)(scaleRatio * 35), 20, 50);
 	}
 
 
@@ -155,7 +164,9 @@ public partial class Home : Control
 		_downloadButton.Disabled = true;
 		_locationButton.Disabled = true;
 		_settings.InstalledVersion = version;
-		_downloadButton.Text = "Downloading...";
+		_downloadLabel.Text = "Downloading...";
+		_downloadWindow.Visible = true;
+		_downloadLabel.GrabFocus();
 		_downloadRequester.DownloadFile = $@"{_settings.SaveDirectory}/{_saveName}";
 		_downloadRequester.Request($@"{_pineappleDownloadBaseUrl}{version}/{_osUsed}-{_yuzuBaseString}{version}{_yuzuExtensionString}");
 		_downloadUpdateTimer.Start();
@@ -174,14 +185,16 @@ public partial class Home : Control
 			_saveManager._settings = _settings;
 			_saveManager.WriteSave();
 			_downloadProgressBar.Value = 100;
-			_downloadButton.Text = "Successfully Downloaded!";
+			_downloadLabel.Text = "Successfully Downloaded!";
 			
 			AddInstalledVersion();
 			UnpackAndSetPermissions();
 			if (_createShortcutButton.ButtonPressed)
 			{
+				_downloadWindow.Visible = false;
 				CreateShortcut();
 			}
+			_downloadWindow.Visible = false;
 		}
 		else
 		{
@@ -286,6 +299,7 @@ Categories=Game;Emulator;Qt;
 		{
 			int latestVersion = GetLatestVersion(Encoding.UTF8.GetString(body));
 			_customVersionSpinBox.Value = latestVersion;
+			_latestVersionLabel.Text = $"Latest: {latestVersion.ToString()}";
 
 			//Add a version item for the latest and the dictated amount of previous versions.
 			for (int previousIndex = 0; previousIndex < _previousVersionsToAdd; previousIndex++)
@@ -354,7 +368,7 @@ Categories=Game;Emulator;Qt;
 		}
 		else if (_osUsed == "Windows")
 		{
-			if (_autoExtractButton.ButtonPressed)
+			if (_autoUnpackButton.ButtonPressed)
 			{
 				System.IO.Compression.ZipFile.ExtractToDirectory(yuzuPath, _settings.SaveDirectory);
 				String yuzuWindowsDirectory = $@"{_settings.SaveDirectory}/{_windowsFolderName}";
@@ -424,7 +438,7 @@ Categories=Game;Emulator;Qt;
 		
 		else if (_osUsed == "Windows")
 		{
-			if (_autoExtractButton.ButtonPressed)
+			if (_autoUnpackButton.ButtonPressed)
 			{
 				DeleteDirectoryContents(_settings.SaveDirectory);
 			}
@@ -549,4 +563,24 @@ Categories=Game;Emulator;Qt;
 		_errorPopup.InitialPosition = Window.WindowInitialPosition.Absolute;
 		_errorPopup.PopupCentered();
 	}
+	
+	private void ToggledMusicButton(bool musicEnabled)
+	{
+		if(musicEnabled) {_backgroundAudio.VolumeDb = -(20.0f * (1.0f - 0.5f) + 80.0f * 0.5f);}
+		else {_backgroundAudio.VolumeDb = -20;}
+	}
+
+	private void ClearInstallationFolder()
+	{
+		DeleteDirectoryContents(_settings.SaveDirectory);
+	}
+
+	private void AutoUnpackToggled(bool unpackEnabled)
+	{
+		_createShortcutButton.Disabled = !unpackEnabled;
+		_downloadWarning.Visible = unpackEnabled;
+		_extractWarning.Visible = unpackEnabled;
+	}
 }
+
+

@@ -1,34 +1,47 @@
-[gd_scene load_steps=12 format=3 uid="uid://c7wdbnvnydnxk"]
+[gd_scene load_steps=18 format=3 uid="uid://c7wdbnvnydnxk"]
 
 [ext_resource type="Theme" uid="uid://cnnid0n04kfr7" path="res://Themes/DarkTheme.tres" id="1_c22a4"]
 [ext_resource type="Script" path="res://Scripts/Home.cs" id="1_p51ic"]
 [ext_resource type="Theme" uid="uid://dky537toysr34" path="res://Themes/LightTheme.tres" id="3_a1ctt"]
 [ext_resource type="Image" uid="uid://dt3aq1jm2e2ds" path="res://Icon.png" id="3_ltbvi"]
 [ext_resource type="Texture2D" uid="uid://dtcak8d8m61be" path="res://PineappleIconSmall.png" id="5_4ib1e"]
+[ext_resource type="StyleBox" uid="uid://tcrn2c2voh4i" path="res://Themes/Styleboxes/DarkVSeparator.tres" id="5_qxukt"]
+[ext_resource type="AudioStream" uid="uid://bfqr7fmwq62ku" path="res://Audio/BackgroundAudio.mp3" id="5_v4a5s"]
+[ext_resource type="StyleBox" uid="uid://ct4a4b2lcwimn" path="res://Themes/Styleboxes/LightVSeparator.tres" id="7_iauax"]
+[ext_resource type="FontFile" uid="uid://bs747wsxnk330" path="res://Fonts/Primary.TTF" id="7_jk62c"]
+[ext_resource type="Texture2D" uid="uid://e5vtrghoacs2" path="res://WarningSign.png" id="10_f00sk"]
 
 [sub_resource type="Gradient" id="Gradient_awkjf"]
 interpolation_mode = 2
 offsets = PackedFloat32Array(0, 0.458333, 1)
-colors = PackedColorArray(0.129412, 0.129412, 0.129412, 1, 0.141543, 0.128057, 0.101416, 1, 0.129412, 0.129412, 0.129412, 1)
+colors = PackedColorArray(0.254902, 0.270588, 0.282353, 1, 0.254902, 0.270588, 0.282353, 1, 0.254902, 0.270588, 0.282353, 1)
 
 [sub_resource type="GradientTexture1D" id="GradientTexture1D_jfc3p"]
 gradient = SubResource("Gradient_awkjf")
 
 [sub_resource type="Gradient" id="Gradient_an2lc"]
 interpolation_mode = 2
-offsets = PackedFloat32Array(0, 0.471591, 1)
-colors = PackedColorArray(0.724643, 0.724643, 0.724643, 1, 1, 0.980728, 0.710675, 1, 0.650128, 0.650128, 0.650128, 1)
+offsets = PackedFloat32Array(0, 0.274775, 0.72973, 1)
+colors = PackedColorArray(0.870588, 0.870588, 0.870588, 1, 0.788235, 0.788235, 0.788235, 1, 0.788235, 0.788235, 0.788235, 1, 0.870588, 0.870588, 0.870588, 1)
 
 [sub_resource type="GradientTexture1D" id="GradientTexture1D_le02a"]
 gradient = SubResource("Gradient_an2lc")
 
-[sub_resource type="Gradient" id="Gradient_ytxn0"]
-colors = PackedColorArray(0.427451, 0.372549, 0, 0.054902, 0.870588, 0.698039, 0, 0.431373)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tufja"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.8, 0.8, 0.8, 0)
 
-[sub_resource type="GradientTexture1D" id="GradientTexture1D_k5kpi"]
-gradient = SubResource("Gradient_ytxn0")
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7ft08"]
+bg_color = Color(0.184314, 0.196078, 0.203922, 1)
 
-[node name="Home" type="Control" node_paths=PackedStringArray("_header", "_headerLabel", "_darkBg", "_lightBg", "_versionButton", "_createShortcutButton", "_locationButton", "_downloadButton", "_autoExtractButton", "_downloadProgressBar", "_customVersionCheckBox", "_customVersionSpinBox", "_downloadUpdateTimer", "_enableLightTheme", "_errorPopup", "_errorLabel", "_latestReleaseRequester", "_downloadRequester")]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jo4ax"]
+bg_color = Color(0.168627, 0.180392, 0.188235, 0.529412)
+
+[node name="Home" type="Control" node_paths=PackedStringArray("_backgroundAudio", "_header", "_headerLabel", "_darkBg", "_lightBg", "_headerSeparator", "_versionButton", "_createShortcutButton", "_locationButton", "_downloadButton", "_downloadWindow", "_downloadWindowApp", "_downloadLabel", "_autoUnpackButton", "_downloadProgressBar", "_customVersionCheckBox", "_customVersionSpinBox", "_downloadUpdateTimer", "_enableLightTheme", "_errorPopup", "_errorLabel", "_latestVersionLabel", "_latestReleaseRequester", "_downloadRequester", "_extractWarning", "_downloadWarning")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -39,23 +52,30 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 theme = ExtResource("1_c22a4")
 script = ExtResource("1_p51ic")
+_appVersion = 1.9
 _icon = ExtResource("3_ltbvi")
+_backgroundAudio = NodePath("BackgroundAudio")
 _header = NodePath("Header")
-_headerLabel = NodePath("Header/HeaderLabel")
+_headerLabel = NodePath("Header/HeaderLabels/HeaderLabel")
 _darkBg = NodePath("DarkBG")
 _lightBg = NodePath("LightBG")
+_headerSeparator = NodePath("Header/HeaderLabels/VSeparator")
 _versionButton = NodePath("ControlsContainer/VersionSelectionButton")
 _createShortcutButton = NodePath("ControlsContainer/CreateShortcutButton")
 _locationButton = NodePath("ControlsContainer/LocationButton")
-_downloadButton = NodePath("Footer/HBoxContainer/VBoxContainer/DownloadButton")
-_autoExtractButton = NodePath("ControlsContainer/ExtractButton")
-_downloadProgressBar = NodePath("Footer/HBoxContainer/VBoxContainer/DownloadProgress")
+_downloadButton = NodePath("DownloadContainer/DownloadButton")
+_downloadWindow = NodePath("DownloadWindow")
+_downloadWindowApp = NodePath("DownloadWindow/Window")
+_downloadLabel = NodePath("DownloadWindow/Window/DownloadLabelBox")
+_autoUnpackButton = NodePath("ControlsContainer/ExtractButton")
+_downloadProgressBar = NodePath("DownloadWindow/Window/DownloadProgress")
 _customVersionCheckBox = NodePath("ControlsContainer/CustomVersion/CustomVersionCheckBox")
 _customVersionSpinBox = NodePath("ControlsContainer/CustomVersion/CustomVersionSpinBox")
-_downloadUpdateTimer = NodePath("Footer/HBoxContainer/VBoxContainer/DownloadUpdater")
-_enableLightTheme = NodePath("Header/LightMode")
+_downloadUpdateTimer = NodePath("DownloadWindow/Window/DownloadProgressUpdater")
+_enableLightTheme = NodePath("Header/Option/LightMode")
 _errorPopup = NodePath("ErrorPopup")
 _errorLabel = NodePath("ErrorPopup/ErrorLabel")
+_latestVersionLabel = NodePath("Header/HeaderLabels/LastestVersion")
 _latestReleaseRequester = NodePath("ReleaseRequester")
 _downloadRequester = NodePath("DownloadRequester")
 _pineappleLatestUrl = "https://api.github.com/repos/pineappleEA/pineapple-src/releases/latest"
@@ -63,6 +83,9 @@ _pineappleDownloadBaseUrl = "https://github.com/pineappleEA/pineapple-src/releas
 _saveName = "Yuzu"
 _previousVersionsToAdd = 20
 _themes = Array[Theme]([ExtResource("1_c22a4"), ExtResource("3_a1ctt")])
+_themesSeparator = Array[StyleBoxLine]([ExtResource("5_qxukt"), ExtResource("7_iauax")])
+_extractWarning = NodePath("ControlsContainer/ExtractLabel/ExtractWarning")
+_downloadWarning = NodePath("DownloadContainer/DownloadButton/DownloadWarning")
 metadata/_edit_use_anchors_ = true
 
 [node name="DarkBG" type="TextureRect" parent="."]
@@ -73,7 +96,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = SubResource("GradientTexture1D_jfc3p")
-metadata/_edit_use_anchors_ = true
 
 [node name="LightBG" type="TextureRect" parent="."]
 visible = false
@@ -86,6 +108,11 @@ grow_vertical = 2
 texture = SubResource("GradientTexture1D_le02a")
 metadata/_edit_use_anchors_ = true
 
+[node name="BackgroundAudio" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("5_v4a5s")
+volume_db = -80.0
+autoplay = true
+
 [node name="Header" type="ColorRect" parent="."]
 layout_mode = 1
 anchors_preset = -1
@@ -93,50 +120,94 @@ anchor_right = 1.0
 anchor_bottom = 0.111111
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.211765, 0.211765, 0.211765, 1)
-
-[node name="HeaderLabel" type="Label" parent="Header"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.0630208
-anchor_top = 0.158333
-anchor_right = 1.0
-anchor_bottom = 0.833334
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_font_sizes/font_size = 76
-text = "PineappleEA"
-metadata/_edit_use_anchors_ = true
-
-[node name="LightMode" type="CheckBox" parent="Header"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.859896
-anchor_right = 1.0
-anchor_bottom = 0.500001
-grow_horizontal = 0
-text = "Light Mode:"
-metadata/_edit_use_anchors_ = true
+color = Color(0.168627, 0.180392, 0.188235, 1)
 
 [node name="Icon" type="TextureRect" parent="Header"]
 layout_mode = 1
-anchors_preset = -1
-anchor_top = 0.0833334
-anchor_right = 0.0520833
-anchor_bottom = 0.916668
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = -35.0
+offset_right = 70.0
+offset_bottom = 35.0
 grow_vertical = 2
 texture = ExtResource("5_4ib1e")
-metadata/_edit_use_anchors_ = true
+
+[node name="HeaderLabels" type="HBoxContainer" parent="Header"]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 68.0
+offset_top = -26.5
+offset_right = 713.0
+offset_bottom = 26.5
+grow_vertical = 2
+theme_override_constants/separation = 20
+metadata/_edit_group_ = true
+
+[node name="HeaderLabel" type="Label" parent="Header/HeaderLabels"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 49
+text = "PineappleEA"
+vertical_alignment = 3
+
+[node name="VSeparator" type="VSeparator" parent="Header/HeaderLabels"]
+layout_mode = 2
+
+[node name="LastestVersion" type="Label" parent="Header/HeaderLabels"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("7_jk62c")
+theme_override_font_sizes/font_size = 32
+text = "Latest: 0000"
+vertical_alignment = 1
+
+[node name="Option" type="HBoxContainer" parent="Header"]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -396.0
+offset_top = -20.9444
+offset_bottom = 21.0556
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_constants/separation = 29
+alignment = 1
+
+[node name="LightMode" type="CheckBox" parent="Header/Option"]
+layout_mode = 2
+focus_mode = 0
+theme_override_styles/normal = SubResource("StyleBoxFlat_tufja")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_tufja")
+theme_override_styles/hover_pressed = SubResource("StyleBoxFlat_tufja")
+text = "Light Mode"
+
+[node name="MuteButton" type="CheckButton" parent="Header/Option"]
+layout_mode = 2
+tooltip_text = "Mute background music"
+focus_mode = 0
+theme_override_styles/normal = SubResource("StyleBoxFlat_tufja")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_tufja")
+theme_override_styles/hover_pressed = SubResource("StyleBoxFlat_tufja")
+button_pressed = true
+text = "Mute"
 
 [node name="ControlsContainer" type="GridContainer" parent="."]
 layout_mode = 1
 anchors_preset = -1
-anchor_top = 0.150926
-anchor_right = 1.0
-anchor_bottom = 1.0
+anchor_left = 0.0994792
+anchor_top = 0.214537
+anchor_right = 0.9
+anchor_bottom = 0.414537
+offset_top = 70.7
+offset_bottom = -70.7
 grow_horizontal = 2
 grow_vertical = 2
 columns = 2
+metadata/_edit_group_ = true
 metadata/_edit_use_anchors_ = true
 
 [node name="VersionSelectionLabel" type="Label" parent="ControlsContainer"]
@@ -147,6 +218,7 @@ text = "Versions:"
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
+focus_mode = 0
 alignment = 1
 
 [node name="UseCustomVersionLabel" type="Label" parent="ControlsContainer"]
@@ -159,6 +231,7 @@ size_flags_vertical = 4
 
 [node name="CustomVersionCheckBox" type="CheckBox" parent="ControlsContainer/CustomVersion"]
 layout_mode = 2
+focus_mode = 0
 flat = true
 
 [node name="CustomVersionSpinBox" type="SpinBox" parent="ControlsContainer/CustomVersion"]
@@ -171,7 +244,7 @@ rounded = true
 
 [node name="LocationLabel" type="Label" parent="ControlsContainer"]
 layout_mode = 2
-text = "Install directory:"
+text = "File location:"
 
 [node name="LocationButton" type="Button" parent="ControlsContainer"]
 custom_minimum_size = Vector2(100, 0)
@@ -181,87 +254,88 @@ size_flags_horizontal = 3
 [node name="ExtractLabel" type="Label" parent="ControlsContainer"]
 layout_mode = 2
 size_flags_horizontal = 0
-text = "Auto unpack:"
+text = "Auto extract:"
+
+[node name="ExtractWarning" type="TextureRect" parent="ControlsContainer/ExtractLabel"]
+layout_mode = 2
+anchor_left = 1.19383
+anchor_top = 0.179487
+anchor_right = 1.3348
+anchor_bottom = 0.794872
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("10_f00sk")
+expand_mode = 1
+metadata/_edit_use_anchors_ = true
 
 [node name="ExtractButton" type="CheckBox" parent="ControlsContainer"]
 layout_mode = 2
+tooltip_text = "(Windows only) WARNING WILL DELETE ALL DATA IN YUZU DIRECTORY"
+focus_mode = 0
 text = "(Windows only) WARNING WILL DELETE ALL DATA IN YUZU DIRECTORY"
 alignment = 1
+text_overrun_behavior = 4
 
 [node name="CreateShortcutLabel" type="Label" parent="ControlsContainer"]
 layout_mode = 2
-text = "Shortcut creation"
+text = "Create shortcut:  "
 
 [node name="CreateShortcutButton" type="CheckBox" parent="ControlsContainer"]
 layout_mode = 2
-text = "Creates a start menu shortcut for yuzu-ea (requires auto unpack and admin on windows)"
+tooltip_text = "(Linux only) Creates a start menu shortcut for yuzu-ea"
+focus_mode = 0
+text = "(Linux only) Creates a start menu shortcut for yuzu-ea"
 alignment = 1
+text_overrun_behavior = 4
 
-[node name="Footer" type="TextureRect" parent="."]
+[node name="DownloadContainer" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = -1
-anchor_top = 0.853704
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 0
-texture = SubResource("GradientTexture1D_k5kpi")
-metadata/_edit_use_anchors_ = true
-
-[node name="HBoxContainer" type="HBoxContainer" parent="Footer"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
+anchor_left = 0.2
+anchor_top = 0.580778
+anchor_right = 0.833333
+anchor_bottom = 0.745222
 grow_horizontal = 2
 grow_vertical = 2
-alignment = 1
-
-[node name="LeftMargin" type="Control" parent="Footer/HBoxContainer"]
-custom_minimum_size = Vector2(10, 0)
-layout_mode = 2
-
-[node name="VBoxContainer" type="VBoxContainer" parent="Footer/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
+theme_override_constants/separation = 18
 metadata/_edit_use_anchors_ = true
 
-[node name="TopMargin" type="Control" parent="Footer/HBoxContainer/VBoxContainer"]
-custom_minimum_size = Vector2(0, 10)
-layout_mode = 2
-
-[node name="DownloadProgress" type="ProgressBar" parent="Footer/HBoxContainer/VBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-
-[node name="DividerMargin" type="Control" parent="Footer/HBoxContainer/VBoxContainer"]
-custom_minimum_size = Vector2(0, 10)
-layout_mode = 2
-
-[node name="DownloadButton" type="Button" parent="Footer/HBoxContainer/VBoxContainer"]
+[node name="DownloadButton" type="Button" parent="DownloadContainer"]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+focus_next = NodePath(".")
+focus_previous = NodePath(".")
 text = "Download
 "
 
-[node name="DownloadUpdater" type="Timer" parent="Footer/HBoxContainer/VBoxContainer"]
-wait_time = 0.1
+[node name="DownloadWarning" type="TextureRect" parent="DownloadContainer/DownloadButton"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = -0.0625098
+anchor_top = 0.259258
+anchor_right = -0.0203157
+anchor_bottom = 0.759258
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("10_f00sk")
+expand_mode = 1
+metadata/_edit_use_anchors_ = true
 
-[node name="BottomMargin" type="Control" parent="Footer/HBoxContainer/VBoxContainer"]
-custom_minimum_size = Vector2(0, 10)
+[node name="ClearButton" type="Button" parent="DownloadContainer"]
+custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
-
-[node name="RightMargin" type="Control" parent="Footer/HBoxContainer"]
-custom_minimum_size = Vector2(10, 0)
-layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+focus_mode = 0
+text = "Clear Installation Folder"
 
 [node name="ErrorPopup" type="PopupPanel" parent="."]
 initial_position = 2
 size = Vector2i(600, 300)
 always_on_top = true
+theme_override_styles/panel = SubResource("StyleBoxFlat_7ft08")
 
 [node name="ErrorLabel" type="Label" parent="ErrorPopup"]
 anchors_preset = -1
@@ -269,9 +343,10 @@ anchor_left = 0.00666667
 anchor_top = 0.0133333
 anchor_right = 0.993333
 anchor_bottom = 0.986667
-offset_top = 1.00136e-05
-offset_right = 0.000183105
-offset_bottom = -9.15527e-05
+offset_left = -4.0
+offset_top = -3.99999
+offset_right = 4.00018
+offset_bottom = 3.99991
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3
@@ -285,3 +360,71 @@ metadata/_edit_use_anchors_ = true
 
 [node name="DownloadRequester" type="HTTPRequest" parent="."]
 use_threads = true
+
+[node name="DownloadWindow" type="Panel" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_jo4ax")
+
+[node name="Window" type="ColorRect" parent="DownloadWindow"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -505.0
+offset_top = -125.0
+offset_right = 505.0
+offset_bottom = 127.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.168627, 0.180392, 0.188235, 1)
+
+[node name="DownloadLabelBox" type="Label" parent="DownloadWindow/Window"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -246.5
+offset_top = -93.0
+offset_right = 246.5
+offset_bottom = -1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 2
+theme_override_font_sizes/font_size = 64
+text = "Download..."
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="DownloadProgress" type="ProgressBar" parent="DownloadWindow/Window"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -491.0
+offset_top = -101.0
+offset_right = 491.0
+offset_bottom = -50.0
+grow_horizontal = 2
+grow_vertical = 0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+rounded = true
+
+[node name="DownloadProgressUpdater" type="Timer" parent="DownloadWindow/Window"]
+wait_time = 0.1
+
+[connection signal="toggled" from="Header/Option/MuteButton" to="." method="ToggledMusicButton"]
+[connection signal="toggled" from="ControlsContainer/CreateShortcutButton" to="." method="AutoUnpackToggled"]
+[connection signal="pressed" from="DownloadContainer/ClearButton" to="." method="ClearInstallationFolder"]
