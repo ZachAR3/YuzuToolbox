@@ -41,7 +41,7 @@ bg_color = Color(0.184314, 0.196078, 0.203922, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jo4ax"]
 bg_color = Color(0.168627, 0.180392, 0.188235, 0.529412)
 
-[node name="Home" type="Control" node_paths=PackedStringArray("_backgroundAudio", "_header", "_headerLabel", "_darkBg", "_lightBg", "_headerSeparator", "_versionButton", "_createShortcutButton", "_locationButton", "_downloadButton", "_downloadWindow", "_downloadWindowApp", "_downloadLabel", "_autoUnpackButton", "_downloadProgressBar", "_customVersionCheckBox", "_customVersionSpinBox", "_downloadUpdateTimer", "_enableLightTheme", "_errorPopup", "_errorLabel", "_latestVersionLabel", "_latestReleaseRequester", "_downloadRequester", "_extractWarning", "_downloadWarning")]
+[node name="Home" type="Control" node_paths=PackedStringArray("_backgroundAudio", "_header", "_headerLabel", "_darkBg", "_lightBg", "_headerSeparator", "_versionButton", "_createShortcutButton", "_locationButton", "_downloadButton", "_clearShadersButton", "_shadersLocationButton", "_downloadWindow", "_downloadWindowApp", "_downloadLabel", "_autoUnpackButton", "_downloadProgressBar", "_customVersionCheckBox", "_customVersionSpinBox", "_downloadUpdateTimer", "_enableLightTheme", "_errorPopup", "_errorLabel", "_latestVersionLabel", "_latestReleaseRequester", "_downloadRequester", "_extractWarning", "_downloadWarning", "_clearShadersWarning")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -52,6 +52,7 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 theme = ExtResource("1_c22a4")
 script = ExtResource("1_p51ic")
+_settingsVersion = 1.8
 _icon = ExtResource("3_ltbvi")
 _backgroundAudio = NodePath("BackgroundAudio")
 _header = NodePath("Header")
@@ -63,6 +64,8 @@ _versionButton = NodePath("ControlsContainer/VersionSelectionButton")
 _createShortcutButton = NodePath("ControlsContainer/CreateShortcutButton")
 _locationButton = NodePath("ControlsContainer/LocationButton")
 _downloadButton = NodePath("DownloadContainer/DownloadButton")
+_clearShadersButton = NodePath("ControlsContainer/ClearShadersButton")
+_shadersLocationButton = NodePath("ControlsContainer/ShaderLocationButton")
 _downloadWindow = NodePath("DownloadWindow")
 _downloadWindowApp = NodePath("DownloadWindow/Window")
 _downloadLabel = NodePath("DownloadWindow/Window/DownloadLabelBox")
@@ -85,6 +88,7 @@ _themes = Array[Theme]([ExtResource("1_c22a4"), ExtResource("3_a1ctt")])
 _themesSeparator = Array[StyleBoxLine]([ExtResource("5_qxukt"), ExtResource("7_iauax")])
 _extractWarning = NodePath("ControlsContainer/ExtractLabel/ExtractWarning")
 _downloadWarning = NodePath("DownloadContainer/DownloadButton/DownloadWarning")
+_clearShadersWarning = NodePath("ControlsContainer/ClearShadersLabel/ClearShadersWarning")
 metadata/_edit_use_anchors_ = true
 
 [node name="DarkBG" type="TextureRect" parent="."]
@@ -206,7 +210,6 @@ offset_bottom = -21.31
 grow_horizontal = 2
 grow_vertical = 2
 columns = 2
-metadata/_edit_group_ = true
 metadata/_edit_use_anchors_ = true
 
 [node name="VersionSelectionLabel" type="Label" parent="ControlsContainer"]
@@ -251,6 +254,39 @@ layout_mode = 2
 size_flags_horizontal = 3
 tooltip_text = "Location to intall Yuzu"
 
+[node name="ShaderLocationLabel" type="Label" parent="ControlsContainer"]
+layout_mode = 2
+text = "Shaders location:"
+
+[node name="ShaderLocationButton" type="Button" parent="ControlsContainer"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Location to intall Yuzu"
+
+[node name="ClearShadersLabel" type="Label" parent="ControlsContainer"]
+layout_mode = 2
+text = "Clear shaders"
+
+[node name="ClearShadersWarning" type="TextureRect" parent="ControlsContainer/ClearShadersLabel"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.696742
+anchor_top = 0.228476
+anchor_right = 0.774436
+anchor_bottom = 0.895143
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("10_f00sk")
+expand_mode = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="ClearShadersButton" type="CheckBox" parent="ControlsContainer"]
+layout_mode = 2
+tooltip_text = "Clears shader cache folder upon install"
+text = " (WARNING DELETES ALL DATA IN FOLDER)"
+alignment = 1
+
 [node name="ExtractLabel" type="Label" parent="ControlsContainer"]
 layout_mode = 2
 size_flags_horizontal = 0
@@ -282,9 +318,9 @@ text = "Create start shortcut:  "
 
 [node name="CreateShortcutButton" type="CheckBox" parent="ControlsContainer"]
 layout_mode = 2
-tooltip_text = "Creates a start menu shortcut for yuzu-ea (requires auto unpack and admin on windows)"
+tooltip_text = "Creates a start menu shortcut for yuzu-ea (requires auto unpack and admin privleges on windows)"
 focus_mode = 0
-text = "Creates a start menu shortcut for yuzu-ea (requires autounpack and admin on windows)"
+text = "Creates a start menu shortcut for yuzu-ea (requires auto unpack and admin privleges on windows)"
 alignment = 1
 text_overrun_behavior = 4
 
@@ -426,4 +462,5 @@ rounded = true
 wait_time = 0.1
 
 [connection signal="toggled" from="Header/Option/MuteButton" to="." method="ToggledMusicButton"]
+[connection signal="toggled" from="ControlsContainer/ClearShadersButton" to="." method="ClearShadersToggle"]
 [connection signal="pressed" from="DownloadContainer/ClearButton" to="." method="ClearInstallationFolder"]

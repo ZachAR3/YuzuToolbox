@@ -9,13 +9,14 @@ using Mono.Unix;
 using ProgressBar = Godot.ProgressBar;
 using Window = Godot.Window;
 using WindowsShortcutFactory;
+using Environment = System.Environment;
 
 
 public partial class Home : Control
 {
 	[Export()] private float _appVersion = 2.1f;
 	[Export()] private float _settingsVersion = 1.7f;
-	
+
 	[Export()] private Godot.Image _icon;
 	[Export()] private AudioStreamPlayer _backgroundAudio;
 	[Export()] private ColorRect _header;
@@ -27,6 +28,8 @@ public partial class Home : Control
 	[Export()] private CheckBox _createShortcutButton;
 	[Export()] private Godot.Button _locationButton;
 	[Export()] private Godot.Button _downloadButton;
+	[Export()] private CheckBox _clearShadersButton;
+	[Export()] private Godot.Button _shadersLocationButton;
 	[Export()] private Panel _downloadWindow;
 	[Export()] private ColorRect _downloadWindowApp;
 	[Export()] private Godot.Label _downloadLabel;
@@ -38,7 +41,7 @@ public partial class Home : Control
 	[Export()] private CheckBox _enableLightTheme;
 	[Export()] private Popup _errorPopup;
 	[Export()] private Godot.Label _errorLabel;
-	[Export()] private Godot.Label _latestVersionLabel; 
+	[Export()] private Godot.Label _latestVersionLabel;
 	[Export()] private HttpRequest _latestReleaseRequester;
 	[Export()] private HttpRequest _downloadRequester;
 	[Export()] private String _pineappleLatestUrl;
@@ -51,6 +54,7 @@ public partial class Home : Control
 	[Export()] private Array<StyleBoxLine> _themesSeparator;
 	[Export()] private TextureRect _extractWarning;
 	[Export()] private TextureRect _downloadWarning;
+	[Export()] private TextureRect _clearShadersWarning;
 
 	private FileChooserDialog _fileChooser;
 	private ResourceSaveManager _saveManager;
@@ -58,12 +62,12 @@ public partial class Home : Control
 	private String _osUsed;
 	private string _yuzuExtensionString;
 	private Theme _currentTheme;
-	
+
 	public override void _Ready()
 	{
 		// Sets minimum window size to prevent text clipping and UI breaking at smaller scales.
-		DisplayServer.WindowSetMinSize(new Vector2I(1024,576));
-		_osUsed = OS.GetName();
+		DisplayServer.WindowSetMinSize(new Vector2I(1024, 576));
+		_osUsed = "Windows"; //OS.GetName();
 		if (_osUsed == "Linux")
 		{
 			_saveName += ".AppImage";
@@ -76,22 +80,35 @@ public partial class Home : Control
 			_yuzuExtensionString = ".zip";
 			_createShortcutButton.Disabled = true;
 		}
-		
+
 		_saveManager = new ResourceSaveManager();
 		_saveManager.Version = _settingsVersion;
 		GetSettings();
+
+		if (_settings.ShadersLocation == "")
+		{
+			_settings.ShadersLocation =
+				$@"{System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData)}/yuzu/shader";
+			_saveManager._settings = _settings;
+			_saveManager.WriteSave();
+		}
+
+		_shadersLocationButton.Text = _settings.ShadersLocation;
+
 		_locationButton.Text = _settings.SaveDirectory;
-		
+
 		// Call a request to get the latest versions and connect it to our GetNewVersions function
 		_latestReleaseRequester.RequestCompleted += AddVersions;
 		_latestReleaseRequester.Request(_pineappleLatestUrl);
 
 		_downloadButton.Disabled = true;
 		_downloadButton.Pressed += InstallSelectedVersion;
-		_locationButton.Pressed += OpenFileChooser;
+		_locationButton.Pressed += OnLocationButtonPressed;
 		_downloadRequester.RequestCompleted += VersionDownloadCompleted;
 		_downloadUpdateTimer.Timeout += UpdateDownloadBar;
 		_downloadWindow.Visible = false;
+
+		_shadersLocationButton.Pressed += OnShadersLocationButtonPressed;
 		
 		Resized += WindowResized;
 
@@ -105,6 +122,7 @@ public partial class Home : Control
 		_autoUnpackButton.Toggled += AutoUnpackToggled;
 		_extractWarning.Visible = false;
 		_downloadWarning.Visible = false;
+		_clearShadersWarning.Visible = false;
 	}
 
 	private void SetTheme(bool enableLight)
@@ -285,7 +303,7 @@ Categories=Game;Emulator;Qt;
 			catch (Exception shortcutError)
 			{
 				yuzuShortcutPath = $@"{_settings.SaveDirectory}/{windowsShortcutName}";
-				ErrorPopup($@"cannot create shortcut, ensure app is running as admin. Placing instead at {yuzuShortcutPath}");
+				ErrorPopup($@"cannot create shortcut, ensure app is running as admin. Placing instead at {yuzuShortcutPath}. Exception:{shortcutError}");
 				windowsShortcut.Save(yuzuShortcutPath);
 			}
 			
@@ -451,10 +469,39 @@ Categories=Game;Emulator;Qt;
 			}
 		}
 
+		if (_clearShadersButton.ButtonPressed)
+		{
+			if (Directory.Exists(_settings.ShadersLocation))
+			{
+				DeleteDirectoryContents(_settings.ShadersLocation);
+			}
+			else
+			{
+				ErrorPopup("failed to find shaders location");
+			}
+
+		}
+
+	}
+
+
+	private void OnShadersLocationButtonPressed()
+	{
+		OpenFileChooser(ref _settings.ShadersLocation);
+		_shadersLocationButton.Text = _settings.ShadersLocation;
+		SaveSettings();
 	}
 	
-
-	private void OpenFileChooser()
+	
+	private void OnLocationButtonPressed()
+	{
+		OpenFileChooser(ref _settings.SaveDirectory);
+		_locationButton.Text = _settings.SaveDirectory;
+		SaveSettings();
+	}
+	
+	
+	private void OpenFileChooser(ref string returnObject)
 	{
 		try
 		{
@@ -472,29 +519,31 @@ Categories=Game;Emulator;Qt;
 		// Add an "Open" button to the dialog
 		_fileChooser.AddButton("Open", ResponseType.Ok);
 
-		// Set the initial directory (optional)
+		// Set the initial directory
 		_fileChooser.SetCurrentFolder("/");
 
-		// Connect the response signal
-		_fileChooser.Response += OnFileChooserResponse;
+		// Connect the response signal, I would like to directly pass in the return object, but this isn't possible 
+		// in a lambda, so we create a temp value to hold it and then assign it to that value after.
+		string tempReturnString = returnObject;
+		_fileChooser.Response += (sender, args) => OnFileChooserResponse(sender, args, ref tempReturnString);
 
 		// Show the dialog
 		_fileChooser.Show();
 		Application.Run();
+		
+		// Sets our original object back to be the returned temporary string.
+		returnObject = tempReturnString;
 	}
 
-	private void OnFileChooserResponse(object sender, ResponseArgs args)
+	private void OnFileChooserResponse(object sender, ResponseArgs args, ref string returnObject)
 	{
 		if (args.ResponseId == ResponseType.Ok)
 		{
 			// The user selected a file
-			_settings.SaveDirectory = _fileChooser.File.Path;
-			_locationButton.Text = _settings.SaveDirectory;
+			returnObject = _fileChooser.File.Path;
 		}
 
-		// Clean up resources4
-		_saveManager._settings = _settings;
-		_saveManager.WriteSave();
+		// Clean up resources
 		_fileChooser.Dispose();
 		Application.Quit();
 	}
@@ -580,8 +629,21 @@ Categories=Game;Emulator;Qt;
 		// If unpack is toggled off, ensures the create shortcut button is also disabled and turns off.
 		_createShortcutButton.ButtonPressed = unpackEnabled && _createShortcutButton.ButtonPressed;
 		_createShortcutButton.Disabled = !unpackEnabled;
-		_downloadWarning.Visible = unpackEnabled;
+		_downloadWarning.Visible = _extractWarning.Visible || unpackEnabled;
 		_extractWarning.Visible = unpackEnabled;
+	}
+
+	private void ClearShadersToggle(bool clearEnabled)
+	{
+		_clearShadersWarning.Visible = clearEnabled;
+		_downloadWarning.Visible = _extractWarning.Visible || clearEnabled;
+	}
+
+
+	private void SaveSettings()
+	{
+		_saveManager._settings = _settings;
+		_saveManager.WriteSave();
 	}
 }
 
