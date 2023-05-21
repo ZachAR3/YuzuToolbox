@@ -41,7 +41,7 @@ bg_color = Color(0.184314, 0.196078, 0.203922, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jo4ax"]
 bg_color = Color(0.168627, 0.180392, 0.188235, 0.529412)
 
-[node name="Home" type="Control" node_paths=PackedStringArray("_backgroundAudio", "_header", "_headerLabel", "_darkBg", "_lightBg", "_headerSeparator", "_versionButton", "_createShortcutButton", "_locationButton", "_downloadButton", "_clearShadersButton", "_shadersLocationButton", "_downloadWindow", "_downloadWindowApp", "_downloadLabel", "_autoUnpackButton", "_downloadProgressBar", "_customVersionCheckBox", "_customVersionSpinBox", "_downloadUpdateTimer", "_enableLightTheme", "_errorPopup", "_errorLabel", "_latestVersionLabel", "_latestReleaseRequester", "_downloadRequester", "_extractWarning", "_downloadWarning", "_clearShadersWarning")]
+[node name="Home" type="Control" node_paths=PackedStringArray("_backgroundAudio", "_header", "_headerLabel", "_darkBg", "_lightBg", "_headerSeparator", "_versionButton", "_createShortcutButton", "_locationButton", "_downloadButton", "_clearShadersButton", "_shadersLocationButton", "_downloadWindow", "_downloadWindowApp", "_downloadLabel", "_autoUnpackButton", "_downloadProgressBar", "_customVersionCheckBox", "_customVersionSpinBox", "_downloadUpdateTimer", "_enableLightTheme", "_errorPopup", "_errorLabel", "_latestVersionLabel", "_latestReleaseRequester", "_downloadRequester", "_extractWarning", "_downloadWarning", "_clearShadersWarning", "_backupSavesButton", "_restoreSavesButton", "_fromSaveDirectoryButton", "_toSaveDirectoryButton")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -52,7 +52,7 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 theme = ExtResource("1_c22a4")
 script = ExtResource("1_p51ic")
-_settingsVersion = 1.8
+_settingsVersion = 1.9
 _icon = ExtResource("3_ltbvi")
 _backgroundAudio = NodePath("BackgroundAudio")
 _header = NodePath("Header")
@@ -63,7 +63,7 @@ _headerSeparator = NodePath("Header/HeaderLabels/VSeparator")
 _versionButton = NodePath("ControlsContainer/VersionSelectionButton")
 _createShortcutButton = NodePath("ControlsContainer/CreateShortcutButton")
 _locationButton = NodePath("ControlsContainer/LocationButton")
-_downloadButton = NodePath("DownloadContainer/DownloadButton")
+_downloadButton = NodePath("DownloadButton")
 _clearShadersButton = NodePath("ControlsContainer/ClearShadersButton")
 _shadersLocationButton = NodePath("ControlsContainer/ShaderLocationButton")
 _downloadWindow = NodePath("DownloadWindow")
@@ -87,8 +87,12 @@ _previousVersionsToAdd = 20
 _themes = Array[Theme]([ExtResource("1_c22a4"), ExtResource("3_a1ctt")])
 _themesSeparator = Array[StyleBoxLine]([ExtResource("5_qxukt"), ExtResource("7_iauax")])
 _extractWarning = NodePath("ControlsContainer/ExtractLabel/ExtractWarning")
-_downloadWarning = NodePath("DownloadContainer/DownloadButton/DownloadWarning")
+_downloadWarning = NodePath("DownloadButton/DownloadWarning")
 _clearShadersWarning = NodePath("ControlsContainer/ClearShadersLabel/ClearShadersWarning")
+_backupSavesButton = NodePath("Tools/BackupSavesButton")
+_restoreSavesButton = NodePath("Tools/RestoreSavesButton")
+_fromSaveDirectoryButton = NodePath("Tools/SaveContainer/FromButton")
+_toSaveDirectoryButton = NodePath("Tools/SaveContainer/ToButton")
 metadata/_edit_use_anchors_ = true
 
 [node name="DarkBG" type="TextureRect" parent="."]
@@ -264,29 +268,6 @@ layout_mode = 2
 size_flags_horizontal = 3
 tooltip_text = "Location to intall Yuzu"
 
-[node name="ClearShadersLabel" type="Label" parent="ControlsContainer"]
-layout_mode = 2
-text = "Clear shaders"
-
-[node name="ClearShadersWarning" type="TextureRect" parent="ControlsContainer/ClearShadersLabel"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.696742
-anchor_top = 0.228476
-anchor_right = 0.774436
-anchor_bottom = 0.895143
-grow_horizontal = 2
-grow_vertical = 2
-texture = ExtResource("10_f00sk")
-expand_mode = 1
-metadata/_edit_use_anchors_ = true
-
-[node name="ClearShadersButton" type="CheckBox" parent="ControlsContainer"]
-layout_mode = 2
-tooltip_text = "Clears shader cache folder upon install"
-text = " (WARNING DELETES ALL DATA IN FOLDER)"
-alignment = 1
-
 [node name="ExtractLabel" type="Label" parent="ControlsContainer"]
 layout_mode = 2
 size_flags_horizontal = 0
@@ -312,6 +293,32 @@ text = "Windows only:WARNING WILL DELETE ALL DATA IN INSTALL LOCATION"
 alignment = 1
 text_overrun_behavior = 4
 
+[node name="ClearShadersLabel" type="Label" parent="ControlsContainer"]
+layout_mode = 2
+text = "Clear shaders"
+autowrap_mode = 3
+
+[node name="ClearShadersWarning" type="TextureRect" parent="ControlsContainer/ClearShadersLabel"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.696742
+anchor_top = 0.228476
+anchor_right = 0.774436
+anchor_bottom = 0.895143
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("10_f00sk")
+expand_mode = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="ClearShadersButton" type="CheckBox" parent="ControlsContainer"]
+layout_mode = 2
+tooltip_text = "Clears shaders on install (WARNING DELETES ALL DATA IN SELECTED LOCATION)"
+text = "Clear shaders on install (WARNING DELETES ALL DATA IN SELECTED LOCATION)"
+alignment = 1
+text_overrun_behavior = 4
+clip_text = true
+
 [node name="CreateShortcutLabel" type="Label" parent="ControlsContainer"]
 layout_mode = 2
 text = "Create start shortcut:  "
@@ -324,29 +331,22 @@ text = "Creates a start menu shortcut for yuzu-ea (requires auto unpack and admi
 alignment = 1
 text_overrun_behavior = 4
 
-[node name="DownloadContainer" type="VBoxContainer" parent="."]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.2
-anchor_top = 0.580778
-anchor_right = 0.833333
-anchor_bottom = 0.745222
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/separation = 18
-metadata/_edit_use_anchors_ = true
-
-[node name="DownloadButton" type="Button" parent="DownloadContainer"]
+[node name="DownloadButton" type="Button" parent="."]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
+anchor_left = 0.2
+anchor_top = 0.559259
+anchor_right = 0.833333
+anchor_bottom = 0.634259
 size_flags_horizontal = 3
 size_flags_vertical = 3
 focus_next = NodePath(".")
 focus_previous = NodePath(".")
 text = "Download
 "
+metadata/_edit_use_anchors_ = true
 
-[node name="DownloadWarning" type="TextureRect" parent="DownloadContainer/DownloadButton"]
+[node name="DownloadWarning" type="TextureRect" parent="DownloadButton"]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = -0.0625098
@@ -356,16 +356,106 @@ anchor_bottom = 0.759258
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("10_f00sk")
-expand_mode = 1
+expand_mode = 5
 metadata/_edit_use_anchors_ = true
 
-[node name="ClearButton" type="Button" parent="DownloadContainer"]
+[node name="Tools" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.2
+anchor_top = 0.676
+anchor_right = 0.833333
+anchor_bottom = 0.967
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 18
+metadata/_edit_use_anchors_ = true
+
+[node name="ClearInstallFolderButton" type="Button" parent="Tools"]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 focus_mode = 0
 text = "Clear Installation Folder"
+
+[node name="ClearInstallWarning" type="TextureRect" parent="Tools/ClearInstallFolderButton"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = -0.0625098
+anchor_top = 0.259258
+anchor_right = -0.0203157
+anchor_bottom = 0.759258
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("10_f00sk")
+expand_mode = 5
+metadata/_edit_use_anchors_ = true
+
+[node name="ClearShaders" type="Button" parent="Tools"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+focus_mode = 0
+text = "Clear Shaders"
+
+[node name="ClearShadersManualWarning" type="TextureRect" parent="Tools/ClearShaders"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = -0.0625098
+anchor_top = 0.259258
+anchor_right = -0.0203157
+anchor_bottom = 0.759258
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("10_f00sk")
+expand_mode = 5
+metadata/_edit_use_anchors_ = true
+
+[node name="BackupSavesButton" type="Button" parent="Tools"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+focus_mode = 0
+text = "Backup saves"
+
+[node name="RestoreSavesButton" type="Button" parent="Tools"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+focus_mode = 0
+text = "Restore saves (pulls from to and places in from)"
+
+[node name="SaveContainer" type="GridContainer" parent="Tools"]
+layout_mode = 2
+columns = 2
+
+[node name="FromLabel" type="Label" parent="Tools/SaveContainer"]
+layout_mode = 2
+text = "From:"
+
+[node name="FromButton" type="Button" parent="Tools/SaveContainer"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+focus_mode = 0
+text = "
+"
+
+[node name="ToLabel" type="Label" parent="Tools/SaveContainer"]
+layout_mode = 2
+text = "To:"
+
+[node name="ToButton" type="Button" parent="Tools/SaveContainer"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+focus_mode = 0
 
 [node name="ErrorPopup" type="PopupPanel" parent="."]
 initial_position = 2
@@ -463,4 +553,9 @@ wait_time = 0.1
 
 [connection signal="toggled" from="Header/Option/MuteButton" to="." method="ToggledMusicButton"]
 [connection signal="toggled" from="ControlsContainer/ClearShadersButton" to="." method="ClearShadersToggle"]
-[connection signal="pressed" from="DownloadContainer/ClearButton" to="." method="ClearInstallationFolder"]
+[connection signal="pressed" from="Tools/ClearInstallFolderButton" to="." method="ClearInstallationFolder"]
+[connection signal="pressed" from="Tools/ClearShaders" to="." method="ClearShaders"]
+[connection signal="pressed" from="Tools/BackupSavesButton" to="." method="OnBackupSavesButtonPressed"]
+[connection signal="pressed" from="Tools/RestoreSavesButton" to="." method="OnRestoreSavesPressed"]
+[connection signal="pressed" from="Tools/SaveContainer/FromButton" to="." method="OnFromSaveDirectoryButtonPressed"]
+[connection signal="pressed" from="Tools/SaveContainer/ToButton" to="." method="OnToSaveDirectoryButtonPressed"]

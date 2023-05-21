@@ -55,6 +55,11 @@ public partial class Home : Control
 	[Export()] private TextureRect _extractWarning;
 	[Export()] private TextureRect _downloadWarning;
 	[Export()] private TextureRect _clearShadersWarning;
+	[ExportGroup("Tools")] 
+	[Export()] private Godot.Button _backupSavesButton;
+	[Export()] private Godot.Button _restoreSavesButton;
+	[Export()] private Godot.Button _fromSaveDirectoryButton;
+	[Export()] private Godot.Button _toSaveDirectoryButton;
 
 	private FileChooserDialog _fileChooser;
 	private ResourceSaveManager _saveManager;
@@ -89,13 +94,21 @@ public partial class Home : Control
 		{
 			_settings.ShadersLocation =
 				$@"{System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData)}/yuzu/shader";
-			_saveManager._settings = _settings;
-			_saveManager.WriteSave();
+			SaveSettings();
 		}
 
-		_shadersLocationButton.Text = _settings.ShadersLocation;
+		if (_settings.FromSaveDirectory == "")
+		{
+			_settings.FromSaveDirectory = 
+				$@"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}/yuzu/nand/user/save";
+			SaveSettings();
+		}
+		
 
+		_shadersLocationButton.Text = _settings.ShadersLocation;
 		_locationButton.Text = _settings.SaveDirectory;
+		_fromSaveDirectoryButton.Text = _settings.FromSaveDirectory;
+		_toSaveDirectoryButton.Text = _settings.ToSaveDirectory;
 
 		// Call a request to get the latest versions and connect it to our GetNewVersions function
 		_latestReleaseRequester.RequestCompleted += AddVersions;
@@ -277,6 +290,7 @@ Categories=Game;Emulator;Qt;
 					shortcutPath = $@"{_settings.SaveDirectory}/{linuxShortcutName}";
 					ErrorPopup($@"Error creating shortcut, creating new at {shortcutPath}. Error:{shortcutError}");
 					File.WriteAllText(shortcutPath, shortcutContent);
+					throw;
 				}
 			}
 		}
@@ -305,6 +319,7 @@ Categories=Game;Emulator;Qt;
 				yuzuShortcutPath = $@"{_settings.SaveDirectory}/{windowsShortcutName}";
 				ErrorPopup($@"cannot create shortcut, ensure app is running as admin. Placing instead at {yuzuShortcutPath}. Exception:{shortcutError}");
 				windowsShortcut.Save(yuzuShortcutPath);
+				throw;
 			}
 			
 		}
@@ -471,23 +486,29 @@ Categories=Game;Emulator;Qt;
 
 		if (_clearShadersButton.ButtonPressed)
 		{
-			if (Directory.Exists(_settings.ShadersLocation))
-			{
-				DeleteDirectoryContents(_settings.ShadersLocation);
-			}
-			else
-			{
-				ErrorPopup("failed to find shaders location");
-			}
-
+			ClearShaders();;
 		}
 
 	}
 
 
+	private void ClearShaders()
+	{
+		if (Directory.Exists(_settings.ShadersLocation))
+		{
+			DeleteDirectoryContents(_settings.ShadersLocation);
+		}
+		else
+		{
+			ErrorPopup("failed to find shaders location");
+		}
+			
+	}
+
+
 	private void OnShadersLocationButtonPressed()
 	{
-		OpenFileChooser(ref _settings.ShadersLocation);
+		OpenFileChooser(ref _settings.ShadersLocation, _settings.ShadersLocation);
 		_shadersLocationButton.Text = _settings.ShadersLocation;
 		SaveSettings();
 	}
@@ -495,13 +516,59 @@ Categories=Game;Emulator;Qt;
 	
 	private void OnLocationButtonPressed()
 	{
-		OpenFileChooser(ref _settings.SaveDirectory);
+		OpenFileChooser(ref _settings.SaveDirectory, _settings.SaveDirectory);
 		_locationButton.Text = _settings.SaveDirectory;
+		SaveSettings();
+	}
+
+
+	private void OnBackupSavesButtonPressed()
+	{
+		try
+		{
+			DuplicateDirectoryContents(_settings.FromSaveDirectory, _settings.ToSaveDirectory, true);
+			_backupSavesButton.Text = "Backup successful!";
+		}
+		catch (Exception backupError)
+		{
+			ErrorPopup("failed to create save backup exception:" + backupError);
+			throw;
+		}
+
+	}
+
+
+	private void OnRestoreSavesPressed()
+	{
+		try
+		{
+			DuplicateDirectoryContents(_settings.ToSaveDirectory, _settings.FromSaveDirectory, true);
+			_restoreSavesButton.Text = "Saves restored successfully!";
+		}
+		catch (Exception restoreError)
+		{
+			ErrorPopup("failed to restore saves, exception: " + restoreError);
+			throw;
+		}
+	}
+	
+	
+	private void OnFromSaveDirectoryButtonPressed()
+	{
+		OpenFileChooser(ref _settings.FromSaveDirectory, _settings.FromSaveDirectory);
+		_fromSaveDirectoryButton.Text = _settings.FromSaveDirectory;
+		SaveSettings();
+	}
+	
+	private void OnToSaveDirectoryButtonPressed()
+	{
+		OpenFileChooser(ref _settings.ToSaveDirectory, _settings.ToSaveDirectory);
+		_toSaveDirectoryButton.Text = _settings.ToSaveDirectory;
 		SaveSettings();
 	}
 	
 	
-	private void OpenFileChooser(ref string returnObject)
+	private void OpenFileChooser(ref string returnObject, string startingDirectory)
 	{
 		try
 		{
@@ -510,6 +577,7 @@ Categories=Game;Emulator;Qt;
 		catch (Exception gtkError)
 		{
 			ErrorPopup("opening GTK window failed: " + gtkError);
+			throw;
 		}
 		_fileChooser = new FileChooserDialog("Select a File", null, FileChooserAction.SelectFolder);
 
@@ -520,7 +588,7 @@ Categories=Game;Emulator;Qt;
 		_fileChooser.AddButton("Open", ResponseType.Ok);
 
 		// Set the initial directory
-		_fileChooser.SetCurrentFolder("/");
+		_fileChooser.SetCurrentFolder(startingDirectory);
 
 		// Connect the response signal, I would like to directly pass in the return object, but this isn't possible 
 		// in a lambda, so we create a temp value to hold it and then assign it to that value after.
@@ -604,6 +672,28 @@ Categories=Game;Emulator;Qt;
 		}
 	}
 	
+	
+	public void DuplicateDirectoryContents(string sourceDir, string destinationDir, bool overwriteFiles)
+	{
+		// Get all directories in the source directory
+		string[] allDirectories = Directory.GetDirectories(sourceDir, "*", SearchOption.AllDirectories);
+
+		foreach (string dir in allDirectories)
+		{
+			string dirToCreate = dir.Replace(sourceDir, destinationDir);
+			Directory.CreateDirectory(dirToCreate);
+		}
+
+		// Get all files in the source directory
+		string[] allFiles = Directory.GetFiles(sourceDir, "*.*", SearchOption.AllDirectories);
+
+		foreach (string filePath in allFiles)
+		{
+			string newFilePath = filePath.Replace(sourceDir, destinationDir);
+			File.Copy(filePath, newFilePath, overwriteFiles);
+		}
+	}
+	
 
 	private void ErrorPopup(String error)
 	{
@@ -646,5 +736,4 @@ Categories=Game;Emulator;Qt;
 		_saveManager.WriteSave();
 	}
 }
-
 
