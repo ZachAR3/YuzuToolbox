@@ -41,7 +41,7 @@ bg_color = Color(0.184314, 0.196078, 0.203922, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jo4ax"]
 bg_color = Color(0.168627, 0.180392, 0.188235, 0.529412)
 
-[node name="Home" type="Control" node_paths=PackedStringArray("_backgroundAudio", "_header", "_headerLabel", "_darkBg", "_lightBg", "_headerSeparator", "_versionButton", "_createShortcutButton", "_locationButton", "_downloadButton", "_clearShadersButton", "_shadersLocationButton", "_downloadWindow", "_downloadWindowApp", "_downloadLabel", "_autoUnpackButton", "_downloadProgressBar", "_customVersionCheckBox", "_customVersionSpinBox", "_downloadUpdateTimer", "_enableLightTheme", "_errorPopup", "_errorLabel", "_latestVersionLabel", "_latestReleaseRequester", "_downloadRequester", "_extractWarning", "_downloadWarning", "_clearShadersWarning", "_backupSavesButton", "_restoreSavesButton", "_fromSaveDirectoryButton", "_toSaveDirectoryButton")]
+[node name="Home" type="Control" node_paths=PackedStringArray("_backgroundAudio", "_header", "_headerLabel", "_darkBg", "_lightBg", "_headerSeparator", "_versionButton", "_createShortcutButton", "_locationButton", "_downloadButton", "_clearShadersButton", "_shadersLocationButton", "_downloadWindow", "_downloadWindowApp", "_downloadLabel", "_autoUnpackButton", "_downloadProgressBar", "_customVersionCheckBox", "_customVersionSpinBox", "_downloadUpdateTimer", "_enableLightTheme", "_errorPopup", "_errorLabel", "_latestVersionLabel", "_latestReleaseRequester", "_downloadRequester", "_extractWarning", "_downloadWarning", "_clearShadersWarning", "_clearInstallFolderButton", "_clearShadersToolButton", "_backupSavesButton", "_restoreSavesButton", "_fromSaveDirectoryButton", "_toSaveDirectoryButton")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -52,8 +52,6 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 theme = ExtResource("1_c22a4")
 script = ExtResource("1_p51ic")
-_appVersion = 2.2
-_settingsVersion = 1.9
 _icon = ExtResource("3_ltbvi")
 _backgroundAudio = NodePath("BackgroundAudio")
 _header = NodePath("Header")
@@ -90,6 +88,8 @@ _themesSeparator = Array[StyleBoxLine]([ExtResource("5_qxukt"), ExtResource("7_i
 _extractWarning = NodePath("MainPage/Installer/ControlsContainer/ExtractLabel/ExtractWarning")
 _downloadWarning = NodePath("MainPage/Installer/DownloadButton/DownloadWarning")
 _clearShadersWarning = NodePath("MainPage/Installer/ControlsContainer/ClearShadersLabel/ClearShadersWarning")
+_clearInstallFolderButton = NodePath("MainPage/Tools/Tools/ClearInstallFolderButton")
+_clearShadersToolButton = NodePath("MainPage/Tools/Tools/ClearShaders")
 _backupSavesButton = NodePath("MainPage/Tools/Tools/BackupSavesButton")
 _restoreSavesButton = NodePath("MainPage/Tools/Tools/RestoreSavesButton")
 _fromSaveDirectoryButton = NodePath("MainPage/Tools/Tools/SaveContainer/FromButton")

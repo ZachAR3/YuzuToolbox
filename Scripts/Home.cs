@@ -56,6 +56,8 @@ public partial class Home : Control
 	[Export()] private TextureRect _downloadWarning;
 	[Export()] private TextureRect _clearShadersWarning;
 	[ExportGroup("Tools")] 
+	[Export()] private Godot.Button _clearInstallFolderButton;
+	[Export()] private Godot.Button _clearShadersToolButton;
 	[Export()] private Godot.Button _backupSavesButton;
 	[Export()] private Godot.Button _restoreSavesButton;
 	[Export()] private Godot.Button _fromSaveDirectoryButton;
@@ -92,15 +94,18 @@ public partial class Home : Control
 
 		if (_settings.ShadersLocation == "")
 		{
-			_settings.ShadersLocation =
-				$@"{System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData)}/yuzu/shader";
+			_settings.ShadersLocation = _osUsed == "Linux"
+				?
+				$@"{System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData)}/yuzu/shader" : 
+				$@"{System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData)}\yuzu\shader";
 			SaveSettings();
 		}
 
 		if (_settings.FromSaveDirectory == "")
 		{
-			_settings.FromSaveDirectory = 
-				$@"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}/yuzu/nand/user/save";
+			_settings.FromSaveDirectory = _osUsed == "Linux"
+				? $@"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}/yuzu/nand/user/save"
+				: $@"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\yuzu\nand\user\save";
 			SaveSettings();
 		}
 		
@@ -497,6 +502,8 @@ Categories=Game;Emulator;Qt;
 		if (Directory.Exists(_settings.ShadersLocation))
 		{
 			DeleteDirectoryContents(_settings.ShadersLocation);
+			_clearShadersButton.Text = "Shaders cleared successfully!";
+			_clearShadersToolButton.Text = "Shaders cleared successfully!";
 		}
 		else
 		{
@@ -712,6 +719,7 @@ Categories=Game;Emulator;Qt;
 	private void ClearInstallationFolder()
 	{
 		DeleteDirectoryContents(_settings.SaveDirectory);
+		_clearInstallFolderButton.Text = "Cleared install folder successfully!";
 	}
 
 	private void AutoUnpackToggled(bool unpackEnabled)
