@@ -564,9 +564,9 @@ Categories=Game;Emulator;Qt;
 		_errorPopup.PopupCentered();
 	}
 	
-	private void ToggledMusicButton(bool musicEnabled)
+	private void ToggledMusicButton(bool musicDisabled)
 	{
-		if(musicEnabled) {_backgroundAudio.VolumeDb = -(20.0f * (1.0f - 0.5f) + 80.0f * 0.5f);}
+		if(musicDisabled) {_backgroundAudio.VolumeDb = -80;}
 		else {_backgroundAudio.VolumeDb = -20;}
 	}
 
