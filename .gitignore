@@ -2,3 +2,5 @@
 .godot/
 .idea/
 releases/
+.vs/
+.vscode/
