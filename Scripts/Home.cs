@@ -9,13 +9,14 @@ using Mono.Unix;
 using ProgressBar = Godot.ProgressBar;
 using Window = Godot.Window;
 using WindowsShortcutFactory;
+using Environment = System.Environment;
 
 
 public partial class Home : Control
 {
-	[Export()] private float _appVersion = 2.1f;
-	[Export()] private float _settingsVersion = 1.7f;
-	
+	[Export()] private float _appVersion = 2.2f;
+	[Export()] private float _settingsVersion = 1.9f;
+
 	[Export()] private Godot.Image _icon;
 	[Export()] private AudioStreamPlayer _backgroundAudio;
 	[Export()] private ColorRect _header;
@@ -27,6 +28,8 @@ public partial class Home : Control
 	[Export()] private CheckBox _createShortcutButton;
 	[Export()] private Godot.Button _locationButton;
 	[Export()] private Godot.Button _downloadButton;
+	[Export()] private CheckBox _clearShadersButton;
+	[Export()] private Godot.Button _shadersLocationButton;
 	[Export()] private Panel _downloadWindow;
 	[Export()] private ColorRect _downloadWindowApp;
 	[Export()] private Godot.Label _downloadLabel;
@@ -38,7 +41,7 @@ public partial class Home : Control
 	[Export()] private CheckBox _enableLightTheme;
 	[Export()] private Popup _errorPopup;
 	[Export()] private Godot.Label _errorLabel;
-	[Export()] private Godot.Label _latestVersionLabel; 
+	[Export()] private Godot.Label _latestVersionLabel;
 	[Export()] private HttpRequest _latestReleaseRequester;
 	[Export()] private HttpRequest _downloadRequester;
 	[Export()] private String _pineappleLatestUrl;
@@ -51,6 +54,14 @@ public partial class Home : Control
 	[Export()] private Array<StyleBoxLine> _themesSeparator;
 	[Export()] private TextureRect _extractWarning;
 	[Export()] private TextureRect _downloadWarning;
+	[Export()] private TextureRect _clearShadersWarning;
+	[ExportGroup("Tools")] 
+	[Export()] private Godot.Button _clearInstallFolderButton;
+	[Export()] private Godot.Button _clearShadersToolButton;
+	[Export()] private Godot.Button _backupSavesButton;
+	[Export()] private Godot.Button _restoreSavesButton;
+	[Export()] private Godot.Button _fromSaveDirectoryButton;
+	[Export()] private Godot.Button _toSaveDirectoryButton;
 
 	private FileChooserDialog _fileChooser;
 	private ResourceSaveManager _saveManager;
@@ -58,11 +69,11 @@ public partial class Home : Control
 	private String _osUsed;
 	private string _yuzuExtensionString;
 	private Theme _currentTheme;
-	
+
 	public override void _Ready()
 	{
 		// Sets minimum window size to prevent text clipping and UI breaking at smaller scales.
-		DisplayServer.WindowSetMinSize(new Vector2I(1024,576));
+		DisplayServer.WindowSetMinSize(new Vector2I(1024, 576));
 		_osUsed = OS.GetName();
 		if (_osUsed == "Linux")
 		{
@@ -76,22 +87,46 @@ public partial class Home : Control
 			_yuzuExtensionString = ".zip";
 			_createShortcutButton.Disabled = true;
 		}
-		
+
 		_saveManager = new ResourceSaveManager();
 		_saveManager.Version = _settingsVersion;
 		GetSettings();
-		_locationButton.Text = _settings.SaveDirectory;
+
+		if (_settings.ShadersLocation == "")
+		{
+			_settings.ShadersLocation = _osUsed == "Linux"
+				?
+				$@"{System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData)}/yuzu/shader" : 
+				$@"{System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData)}\yuzu\shader";
+			SaveSettings();
+		}
+
+		if (_settings.FromSaveDirectory == "")
+		{
+			_settings.FromSaveDirectory = _osUsed == "Linux"
+				? $@"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}/yuzu/nand/user/save"
+				: $@"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\yuzu\nand\user\save";
+			SaveSettings();
+		}
 		
+
+		_shadersLocationButton.Text = _settings.ShadersLocation;
+		_locationButton.Text = _settings.SaveDirectory;
+		_fromSaveDirectoryButton.Text = _settings.FromSaveDirectory;
+		_toSaveDirectoryButton.Text = _settings.ToSaveDirectory;
+
 		// Call a request to get the latest versions and connect it to our GetNewVersions function
 		_latestReleaseRequester.RequestCompleted += AddVersions;
 		_latestReleaseRequester.Request(_pineappleLatestUrl);
 
 		_downloadButton.Disabled = true;
 		_downloadButton.Pressed += InstallSelectedVersion;
-		_locationButton.Pressed += OpenFileChooser;
+		_locationButton.Pressed += OnLocationButtonPressed;
 		_downloadRequester.RequestCompleted += VersionDownloadCompleted;
 		_downloadUpdateTimer.Timeout += UpdateDownloadBar;
 		_downloadWindow.Visible = false;
+
+		_shadersLocationButton.Pressed += OnShadersLocationButtonPressed;
 		
 		Resized += WindowResized;
 
@@ -105,6 +140,7 @@ public partial class Home : Control
 		_autoUnpackButton.Toggled += AutoUnpackToggled;
 		_extractWarning.Visible = false;
 		_downloadWarning.Visible = false;
+		_clearShadersWarning.Visible = false;
 	}
 
 	private void SetTheme(bool enableLight)
@@ -124,7 +160,7 @@ public partial class Home : Control
 
 	private void WindowResized()
 	{
-		float scaleRatio = (float)GetWindow().Size.X / 1920;
+		float scaleRatio = (((float)GetWindow().Size.X / 1920) + ((float)GetWindow().Size.Y / 1080)) / 2;
 		_headerLabel.AddThemeFontSizeOverride("font_size", (int)(scaleRatio * 76));
 		_latestVersionLabel.AddThemeFontSizeOverride("font_size", (int)(scaleRatio * 32));
 		_currentTheme.DefaultFontSize = Mathf.Clamp((int)(scaleRatio * 35), 20, 50);
@@ -259,6 +295,7 @@ Categories=Game;Emulator;Qt;
 					shortcutPath = $@"{_settings.SaveDirectory}/{linuxShortcutName}";
 					ErrorPopup($@"Error creating shortcut, creating new at {shortcutPath}. Error:{shortcutError}");
 					File.WriteAllText(shortcutPath, shortcutContent);
+					throw;
 				}
 			}
 		}
@@ -285,8 +322,9 @@ Categories=Game;Emulator;Qt;
 			catch (Exception shortcutError)
 			{
 				yuzuShortcutPath = $@"{_settings.SaveDirectory}/{windowsShortcutName}";
-				ErrorPopup($@"cannot create shortcut, ensure app is running as admin. Placing instead at {yuzuShortcutPath}");
+				ErrorPopup($@"cannot create shortcut, ensure app is running as admin. Placing instead at {yuzuShortcutPath}. Exception:{shortcutError}");
 				windowsShortcut.Save(yuzuShortcutPath);
+				throw;
 			}
 			
 		}
@@ -451,10 +489,93 @@ Categories=Game;Emulator;Qt;
 			}
 		}
 
+		if (_clearShadersButton.ButtonPressed)
+		{
+			ClearShaders();;
+		}
+
+	}
+
+
+	private void ClearShaders()
+	{
+		if (Directory.Exists(_settings.ShadersLocation))
+		{
+			DeleteDirectoryContents(_settings.ShadersLocation);
+			_clearShadersButton.Text = "Shaders cleared successfully!";
+			_clearShadersToolButton.Text = "Shaders cleared successfully!";
+		}
+		else
+		{
+			ErrorPopup("failed to find shaders location");
+		}
+			
+	}
+
+
+	private void OnShadersLocationButtonPressed()
+	{
+		OpenFileChooser(ref _settings.ShadersLocation, _settings.ShadersLocation);
+		_shadersLocationButton.Text = _settings.ShadersLocation;
+		SaveSettings();
 	}
 	
+	
+	private void OnLocationButtonPressed()
+	{
+		OpenFileChooser(ref _settings.SaveDirectory, _settings.SaveDirectory);
+		_locationButton.Text = _settings.SaveDirectory;
+		SaveSettings();
+	}
 
-	private void OpenFileChooser()
+
+	private void OnBackupSavesButtonPressed()
+	{
+		try
+		{
+			DuplicateDirectoryContents(_settings.FromSaveDirectory, _settings.ToSaveDirectory, true);
+			_backupSavesButton.Text = "Backup successful!";
+		}
+		catch (Exception backupError)
+		{
+			ErrorPopup("failed to create save backup exception:" + backupError);
+			throw;
+		}
+
+	}
+
+
+	private void OnRestoreSavesPressed()
+	{
+		try
+		{
+			DuplicateDirectoryContents(_settings.ToSaveDirectory, _settings.FromSaveDirectory, true);
+			_restoreSavesButton.Text = "Saves restored successfully!";
+		}
+		catch (Exception restoreError)
+		{
+			ErrorPopup("failed to restore saves, exception: " + restoreError);
+			throw;
+		}
+	}
+	
+	
+	private void OnFromSaveDirectoryButtonPressed()
+	{
+		OpenFileChooser(ref _settings.FromSaveDirectory, _settings.FromSaveDirectory);
+		_fromSaveDirectoryButton.Text = _settings.FromSaveDirectory;
+		SaveSettings();
+	}
+	
+	private void OnToSaveDirectoryButtonPressed()
+	{
+		OpenFileChooser(ref _settings.ToSaveDirectory, _settings.ToSaveDirectory);
+		_toSaveDirectoryButton.Text = _settings.ToSaveDirectory;
+		SaveSettings();
+	}
+	
+	
+	private void OpenFileChooser(ref string returnObject, string startingDirectory)
 	{
 		try
 		{
@@ -463,6 +584,7 @@ Categories=Game;Emulator;Qt;
 		catch (Exception gtkError)
 		{
 			ErrorPopup("opening GTK window failed: " + gtkError);
+			throw;
 		}
 		_fileChooser = new FileChooserDialog("Select a File", null, FileChooserAction.SelectFolder);
 
@@ -472,29 +594,31 @@ Categories=Game;Emulator;Qt;
 		// Add an "Open" button to the dialog
 		_fileChooser.AddButton("Open", ResponseType.Ok);
 
-		// Set the initial directory (optional)
-		_fileChooser.SetCurrentFolder("/");
+		// Set the initial directory
+		_fileChooser.SetCurrentFolder(startingDirectory);
 
-		// Connect the response signal
-		_fileChooser.Response += OnFileChooserResponse;
+		// Connect the response signal, I would like to directly pass in the return object, but this isn't possible 
+		// in a lambda, so we create a temp value to hold it and then assign it to that value after.
+		string tempReturnString = returnObject;
+		_fileChooser.Response += (sender, args) => OnFileChooserResponse(sender, args, ref tempReturnString);
 
 		// Show the dialog
 		_fileChooser.Show();
 		Application.Run();
+		
+		// Sets our original object back to be the returned temporary string.
+		returnObject = tempReturnString;
 	}
 
-	private void OnFileChooserResponse(object sender, ResponseArgs args)
+	private void OnFileChooserResponse(object sender, ResponseArgs args, ref string returnObject)
 	{
 		if (args.ResponseId == ResponseType.Ok)
 		{
 			// The user selected a file
-			_settings.SaveDirectory = _fileChooser.File.Path;
-			_locationButton.Text = _settings.SaveDirectory;
+			returnObject = _fileChooser.File.Path;
 		}
 
-		// Clean up resources4
-		_saveManager._settings = _settings;
-		_saveManager.WriteSave();
+		// Clean up resources
 		_fileChooser.Dispose();
 		Application.Quit();
 	}
@@ -555,7 +679,27 @@ Categories=Game;Emulator;Qt;
 		}
 	}
 	
-	// Popup Gestion
+	public void DuplicateDirectoryContents(string sourceDir, string destinationDir, bool overwriteFiles)
+	{
+		// Get all directories in the source directory
+		string[] allDirectories = Directory.GetDirectories(sourceDir, "*", SearchOption.AllDirectories);
+
+		foreach (string dir in allDirectories)
+		{
+			string dirToCreate = dir.Replace(sourceDir, destinationDir);
+			Directory.CreateDirectory(dirToCreate);
+		}
+
+		// Get all files in the source directory
+		string[] allFiles = Directory.GetFiles(sourceDir, "*.*", SearchOption.AllDirectories);
+
+		foreach (string filePath in allFiles)
+		{
+			string newFilePath = filePath.Replace(sourceDir, destinationDir);
+			File.Copy(filePath, newFilePath, overwriteFiles);
+		}
+	}
+
 	private void ErrorPopup(String error)
 	{
 		_errorLabel.Text = $@"Error:{error}";
@@ -572,6 +716,7 @@ Categories=Game;Emulator;Qt;
 	private void ClearInstallationFolder()
 	{
 		DeleteDirectoryContents(_settings.SaveDirectory);
+		_clearInstallFolderButton.Text = "Cleared install folder successfully!";
 	}
 
 	private void AutoUnpackToggled(bool unpackEnabled)
@@ -579,7 +724,20 @@ Categories=Game;Emulator;Qt;
 		// If unpack is toggled off, ensures the create shortcut button is also disabled and turns off.
 		_createShortcutButton.ButtonPressed = unpackEnabled && _createShortcutButton.ButtonPressed;
 		_createShortcutButton.Disabled = !unpackEnabled;
-		_downloadWarning.Visible = unpackEnabled;
+		_downloadWarning.Visible = _extractWarning.Visible || unpackEnabled;
 		_extractWarning.Visible = unpackEnabled;
+	}
+
+	private void ClearShadersToggle(bool clearEnabled)
+	{
+		_clearShadersWarning.Visible = clearEnabled;
+		_downloadWarning.Visible = _extractWarning.Visible || clearEnabled;
+	}
+
+
+	private void SaveSettings()
+	{
+		_saveManager._settings = _settings;
+		_saveManager.WriteSave();
 	}
 }
