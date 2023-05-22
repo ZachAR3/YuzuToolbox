@@ -19,6 +19,7 @@ public partial class Home : Control
 
 	[Export()] private Godot.Image _icon;
 	[Export()] private AudioStreamPlayer _backgroundAudio;
+	[Export()] private Godot.CheckButton _muteButton;
 	[Export()] private ColorRect _header;
 	[Export()] private Godot.Label _headerLabel;
 	[Export()] private TextureRect _darkBg;
@@ -141,6 +142,9 @@ public partial class Home : Control
 		_extractWarning.Visible = false;
 		_downloadWarning.Visible = false;
 		_clearShadersWarning.Visible = false;
+
+		// Mute by default the music
+		ToggledMusicButton(false);
 	}
 
 	private void SetTheme(bool enableLight)
@@ -679,7 +683,6 @@ Categories=Game;Emulator;Qt;
 		}
 	}
 	
-	
 	public void DuplicateDirectoryContents(string sourceDir, string destinationDir, bool overwriteFiles)
 	{
 		// Get all directories in the source directory
@@ -700,7 +703,6 @@ Categories=Game;Emulator;Qt;
 			File.Copy(filePath, newFilePath, overwriteFiles);
 		}
 	}
-	
 
 	private void ErrorPopup(String error)
 	{
@@ -709,11 +711,10 @@ Categories=Game;Emulator;Qt;
 		_errorPopup.InitialPosition = Window.WindowInitialPosition.Absolute;
 		_errorPopup.PopupCentered();
 	}
-	
+
 	private void ToggledMusicButton(bool musicEnabled)
 	{
-		if(musicEnabled) {_backgroundAudio.VolumeDb = -(20.0f * (1.0f - 0.5f) + 80.0f * 0.5f);}
-		else {_backgroundAudio.VolumeDb = -20;}
+		AudioServer.SetBusMute(AudioServer.GetBusIndex("Master"), !musicEnabled);
 	}
 
 	private void ClearInstallationFolder()
@@ -744,4 +745,3 @@ Categories=Game;Emulator;Qt;
 		_saveManager.WriteSave();
 	}
 }
-

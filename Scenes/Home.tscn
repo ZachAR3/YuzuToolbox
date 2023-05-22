@@ -118,7 +118,7 @@ metadata/_edit_use_anchors_ = true
 
 [node name="BackgroundAudio" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("5_v4a5s")
-volume_db = -80.0
+volume_db = -20.0
 autoplay = true
 
 [node name="Header" type="ColorRect" parent="."]
@@ -200,8 +200,7 @@ focus_mode = 0
 theme_override_styles/normal = SubResource("StyleBoxFlat_tufja")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_tufja")
 theme_override_styles/hover_pressed = SubResource("StyleBoxFlat_tufja")
-button_pressed = true
-text = "Mute"
+text = "Music"
 
 [node name="MainPage" type="TabContainer" parent="."]
 layout_mode = 1
