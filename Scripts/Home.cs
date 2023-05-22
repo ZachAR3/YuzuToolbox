@@ -583,7 +583,7 @@ Categories=Game;Emulator;Qt;
 		}
 		catch (Exception gtkError)
 		{
-			ErrorPopup("opening GTK window failed: " + gtkError);
+			ErrorPopup("opening GTK window failed. Ensure you have GTK runtime installed: " + gtkError);
 			throw;
 		}
 		_fileChooser = new FileChooserDialog("Select a File", null, FileChooserAction.SelectFolder);
