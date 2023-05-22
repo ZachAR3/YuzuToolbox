@@ -41,7 +41,7 @@ bg_color = Color(0.184314, 0.196078, 0.203922, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jo4ax"]
 bg_color = Color(0.168627, 0.180392, 0.188235, 0.529412)
 
-[node name="Home" type="Control" node_paths=PackedStringArray("_backgroundAudio", "_header", "_headerLabel", "_darkBg", "_lightBg", "_headerSeparator", "_versionButton", "_createShortcutButton", "_locationButton", "_downloadButton", "_clearShadersButton", "_shadersLocationButton", "_downloadWindow", "_downloadWindowApp", "_downloadLabel", "_autoUnpackButton", "_downloadProgressBar", "_customVersionCheckBox", "_customVersionSpinBox", "_downloadUpdateTimer", "_enableLightTheme", "_errorPopup", "_errorLabel", "_latestVersionLabel", "_latestReleaseRequester", "_downloadRequester", "_extractWarning", "_downloadWarning", "_clearShadersWarning", "_clearInstallFolderButton", "_clearShadersToolButton", "_backupSavesButton", "_restoreSavesButton", "_fromSaveDirectoryButton", "_toSaveDirectoryButton")]
+[node name="Home" type="Control" node_paths=PackedStringArray("_confirmationPopup", "_backgroundAudio", "_muteButton", "_header", "_headerLabel", "_darkBg", "_lightBg", "_headerSeparator", "_versionButton", "_createShortcutButton", "_locationButton", "_downloadButton", "_clearShadersButton", "_shadersLocationButton", "_downloadWindow", "_downloadWindowApp", "_downloadLabel", "_autoUnpackButton", "_downloadProgressBar", "_customVersionCheckBox", "_customVersionSpinBox", "_downloadUpdateTimer", "_enableLightTheme", "_errorPopup", "_errorLabel", "_latestVersionLabel", "_latestReleaseRequester", "_downloadRequester", "_extractWarning", "_downloadWarning", "_clearShadersWarning", "_clearInstallFolderButton", "_clearShadersToolButton", "_backupSavesButton", "_restoreSavesButton", "_fromSaveDirectoryButton", "_toSaveDirectoryButton")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -52,8 +52,11 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 theme = ExtResource("1_c22a4")
 script = ExtResource("1_p51ic")
+_appVersion = 2.25
 _icon = ExtResource("3_ltbvi")
+_confirmationPopup = NodePath("ConfirmPopup")
 _backgroundAudio = NodePath("BackgroundAudio")
+_muteButton = NodePath("Header/Option/MuteButton")
 _header = NodePath("Header")
 _headerLabel = NodePath("Header/HeaderLabels/HeaderLabel")
 _darkBg = NodePath("DarkBG")
@@ -504,8 +507,10 @@ anchor_left = 0.00666667
 anchor_top = 0.0133333
 anchor_right = 0.993333
 anchor_bottom = 0.986667
-offset_right = 600.0
-offset_bottom = 300.0
+offset_left = -4.0
+offset_top = -3.99999
+offset_right = 4.00018
+offset_bottom = 3.99991
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3
@@ -584,6 +589,18 @@ rounded = true
 [node name="DownloadProgressUpdater" type="Timer" parent="DownloadWindow/Window"]
 wait_time = 0.1
 
+[node name="ConfirmPopup" type="PopupMenu" parent="."]
+initial_position = 1
+title = "Are you sure you?"
+size = Vector2i(600, 100)
+borderless = false
+always_on_top = true
+item_count = 2
+item_0/text = "Confirm"
+item_0/id = 0
+item_1/text = "Cancel"
+item_1/id = 1
+
 [connection signal="toggled" from="Header/Option/MuteButton" to="." method="ToggledMusicButton"]
 [connection signal="toggled" from="MainPage/Installer/ControlsContainer/ClearShadersButton" to="." method="ClearShadersToggle"]
 [connection signal="pressed" from="MainPage/Tools/Tools/ClearInstallFolderButton" to="." method="ClearInstallationFolder"]
@@ -592,3 +609,4 @@ wait_time = 0.1
 [connection signal="pressed" from="MainPage/Tools/Tools/RestoreSavesButton" to="." method="OnRestoreSavesPressed"]
 [connection signal="pressed" from="MainPage/Tools/Tools/SaveContainer/FromButton" to="." method="OnFromSaveDirectoryButtonPressed"]
 [connection signal="pressed" from="MainPage/Tools/Tools/SaveContainer/ToButton" to="." method="OnToSaveDirectoryButtonPressed"]
+[connection signal="index_pressed" from="ConfirmPopup" to="." method="ConfirmationPressed"]

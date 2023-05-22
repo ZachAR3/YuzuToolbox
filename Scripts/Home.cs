@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using Godot.Collections;
 using Gtk;
 using Mono.Unix;
@@ -18,6 +19,7 @@ public partial class Home : Control
 	[Export()] private float _settingsVersion = 1.9f;
 
 	[Export()] private Godot.Image _icon;
+	[Export()] private PopupMenu _confirmationPopup;
 	[Export()] private AudioStreamPlayer _backgroundAudio;
 	[Export()] private Godot.CheckButton _muteButton;
 	[Export()] private ColorRect _header;
@@ -70,6 +72,7 @@ public partial class Home : Control
 	private String _osUsed;
 	private string _yuzuExtensionString;
 	private Theme _currentTheme;
+	private bool? _confirmationChoice = null;
 
 	public override void _Ready()
 	{
@@ -178,8 +181,15 @@ public partial class Home : Control
 	}
 	
 	
-	private void InstallSelectedVersion()
+	private async void InstallSelectedVersion()
 	{
+		// Launches confirmation window, and cancels if not confirmed.
+		var confirm = await ConfirmationPopup();
+		if (confirm != true)
+		{
+			return;
+		}
+		
 		int version;
 		DeleteOldVersion();
 		
@@ -501,10 +511,17 @@ Categories=Game;Emulator;Qt;
 	}
 
 
-	private void ClearShaders()
+	private async void ClearShaders()
 	{
 		if (Directory.Exists(_settings.ShadersLocation))
 		{
+			// Launches confirmation window, and cancels if not confirmed.
+			var confirm = await ConfirmationPopup();
+			if (confirm != true)
+			{
+				return;
+			}
+			
 			DeleteDirectoryContents(_settings.ShadersLocation);
 			_clearShadersButton.Text = "Shaders cleared successfully!";
 			_clearShadersToolButton.Text = "Shaders cleared successfully!";
@@ -712,13 +729,27 @@ Categories=Game;Emulator;Qt;
 		_errorPopup.PopupCentered();
 	}
 
+
+	private async Task<bool?> ConfirmationPopup()
+	{
+		_confirmationPopup.PopupCentered();
+		await ToSignal(_confirmationPopup, "index_pressed");
+		return _confirmationChoice;
+	}
+
 	private void ToggledMusicButton(bool musicEnabled)
 	{
 		AudioServer.SetBusMute(AudioServer.GetBusIndex("Master"), !musicEnabled);
 	}
 
-	private void ClearInstallationFolder()
+	private async void ClearInstallationFolder()
 	{
+		// Launches confirmation window, and cancels if not confirmed.
+		var confirm = await ConfirmationPopup();
+		if (confirm != true)
+		{
+			return;
+		}
 		DeleteDirectoryContents(_settings.SaveDirectory);
 		_clearInstallFolderButton.Text = "Cleared install folder successfully!";
 	}
@@ -738,6 +769,12 @@ Categories=Game;Emulator;Qt;
 		_downloadWarning.Visible = _extractWarning.Visible || clearEnabled;
 	}
 
+
+	private void ConfirmationPressed(int itemIndex)
+	{
+		_confirmationChoice = itemIndex == 0;
+	}
+	
 
 	private void SaveSettings()
 	{
