@@ -19,6 +19,7 @@ public partial class Home : Control
 
 	[Export()] private Godot.Image _icon;
 	[Export()] private AudioStreamPlayer _backgroundAudio;
+	[Export()] private Godot.CheckButton _muteButton;
 	[Export()] private ColorRect _header;
 	[Export()] private Godot.Label _headerLabel;
 	[Export()] private TextureRect _darkBg;
@@ -141,6 +142,9 @@ public partial class Home : Control
 		_extractWarning.Visible = false;
 		_downloadWarning.Visible = false;
 		_clearShadersWarning.Visible = false;
+
+		// Mute by default the music
+		ToggledMusicButton(false);
 	}
 
 	private void SetTheme(bool enableLight)
