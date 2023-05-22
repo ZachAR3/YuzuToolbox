@@ -555,7 +555,7 @@ Categories=Game;Emulator;Qt;
 		}
 	}
 	
-
+	// Popup Gestion
 	private void ErrorPopup(String error)
 	{
 		_errorLabel.Text = $@"Error:{error}";
@@ -563,11 +563,10 @@ Categories=Game;Emulator;Qt;
 		_errorPopup.InitialPosition = Window.WindowInitialPosition.Absolute;
 		_errorPopup.PopupCentered();
 	}
-	
-	private void ToggledMusicButton(bool musicDisabled)
+
+	private void ToggledMusicButton(bool musicEnabled)
 	{
-		if(musicDisabled) {_backgroundAudio.VolumeDb = -80;}
-		else {_backgroundAudio.VolumeDb = -20;}
+		AudioServer.SetBusMute(AudioServer.GetBusIndex("Master"), !musicEnabled);
 	}
 
 	private void ClearInstallationFolder()
@@ -584,5 +583,3 @@ Categories=Game;Emulator;Qt;
 		_extractWarning.Visible = unpackEnabled;
 	}
 }
-
-
