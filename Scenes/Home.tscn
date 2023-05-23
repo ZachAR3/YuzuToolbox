@@ -41,7 +41,7 @@ bg_color = Color(0.184314, 0.196078, 0.203922, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jo4ax"]
 bg_color = Color(0.168627, 0.180392, 0.188235, 0.529412)
 
-[node name="Home" type="Control" node_paths=PackedStringArray("_confirmationPopup", "_backgroundAudio", "_muteButton", "_header", "_headerLabel", "_darkBg", "_lightBg", "_headerSeparator", "_versionButton", "_createShortcutButton", "_locationButton", "_downloadButton", "_clearShadersButton", "_shadersLocationButton", "_downloadWindow", "_downloadWindowApp", "_downloadLabel", "_autoUnpackButton", "_downloadProgressBar", "_customVersionCheckBox", "_customVersionSpinBox", "_downloadUpdateTimer", "_enableLightTheme", "_errorPopup", "_errorLabel", "_latestVersionLabel", "_latestReleaseRequester", "_downloadRequester", "_extractWarning", "_downloadWarning", "_clearShadersWarning", "_clearInstallFolderButton", "_clearShadersToolButton", "_backupSavesButton", "_restoreSavesButton", "_fromSaveDirectoryButton", "_toSaveDirectoryButton")]
+[node name="Home" type="Control" node_paths=PackedStringArray("_confirmationPopup", "_backgroundAudio", "_muteButton", "_header", "_headerLabel", "_darkBg", "_lightBg", "_headerSeparator", "_versionButton", "_createShortcutButton", "_locationButton", "_downloadButton", "_clearShadersButton", "_shadersLocationButton", "_downloadWindow", "_downloadWindowApp", "_downloadLabel", "_autoUnpackButton", "_downloadProgressBar", "_customVersionCheckBox", "_customVersionSpinBox", "_downloadUpdateTimer", "_enableLightTheme", "_errorPopup", "_errorLabel", "_latestVersionLabel", "_latestReleaseRequester", "_titlesRequester", "_modsRequester", "_downloadRequester", "_extractWarning", "_downloadWarning", "_clearShadersWarning", "_clearInstallFolderButton", "_clearShadersToolButton", "_backupSavesButton", "_restoreSavesButton", "_fromSaveDirectoryButton", "_toSaveDirectoryButton")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -52,7 +52,7 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 theme = ExtResource("1_c22a4")
 script = ExtResource("1_p51ic")
-_appVersion = 2.25
+_appVersion = 2.3
 _icon = ExtResource("3_ltbvi")
 _confirmationPopup = NodePath("ConfirmPopup")
 _backgroundAudio = NodePath("BackgroundAudio")
@@ -81,9 +81,12 @@ _errorPopup = NodePath("ErrorPopup")
 _errorLabel = NodePath("ErrorPopup/ErrorLabel")
 _latestVersionLabel = NodePath("Header/HeaderLabels/LastestVersion")
 _latestReleaseRequester = NodePath("ReleaseRequester")
+_titlesRequester = NodePath("TitlesRequester")
+_modsRequester = NodePath("ModsRequester")
 _downloadRequester = NodePath("DownloadRequester")
 _pineappleLatestUrl = "https://api.github.com/repos/pineappleEA/pineapple-src/releases/latest"
 _pineappleDownloadBaseUrl = "https://github.com/pineappleEA/pineapple-src/releases/download/EA-"
+_titlesKeySite = "https://switchbrew.org/w/index.php?title=Title_list/Games&mobileaction=toggle_view_desktop"
 _saveName = "Yuzu"
 _previousVersionsToAdd = 20
 _themes = Array[Theme]([ExtResource("1_c22a4"), ExtResource("3_a1ctt")])
@@ -524,6 +527,10 @@ metadata/_edit_use_anchors_ = true
 
 [node name="DownloadRequester" type="HTTPRequest" parent="."]
 use_threads = true
+
+[node name="ModsRequester" type="HTTPRequest" parent="."]
+
+[node name="TitlesRequester" type="HTTPRequest" parent="."]
 
 [node name="DownloadWindow" type="Panel" parent="."]
 visible = false

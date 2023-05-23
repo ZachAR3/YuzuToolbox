@@ -2,6 +2,8 @@ using Godot;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Godot.Collections;
@@ -10,6 +12,7 @@ using Mono.Unix;
 using ProgressBar = Godot.ProgressBar;
 using Window = Godot.Window;
 using WindowsShortcutFactory;
+using Array = System.Array;
 using Environment = System.Environment;
 
 
@@ -46,10 +49,13 @@ public partial class Home : Control
 	[Export()] private Godot.Label _errorLabel;
 	[Export()] private Godot.Label _latestVersionLabel;
 	[Export()] private HttpRequest _latestReleaseRequester;
+	[Export()] private HttpRequest _titlesRequester;
+	[Export()] private HttpRequest _modsRequester;
 	[Export()] private HttpRequest _downloadRequester;
-	[Export()] private String _pineappleLatestUrl;
-	[Export()] private String _pineappleDownloadBaseUrl;
-	[Export()] private String _windowsFolderName = "yuzu-windows-msvc-early-access";
+	[Export()] private string _pineappleLatestUrl;
+	[Export()] private string _pineappleDownloadBaseUrl;
+	[Export()] private string _titlesKeySite;
+	[Export()] private string _windowsFolderName = "yuzu-windows-msvc-early-access";
 	[Export()] private string _yuzuBaseString = "Yuzu-EA-";
 	[Export()] private string _saveName;
 	[Export()] private int _previousVersionsToAdd = 10;
@@ -71,8 +77,12 @@ public partial class Home : Control
 	private SettingsResource _settings;
 	private String _osUsed;
 	private string _yuzuExtensionString;
+	private string _yuzuAppDataPath;
 	private Theme _currentTheme;
 	private bool? _confirmationChoice = null;
+	private string _yuzuModsPath;
+	private Dictionary<string, string> _titles = new Dictionary<string, string>();
+	private Dictionary<string, string> _installedTitles = new Dictionary<string, string>();
 
 	public override void _Ready()
 	{
@@ -84,32 +94,32 @@ public partial class Home : Control
 			_saveName += ".AppImage";
 			_yuzuExtensionString = ".AppImage";
 			_autoUnpackButton.Disabled = true;
+			_yuzuAppDataPath = $@"{System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData)}/yuzu/";
 		}
 		else if (_osUsed == "Windows")
 		{
 			_saveName += ".zip";
 			_yuzuExtensionString = ".zip";
 			_createShortcutButton.Disabled = true;
+			_yuzuAppDataPath = $@"{System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData)}\yuzu\";
 		}
 
 		_saveManager = new ResourceSaveManager();
 		_saveManager.Version = _settingsVersion;
 		GetSettings();
+		GetInstalledGames();
 
 		if (_settings.ShadersLocation == "")
 		{
-			_settings.ShadersLocation = _osUsed == "Linux"
-				?
-				$@"{System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData)}/yuzu/shader" : 
-				$@"{System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData)}\yuzu\shader";
+			_settings.ShadersLocation = $@"{_yuzuAppDataPath}shader";
 			SaveSettings();
 		}
 
 		if (_settings.FromSaveDirectory == "")
 		{
 			_settings.FromSaveDirectory = _osUsed == "Linux"
-				? $@"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}/yuzu/nand/user/save"
-				: $@"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\yuzu\nand\user\save";
+				? $@"{_yuzuAppDataPath}nand/user/save"
+				: $@"{_yuzuAppDataPath}nand\user\save";
 			SaveSettings();
 		}
 		
@@ -149,6 +159,53 @@ public partial class Home : Control
 		// Mute by default the music
 		ToggledMusicButton(false);
 	}
+
+
+	private async void GetInstalledGames()
+	{
+		_yuzuModsPath = $@"{_yuzuAppDataPath}load";
+		_titlesRequester.RequestCompleted += SetTitles;
+		_titlesRequester.Request(
+			"https://switchbrew.org/w/index.php?title=Title_list/Games&mobileaction=toggle_view_desktop");
+		await ToSignal(_titlesRequester, "request_completed");
+		foreach (var gameModFolder in Directory.GetDirectories(_yuzuModsPath))
+		{
+			string gameId = gameModFolder.GetFile();
+			if (_titles.ContainsKey(gameId))
+			{
+				_installedTitles[gameId] = _titles[gameId];
+				GD.Print(_titles[gameModFolder.GetFile()]);
+			}
+			else
+			{
+				// TODO better solution for informing user
+				GD.Print("Cannot find title:" + gameId);
+			}
+
+		}
+
+
+	}
+
+
+	private async void SetTitles(long result, long responseCode, string[] headers, byte[] body)
+	{
+		string[] gamesArray = Encoding.UTF8.GetString(body).Split("<tr>"); // Splits the list into the begginings of each game
+		var gameList = gamesArray.ToList(); // Converted to list so first and second item (headers and example text at top) can be removed
+		gameList.RemoveRange(0, 2);
+
+		foreach (string game in gameList)
+		{
+			// Removes the <td> and </td> html from our script for cleaning along with the special TM character otherwise the mod sites won't recognize the title.
+			var gameCleaned = game.Replace("<td>", "").Replace("</td>", "").Replace("™", "");
+			// Splits at every new line
+			var gameSplit = gameCleaned.Split(Environment.NewLine);
+			// Adds the game to our title list with type Dictionary(string ID, string Title)
+			_titles[gameSplit[1]] = gameSplit[2];
+		}
+		//GD.Print(_titles);
+	}
+	
 
 	private void SetTheme(bool enableLight)
 	{
