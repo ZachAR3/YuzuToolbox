@@ -1,9 +1,10 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Godot.Collections;
@@ -14,6 +15,7 @@ using Window = Godot.Window;
 using WindowsShortcutFactory;
 using Array = System.Array;
 using Environment = System.Environment;
+using HttpClient = System.Net.Http.HttpClient;
 
 
 public partial class Home : Control
@@ -81,8 +83,11 @@ public partial class Home : Control
 	private Theme _currentTheme;
 	private bool? _confirmationChoice = null;
 	private string _yuzuModsPath;
-	private Dictionary<string, string> _titles = new Dictionary<string, string>();
-	private Dictionary<string, string> _installedTitles = new Dictionary<string, string>();
+	// Dictionary of string + array to hold titles and mod IDs for them. Dictionary<string ID, Array<string>[0] TitleName, Array<string>[1] ModID>
+	private System.Collections.Generic.Dictionary<string, string> _titles = new System.Collections.Generic.Dictionary<string, string>();
+	private System.Collections.Generic.Dictionary<string, (string, int)> _installedTitles = new System.Collections.Generic.Dictionary<string, (string, int)>();
+	//private Dictionary<string, string> _installedTitles = new Dictionary<string, string>();
+	private Godot.Collections.Dictionary<string, int> _installedTitleModsIds = new Godot.Collections.Dictionary<string, int>();
 
 	public override void _Ready()
 	{
@@ -132,6 +137,8 @@ public partial class Home : Control
 		// Call a request to get the latest versions and connect it to our GetNewVersions function
 		_latestReleaseRequester.RequestCompleted += AddVersions;
 		_latestReleaseRequester.Request(_pineappleLatestUrl);
+		
+		_titlesRequester.RequestCompleted += GetTitles;
 
 		_downloadButton.Disabled = true;
 		_downloadButton.Pressed += InstallSelectedVersion;
@@ -164,17 +171,16 @@ public partial class Home : Control
 	private async void GetInstalledGames()
 	{
 		_yuzuModsPath = $@"{_yuzuAppDataPath}load";
-		_titlesRequester.RequestCompleted += SetTitles;
 		_titlesRequester.Request(
 			"https://switchbrew.org/w/index.php?title=Title_list/Games&mobileaction=toggle_view_desktop");
-		await ToSignal(_titlesRequester, "request_completed");
+		await ToSignal(_titlesRequester, "request_completed"); // Waits for titles to be retrieved before checking installed titles against them.
+		
 		foreach (var gameModFolder in Directory.GetDirectories(_yuzuModsPath))
 		{
-			string gameId = gameModFolder.GetFile();
-			if (_titles.ContainsKey(gameId))
+			string gameId = gameModFolder.GetFile(); // Gets game id by grabbing the folders name
+			if (_titles.TryGetValue(gameId, out var title)) // Checks if title list contains the id, if so adds it to installed titles.
 			{
-				_installedTitles[gameId] = _titles[gameId];
-				GD.Print(_titles[gameModFolder.GetFile()]);
+				_installedTitles[gameId] = (title, GetGameModId(title));
 			}
 			else
 			{
@@ -183,12 +189,10 @@ public partial class Home : Control
 			}
 
 		}
-
-
 	}
 
 
-	private async void SetTitles(long result, long responseCode, string[] headers, byte[] body)
+	private void GetTitles(long result, long responseCode, string[] headers, byte[] body)
 	{
 		string[] gamesArray = Encoding.UTF8.GetString(body).Split("<tr>"); // Splits the list into the begginings of each game
 		var gameList = gamesArray.ToList(); // Converted to list so first and second item (headers and example text at top) can be removed
@@ -200,12 +204,26 @@ public partial class Home : Control
 			var gameCleaned = game.Replace("<td>", "").Replace("</td>", "").Replace("™", "");
 			// Splits at every new line
 			var gameSplit = gameCleaned.Split(Environment.NewLine);
-			// Adds the game to our title list with type Dictionary(string ID, string Title)
+			// Adds the game to our title list with type Dictionary(string ID, string Title, string modID)
 			_titles[gameSplit[1]] = gameSplit[2];
 		}
-		//GD.Print(_titles);
 	}
-	
+
+
+	private int GetGameModId(string gameName)
+	{
+		HttpClient httpClient = new HttpClient();
+		// Searches for the game ID using the name from banana mods
+		string gameSearchContent = httpClient.GetAsync("https://gamebanana.com/apiv11/Util/Game/NameMatch?_sName=" + gameName).Result.Content.ReadAsStringAsync().Result;
+		// Sets the start ID, that will give us to the ID associated with the game and sets our length to end at the comma after the ID
+		string idSearch = "\"_idRow\": ";
+		int idStart = gameSearchContent.Find(idSearch) + idSearch.Length;
+		int idEnd = gameSearchContent.Find(",", idStart);
+		// Gets the ID from the source starting at our start index, and going for the length of the ID before converting it into an int.
+		int gameId = gameSearchContent.Substring(idStart, idEnd -idStart).ToInt();
+		return gameId;
+	}
+
 
 	private void SetTheme(bool enableLight)
 	{
