@@ -1,22 +1,21 @@
 using Godot;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Godot.Collections;
 using Gtk;
 using Mono.Unix;
+using Newtonsoft.Json.Linq;
 using ProgressBar = Godot.ProgressBar;
 using Window = Godot.Window;
 using WindowsShortcutFactory;
-using Array = System.Array;
 using Environment = System.Environment;
 using HttpClient = System.Net.Http.HttpClient;
-
+using Json = Newtonsoft.Json;
 
 public partial class Home : Control
 {
@@ -73,7 +72,10 @@ public partial class Home : Control
 	[Export()] private Godot.Button _restoreSavesButton;
 	[Export()] private Godot.Button _fromSaveDirectoryButton;
 	[Export()] private Godot.Button _toSaveDirectoryButton;
+	[ExportGroup("ModManager")] 
+	[Export()] private ItemList _modList;
 
+	// Internal variables
 	private FileChooserDialog _fileChooser;
 	private ResourceSaveManager _saveManager;
 	private SettingsResource _settings;
@@ -85,7 +87,7 @@ public partial class Home : Control
 	private string _yuzuModsPath;
 	// Dictionary of string + array to hold titles and mod IDs for them. Dictionary<string ID, Array<string>[0] TitleName, Array<string>[1] ModID>
 	private System.Collections.Generic.Dictionary<string, string> _titles = new System.Collections.Generic.Dictionary<string, string>();
-	private System.Collections.Generic.Dictionary<string, (string, int)> _installedTitles = new System.Collections.Generic.Dictionary<string, (string, int)>();
+	private System.Collections.Generic.Dictionary<string, (string, int?)> _installedTitles = new System.Collections.Generic.Dictionary<string, (string, int?)>();
 	//private Dictionary<string, string> _installedTitles = new Dictionary<string, string>();
 	private Godot.Collections.Dictionary<string, int> _installedTitleModsIds = new Godot.Collections.Dictionary<string, int>();
 
@@ -181,6 +183,7 @@ public partial class Home : Control
 			if (_titles.TryGetValue(gameId, out var title)) // Checks if title list contains the id, if so adds it to installed titles.
 			{
 				_installedTitles[gameId] = (title, GetGameModId(title));
+				AddGameMods(_installedTitles[gameId].Item2);
 			}
 			else
 			{
@@ -189,6 +192,12 @@ public partial class Home : Control
 			}
 
 		}
+
+		// Testing only
+		// foreach (var game in _installedTitles)
+		// {
+		// 	GD.Print(game.Value);
+		// }
 	}
 
 
@@ -210,18 +219,27 @@ public partial class Home : Control
 	}
 
 
-	private int GetGameModId(string gameName)
+	private int? GetGameModId(string gameName)
 	{
 		HttpClient httpClient = new HttpClient();
 		// Searches for the game ID using the name from banana mods
-		string gameSearchContent = httpClient.GetAsync("https://gamebanana.com/apiv11/Util/Game/NameMatch?_sName=" + gameName).Result.Content.ReadAsStringAsync().Result;
-		// Sets the start ID, that will give us to the ID associated with the game and sets our length to end at the comma after the ID
-		string idSearch = "\"_idRow\": ";
-		int idStart = gameSearchContent.Find(idSearch) + idSearch.Length;
-		int idEnd = gameSearchContent.Find(",", idStart);
-		// Gets the ID from the source starting at our start index, and going for the length of the ID before converting it into an int.
-		int gameId = gameSearchContent.Substring(idStart, idEnd -idStart).ToInt();
-		return gameId;
+		string searchContent = httpClient.GetAsync("https://gamebanana.com/apiv11/Util/Game/NameMatch?_sName=" + gameName).Result.Content.ReadAsStringAsync().Result;
+		var jsonContent = JObject.Parse(searchContent);
+		return jsonContent["_aRecords"]?[0]?["_idRow"].ToString().ToInt();
+	}
+
+
+	private void AddGameMods(int? modId)
+	{
+		int currentPage = 1;
+		HttpClient httpClient = new HttpClient();
+		string gameModsSource = httpClient.GetAsync($@"https://gamebanana.com/apiv11/Game/{modId}/Subfeed?_nPage={currentPage}").Result.Content
+			.ReadAsStringAsync().Result;
+		var jsonMods = JObject.Parse(gameModsSource);
+		foreach (var mod in jsonMods["_aRecords"])
+		{
+			_modList.AddItem(mod["_sName"].ToString());
+		}
 	}
 
 

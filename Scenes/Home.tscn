@@ -41,7 +41,7 @@ bg_color = Color(0.184314, 0.196078, 0.203922, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jo4ax"]
 bg_color = Color(0.168627, 0.180392, 0.188235, 0.529412)
 
-[node name="Home" type="Control" node_paths=PackedStringArray("_confirmationPopup", "_backgroundAudio", "_muteButton", "_header", "_headerLabel", "_darkBg", "_lightBg", "_headerSeparator", "_versionButton", "_createShortcutButton", "_locationButton", "_downloadButton", "_clearShadersButton", "_shadersLocationButton", "_downloadWindow", "_downloadWindowApp", "_downloadLabel", "_autoUnpackButton", "_downloadProgressBar", "_customVersionCheckBox", "_customVersionSpinBox", "_downloadUpdateTimer", "_enableLightTheme", "_errorPopup", "_errorLabel", "_latestVersionLabel", "_latestReleaseRequester", "_titlesRequester", "_modsRequester", "_downloadRequester", "_extractWarning", "_downloadWarning", "_clearShadersWarning", "_clearInstallFolderButton", "_clearShadersToolButton", "_backupSavesButton", "_restoreSavesButton", "_fromSaveDirectoryButton", "_toSaveDirectoryButton")]
+[node name="Home" type="Control" node_paths=PackedStringArray("_confirmationPopup", "_backgroundAudio", "_muteButton", "_header", "_headerLabel", "_darkBg", "_lightBg", "_headerSeparator", "_versionButton", "_createShortcutButton", "_locationButton", "_downloadButton", "_clearShadersButton", "_shadersLocationButton", "_downloadWindow", "_downloadWindowApp", "_downloadLabel", "_autoUnpackButton", "_downloadProgressBar", "_customVersionCheckBox", "_customVersionSpinBox", "_downloadUpdateTimer", "_enableLightTheme", "_errorPopup", "_errorLabel", "_latestVersionLabel", "_latestReleaseRequester", "_titlesRequester", "_modsRequester", "_downloadRequester", "_extractWarning", "_downloadWarning", "_clearShadersWarning", "_clearInstallFolderButton", "_clearShadersToolButton", "_backupSavesButton", "_restoreSavesButton", "_fromSaveDirectoryButton", "_toSaveDirectoryButton", "_modList")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -100,6 +100,7 @@ _backupSavesButton = NodePath("MainPage/Tools/Tools/BackupSavesButton")
 _restoreSavesButton = NodePath("MainPage/Tools/Tools/RestoreSavesButton")
 _fromSaveDirectoryButton = NodePath("MainPage/Tools/Tools/SaveContainer/FromButton")
 _toSaveDirectoryButton = NodePath("MainPage/Tools/Tools/SaveContainer/ToButton")
+_modList = NodePath("MainPage/ModManager/ModsList")
 metadata/_edit_use_anchors_ = true
 
 [node name="DarkBG" type="TextureRect" parent="."]
@@ -216,10 +217,12 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/side_margin = 1825
 tab_alignment = 1
 metadata/_edit_use_anchors_ = true
 
 [node name="Installer" type="Control" parent="MainPage"]
+visible = false
 layout_mode = 2
 metadata/_edit_use_anchors_ = true
 
@@ -497,6 +500,36 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 tooltip_text = "Location to store saves when backing up, and retrieve saves from when restoring."
 focus_mode = 0
+
+[node name="ModManager" type="Control" parent="MainPage"]
+layout_mode = 2
+
+[node name="GameSelection" type="OptionButton" parent="MainPage/ModManager"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 0.0613306
+grow_horizontal = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="ModsList" type="ItemList" parent="MainPage/ModManager"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.03
+anchor_top = 0.1
+anchor_right = 0.97
+anchor_bottom = 0.97
+grow_horizontal = 2
+grow_vertical = 2
+text_overrun_behavior = 4
+item_count = 5
+max_columns = 20
+item_0/text = "Test22"
+item_1/text = "Test1"
+item_2/text = "Test2"
+item_3/text = "Test3"
+item_4/text = "Test4"
+metadata/_edit_use_anchors_ = true
 
 [node name="ErrorPopup" type="PopupPanel" parent="."]
 initial_position = 2
