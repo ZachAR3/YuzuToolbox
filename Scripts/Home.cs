@@ -1,10 +1,10 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Godot.Collections;
 using Gtk;
@@ -15,13 +15,16 @@ using Window = Godot.Window;
 using WindowsShortcutFactory;
 using Environment = System.Environment;
 using HttpClient = System.Net.Http.HttpClient;
-using Json = Newtonsoft.Json;
+using HtmlAgilityPack;
+using Array = System.Array;
 
 public partial class Home : Control
 {
+	[ExportGroup("App")]
 	[Export()] private float _appVersion = 2.2f;
 	[Export()] private float _settingsVersion = 1.9f;
 
+	[ExportGroup("Installer")]
 	[Export()] private Godot.Image _icon;
 	[Export()] private PopupMenu _confirmationPopup;
 	[Export()] private AudioStreamPlayer _backgroundAudio;
@@ -65,6 +68,7 @@ public partial class Home : Control
 	[Export()] private TextureRect _extractWarning;
 	[Export()] private TextureRect _downloadWarning;
 	[Export()] private TextureRect _clearShadersWarning;
+	
 	[ExportGroup("Tools")] 
 	[Export()] private Godot.Button _clearInstallFolderButton;
 	[Export()] private Godot.Button _clearShadersToolButton;
@@ -72,8 +76,10 @@ public partial class Home : Control
 	[Export()] private Godot.Button _restoreSavesButton;
 	[Export()] private Godot.Button _fromSaveDirectoryButton;
 	[Export()] private Godot.Button _toSaveDirectoryButton;
+	
 	[ExportGroup("ModManager")] 
 	[Export()] private ItemList _modList;
+	[Export()] private OptionButton _gamePickerButton;
 
 	// Internal variables
 	private FileChooserDialog _fileChooser;
@@ -85,11 +91,17 @@ public partial class Home : Control
 	private Theme _currentTheme;
 	private bool? _confirmationChoice = null;
 	private string _yuzuModsPath;
-	// Dictionary of string + array to hold titles and mod IDs for them. Dictionary<string ID, Array<string>[0] TitleName, Array<string>[1] ModID>
+	// string ID, string GameTitle
 	private System.Collections.Generic.Dictionary<string, string> _titles = new System.Collections.Generic.Dictionary<string, string>();
+	// String ID, (string game title, int modId)
 	private System.Collections.Generic.Dictionary<string, (string, int?)> _installedTitles = new System.Collections.Generic.Dictionary<string, (string, int?)>();
-	//private Dictionary<string, string> _installedTitles = new Dictionary<string, string>();
-	private Godot.Collections.Dictionary<string, int> _installedTitleModsIds = new Godot.Collections.Dictionary<string, int>();
+	// int gameId, (int itemIndex, string, modTitle, string modUrl)
+	private System.Collections.Generic.Dictionary<string, List<(int, string, string)>> _availableGameMods = new System.Collections.Generic.Dictionary<string, List<(int, string, string)>>();
+	private string _currentGameId;
+	
+	
+	//REMOVE TODO
+	private const string Quote = "\"";
 
 	public override void _Ready()
 	{
@@ -182,16 +194,21 @@ public partial class Home : Control
 			string gameId = gameModFolder.GetFile(); // Gets game id by grabbing the folders name
 			if (_titles.TryGetValue(gameId, out var title)) // Checks if title list contains the id, if so adds it to installed titles.
 			{
-				_installedTitles[gameId] = (title, GetGameModId(title));
-				AddGameMods(_installedTitles[gameId].Item2);
+				//TODO redo layouts of installed to not always need to mod id for bananagames
+				//_installedTitles[gameId] = (title, GetGameModId(title));
+				_installedTitles[gameId] = (title, -1);
+				GetAvailableMods(gameId, false);
+				_gamePickerButton.AddItem(title);
 			}
 			else
 			{
 				// TODO better solution for informing user
-				GD.Print("Cannot find title:" + gameId);
+				//GD.Print("Cannot find title:" + gameId);
 			}
 
 		}
+		// Sets our default game to be the first of the list, which also sets our _currentGameId variable.
+		SelectGame(0);
 
 		// Testing only
 		// foreach (var game in _installedTitles)
@@ -219,26 +236,109 @@ public partial class Home : Control
 	}
 
 
-	private int? GetGameModId(string gameName)
+	// private int? GetGameModId(string gameName)
+	// {
+	// 	HttpClient httpClient = new HttpClient();
+	// 	// Searches for the game ID using the name from banana mods
+	// 	string searchContent = httpClient.GetAsync("https://gamebanana.com/apiv11/Util/Game/NameMatch?_sName=" + gameName).Result.Content.ReadAsStringAsync().Result;
+	// 	var jsonContent = JObject.Parse(searchContent);
+	// 	return jsonContent["_aRecords"]?[0]?["_idRow"]!.ToString().ToInt();
+	// }
+
+
+	private void GetAvailableMods(string? gameId, bool useBananaMods)
 	{
-		HttpClient httpClient = new HttpClient();
-		// Searches for the game ID using the name from banana mods
-		string searchContent = httpClient.GetAsync("https://gamebanana.com/apiv11/Util/Game/NameMatch?_sName=" + gameName).Result.Content.ReadAsStringAsync().Result;
-		var jsonContent = JObject.Parse(searchContent);
-		return jsonContent["_aRecords"]?[0]?["_idRow"].ToString().ToInt();
+		var htmlWeb = new HtmlWeb();
+		if (gameId == null)
+		{
+			GD.PrintErr("No mod ID given, cannot add game mods.");
+			return;
+		}
+		// Checks if there is a mod list for the given game, if not creates one
+		if (!_availableGameMods.ContainsKey(gameId))
+		{
+			_availableGameMods[gameId] = new List<(int, string, string)>();
+		}
+
+		var modsSourcePage = htmlWeb.Load("https://github.com/yuzu-emu/yuzu/wiki/Switch-Mods");
+		// Mods list
+		var mods = modsSourcePage.DocumentNode.SelectNodes($@"//h3[contains(., {Quote}{_installedTitles[gameId].Item1}{Quote})]/following::table[1]//td//a");
+		if (mods == null)
+		{
+			return;
+		}
+
+		int modIndex = 0;
+		for (int searchIndex = 0; searchIndex < mods.Count; searchIndex++)
+		{
+			var mod = mods[searchIndex];
+			string downloadUrl = mod.GetAttributeValue("href", null).Trim();
+			string modName = mod.InnerText;
+			if (downloadUrl.EndsWith(".rar") || downloadUrl.EndsWith(".zip") || downloadUrl.EndsWith(".7z"))
+			{
+				_availableGameMods[gameId].Add((modIndex, modName, downloadUrl));
+				_modList.AddItem(modName);
+				modIndex++;
+			}
+		}
+
+
+		// Checks if querying banana mods or normal
+		// if (useBananaMods)
+		// {
+		// 	int currentPage = 1;
+		// 	string gameModsSource = httpClient
+		// 		.GetAsync($@"https://gamebanana.com/apiv11/Game/{gameId}/Subfeed?_nPage={currentPage}").Result
+		// 		.Content
+		// 		.ReadAsStringAsync().Result;
+		// 	var jsonMods = JObject.Parse(gameModsSource);
+		//
+		//
+		// 	foreach (var mod in jsonMods["_aRecords"])
+		// 	{
+		// 		modIndex++;
+		//
+		// 		_availableGameMods[(int)gameId].Add((modIndex, mod["_sName"].ToString(), mod["_sProfileUrl"].ToString()));
+		// 		_modList.AddItem(mod["_sName"].ToString());
+		// 	}
+		// }
+
 	}
 
 
-	private void AddGameMods(int? modId)
+	private async void InstallMod(string gameId, string modName, string modUrl)
 	{
-		int currentPage = 1;
 		HttpClient httpClient = new HttpClient();
-		string gameModsSource = httpClient.GetAsync($@"https://gamebanana.com/apiv11/Game/{modId}/Subfeed?_nPage={currentPage}").Result.Content
-			.ReadAsStringAsync().Result;
-		var jsonMods = JObject.Parse(gameModsSource);
-		foreach (var mod in jsonMods["_aRecords"])
+		byte[] modDownload = await httpClient.GetAsync(modUrl).Result.Content.ReadAsByteArrayAsync();
+		// Should really make it so / is different for windows and linux TODO
+		await System.IO.File.WriteAllBytesAsync($@"{_yuzuModsPath}/{gameId}/{modName}", modDownload);
+	}
+
+
+	private void ModClicked(int index)
+	{
+		foreach (var mod in _availableGameMods[_currentGameId])
 		{
-			_modList.AddItem(mod["_sName"].ToString());
+			if (index == mod.Item1)
+			{
+				InstallMod(_currentGameId, mod.Item2, mod.Item3);
+			}
+		}
+	}
+
+
+	private void SelectGame(int gameIndex)
+	{
+		// Gets the keys we can equate as an array
+		var installedKeys = _installedTitles.Keys.ToArray();
+		string gameId = installedKeys[gameIndex];
+		_currentGameId = gameId;
+		// Clears old mods from our list
+		_modList.Clear();
+		// Adds all mods from the designated game.
+		foreach (var mod in _availableGameMods[gameId])
+		{
+			_modList.AddItem(mod.Item2);
 		}
 	}
 
@@ -875,3 +975,4 @@ Categories=Game;Emulator;Qt;
 		_saveManager.WriteSave();
 	}
 }
+

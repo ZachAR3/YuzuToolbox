@@ -41,7 +41,7 @@ bg_color = Color(0.184314, 0.196078, 0.203922, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jo4ax"]
 bg_color = Color(0.168627, 0.180392, 0.188235, 0.529412)
 
-[node name="Home" type="Control" node_paths=PackedStringArray("_confirmationPopup", "_backgroundAudio", "_muteButton", "_header", "_headerLabel", "_darkBg", "_lightBg", "_headerSeparator", "_versionButton", "_createShortcutButton", "_locationButton", "_downloadButton", "_clearShadersButton", "_shadersLocationButton", "_downloadWindow", "_downloadWindowApp", "_downloadLabel", "_autoUnpackButton", "_downloadProgressBar", "_customVersionCheckBox", "_customVersionSpinBox", "_downloadUpdateTimer", "_enableLightTheme", "_errorPopup", "_errorLabel", "_latestVersionLabel", "_latestReleaseRequester", "_titlesRequester", "_modsRequester", "_downloadRequester", "_extractWarning", "_downloadWarning", "_clearShadersWarning", "_clearInstallFolderButton", "_clearShadersToolButton", "_backupSavesButton", "_restoreSavesButton", "_fromSaveDirectoryButton", "_toSaveDirectoryButton", "_modList")]
+[node name="Home" type="Control" node_paths=PackedStringArray("_confirmationPopup", "_backgroundAudio", "_muteButton", "_header", "_headerLabel", "_darkBg", "_lightBg", "_headerSeparator", "_versionButton", "_createShortcutButton", "_locationButton", "_downloadButton", "_clearShadersButton", "_shadersLocationButton", "_downloadWindow", "_downloadWindowApp", "_downloadLabel", "_autoUnpackButton", "_downloadProgressBar", "_customVersionCheckBox", "_customVersionSpinBox", "_downloadUpdateTimer", "_enableLightTheme", "_errorPopup", "_errorLabel", "_latestVersionLabel", "_latestReleaseRequester", "_titlesRequester", "_modsRequester", "_downloadRequester", "_extractWarning", "_downloadWarning", "_clearShadersWarning", "_clearInstallFolderButton", "_clearShadersToolButton", "_backupSavesButton", "_restoreSavesButton", "_fromSaveDirectoryButton", "_toSaveDirectoryButton", "_modList", "_gamePickerButton")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -101,6 +101,7 @@ _restoreSavesButton = NodePath("MainPage/Tools/Tools/RestoreSavesButton")
 _fromSaveDirectoryButton = NodePath("MainPage/Tools/Tools/SaveContainer/FromButton")
 _toSaveDirectoryButton = NodePath("MainPage/Tools/Tools/SaveContainer/ToButton")
 _modList = NodePath("MainPage/ModManager/ModsList")
+_gamePickerButton = NodePath("MainPage/ModManager/GameSelection")
 metadata/_edit_use_anchors_ = true
 
 [node name="DarkBG" type="TextureRect" parent="."]
@@ -521,14 +522,11 @@ anchor_right = 0.97
 anchor_bottom = 0.97
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/h_separation = 100
+theme_override_constants/v_separation = 10
 text_overrun_behavior = 4
-item_count = 5
 max_columns = 20
-item_0/text = "Test22"
-item_1/text = "Test1"
-item_2/text = "Test2"
-item_3/text = "Test3"
-item_4/text = "Test4"
+same_column_width = true
 metadata/_edit_use_anchors_ = true
 
 [node name="ErrorPopup" type="PopupPanel" parent="."]
@@ -649,4 +647,6 @@ item_1/id = 1
 [connection signal="pressed" from="MainPage/Tools/Tools/RestoreSavesButton" to="." method="OnRestoreSavesPressed"]
 [connection signal="pressed" from="MainPage/Tools/Tools/SaveContainer/FromButton" to="." method="OnFromSaveDirectoryButtonPressed"]
 [connection signal="pressed" from="MainPage/Tools/Tools/SaveContainer/ToButton" to="." method="OnToSaveDirectoryButtonPressed"]
+[connection signal="item_selected" from="MainPage/ModManager/GameSelection" to="." method="SelectGame"]
+[connection signal="item_activated" from="MainPage/ModManager/ModsList" to="." method="ModClicked"]
 [connection signal="index_pressed" from="ConfirmPopup" to="." method="ConfirmationPressed"]
