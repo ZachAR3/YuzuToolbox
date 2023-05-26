@@ -1,0 +1,120 @@
+[gd_scene load_steps=3 format=3 uid="uid://cwwmo68jd12gd"]
+
+[ext_resource type="Script" path="res://Scripts/ToolsPage.cs" id="1_1ei58"]
+[ext_resource type="Texture2D" uid="uid://e5vtrghoacs2" path="res://WarningSign.png" id="1_pfmpv"]
+
+[node name="Tools" type="Control"]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_1ei58")
+
+[node name="Tools" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.05
+anchor_top = 0.05
+anchor_right = 0.95
+anchor_bottom = 0.95
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 18
+
+[node name="ClearInstallFolderButton" type="Button" parent="Tools"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+tooltip_text = "Clears the selected installation folder of all files"
+focus_mode = 0
+text = "Clear Installation Folder"
+
+[node name="ClearInstallWarning" type="TextureRect" parent="Tools/ClearInstallFolderButton"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = -0.0434028
+anchor_top = 0.310127
+anchor_right = -0.0144676
+anchor_bottom = 0.626582
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_pfmpv")
+expand_mode = 5
+stretch_mode = 4
+metadata/_edit_use_anchors_ = true
+
+[node name="ClearShaders" type="Button" parent="Tools"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+tooltip_text = "Clears the shader folder of all files / previous shaders"
+focus_mode = 0
+text = "Clear Shaders"
+
+[node name="ClearShadersManualWarning" type="TextureRect" parent="Tools/ClearShaders"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = -0.0416667
+anchor_top = 0.329114
+anchor_right = -0.0127315
+anchor_bottom = 0.64557
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_pfmpv")
+expand_mode = 5
+stretch_mode = 4
+metadata/_edit_use_anchors_ = true
+
+[node name="BackupSavesButton" type="Button" parent="Tools"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+tooltip_text = "Creates a backup of all saves from the selected \"From\" directory into the selected \"To\" directory."
+focus_mode = 0
+text = "Backup saves"
+
+[node name="RestoreSavesButton" type="Button" parent="Tools"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+tooltip_text = "Restores saves from the \"To\" directory into the \"From\" directory."
+focus_mode = 0
+text = "Restore saves (pulls from to and places in from)"
+
+[node name="SaveContainer" type="GridContainer" parent="Tools"]
+layout_mode = 2
+size_flags_vertical = 3
+columns = 2
+
+[node name="FromLabel" type="Label" parent="Tools/SaveContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 3
+text = "From:"
+
+[node name="FromButton" type="Button" parent="Tools/SaveContainer"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+tooltip_text = "Location to pull saves from when backing up, and put saves when restoring."
+focus_mode = 0
+text = "
+"
+
+[node name="ToLabel" type="Label" parent="Tools/SaveContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 3
+text = "To:"
+
+[node name="ToButton" type="Button" parent="Tools/SaveContainer"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+tooltip_text = "Location to store saves when backing up, and retrieve saves from when restoring."
+focus_mode = 0

@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Threading;
 
 public partial class ResourceSaveManager : Resource
 {
@@ -12,6 +13,7 @@ public partial class ResourceSaveManager : Resource
 	{
 		ResourceSaver.Save(this, GetSavePath());
 	}
+	
 
 	public static bool SaveExists()
 	{
@@ -26,6 +28,31 @@ public partial class ResourceSaveManager : Resource
 		}
 		return null;
 	}
+
+
+	public SettingsResource GetSettings()
+	{
+		if (SaveExists())
+		{
+			var lastSave = (ResourceSaveManager)LoadSaveGame();
+			
+			// If the save is from a previous version, reset the settings
+			if (lastSave.Version != Version)
+			{
+				_settings = new SettingsResource();
+				WriteSave();
+			}
+			_settings = lastSave._settings;
+		}
+		else
+		{
+			_settings = new SettingsResource();
+			WriteSave();
+		}
+
+		return _settings;
+	}
+	
 
 	static String GetSavePath()
 	{

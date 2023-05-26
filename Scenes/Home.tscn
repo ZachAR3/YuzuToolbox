@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://c7wdbnvnydnxk"]
+[gd_scene load_steps=21 format=3 uid="uid://c7wdbnvnydnxk"]
 
 [ext_resource type="Theme" uid="uid://cnnid0n04kfr7" path="res://Themes/DarkTheme.tres" id="1_c22a4"]
 [ext_resource type="Script" path="res://Scripts/Home.cs" id="1_p51ic"]
@@ -9,7 +9,10 @@
 [ext_resource type="AudioStream" uid="uid://bfqr7fmwq62ku" path="res://Audio/BackgroundAudio.mp3" id="5_v4a5s"]
 [ext_resource type="StyleBox" uid="uid://ct4a4b2lcwimn" path="res://Themes/Styleboxes/LightVSeparator.tres" id="7_iauax"]
 [ext_resource type="FontFile" uid="uid://bs747wsxnk330" path="res://Fonts/Primary.TTF" id="7_jk62c"]
-[ext_resource type="Texture2D" uid="uid://e5vtrghoacs2" path="res://WarningSign.png" id="10_f00sk"]
+[ext_resource type="PackedScene" uid="uid://cr3wosequvma8" path="res://Scenes/InstallerPage.tscn" id="10_7mm46"]
+[ext_resource type="PackedScene" uid="uid://cwwmo68jd12gd" path="res://Scenes/ToolsPage.tscn" id="11_27f86"]
+[ext_resource type="Script" path="res://Scripts/Installer.cs" id="11_kv7yl"]
+[ext_resource type="PackedScene" uid="uid://bdihe2bmwmgtp" path="res://Scenes/ModManagerPage.tscn" id="12_3uycp"]
 
 [sub_resource type="Gradient" id="Gradient_awkjf"]
 interpolation_mode = 2
@@ -41,7 +44,7 @@ bg_color = Color(0.184314, 0.196078, 0.203922, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jo4ax"]
 bg_color = Color(0.168627, 0.180392, 0.188235, 0.529412)
 
-[node name="Home" type="Control" node_paths=PackedStringArray("_confirmationPopup", "_backgroundAudio", "_muteButton", "_header", "_headerLabel", "_darkBg", "_lightBg", "_headerSeparator", "_versionButton", "_createShortcutButton", "_locationButton", "_downloadButton", "_clearShadersButton", "_shadersLocationButton", "_downloadWindow", "_downloadWindowApp", "_downloadLabel", "_autoUnpackButton", "_downloadProgressBar", "_customVersionCheckBox", "_customVersionSpinBox", "_downloadUpdateTimer", "_enableLightTheme", "_errorPopup", "_errorLabel", "_latestVersionLabel", "_latestReleaseRequester", "_titlesRequester", "_modsRequester", "_downloadRequester", "_extractWarning", "_downloadWarning", "_clearShadersWarning", "_clearInstallFolderButton", "_clearShadersToolButton", "_backupSavesButton", "_restoreSavesButton", "_fromSaveDirectoryButton", "_toSaveDirectoryButton", "_modList", "_gamePickerButton")]
+[node name="Home" type="Control" node_paths=PackedStringArray("_confirmationPopup", "_backgroundAudio", "_muteButton", "_header", "_headerLabel", "_darkBg", "_lightBg", "_headerSeparator", "_versionButton", "_createShortcutButton", "_locationButton", "_downloadButton", "_clearShadersButton", "_shadersLocationButton", "_downloadWindow", "_downloadWindowApp", "_downloadLabel", "_autoUnpackButton", "_downloadProgressBar", "_customVersionCheckBox", "_customVersionSpinBox", "_downloadUpdateTimer", "_enableLightTheme", "_errorPopup", "_errorLabel", "_latestVersionLabel", "_latestReleaseRequester", "_titlesRequester", "_modsRequester", "_downloadRequester", "_extractWarning", "_downloadWarning", "_clearShadersWarning", "_clearInstallFolderButton", "_clearShadersToolButton", "_backupSavesButton", "_restoreSavesButton", "_fromSaveDirectoryButton", "_toSaveDirectoryButton")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -53,6 +56,7 @@ size_flags_vertical = 4
 theme = ExtResource("1_c22a4")
 script = ExtResource("1_p51ic")
 _appVersion = 2.3
+_saveManagerVersion = 2.0
 _icon = ExtResource("3_ltbvi")
 _confirmationPopup = NodePath("ConfirmPopup")
 _backgroundAudio = NodePath("BackgroundAudio")
@@ -81,7 +85,7 @@ _errorPopup = NodePath("ErrorPopup")
 _errorLabel = NodePath("ErrorPopup/ErrorLabel")
 _latestVersionLabel = NodePath("Header/HeaderLabels/LastestVersion")
 _latestReleaseRequester = NodePath("ReleaseRequester")
-_titlesRequester = NodePath("TitlesRequester")
+_titlesRequester = NodePath("")
 _modsRequester = NodePath("ModsRequester")
 _downloadRequester = NodePath("DownloadRequester")
 _pineappleLatestUrl = "https://api.github.com/repos/pineappleEA/pineapple-src/releases/latest"
@@ -100,8 +104,6 @@ _backupSavesButton = NodePath("MainPage/Tools/Tools/BackupSavesButton")
 _restoreSavesButton = NodePath("MainPage/Tools/Tools/RestoreSavesButton")
 _fromSaveDirectoryButton = NodePath("MainPage/Tools/Tools/SaveContainer/FromButton")
 _toSaveDirectoryButton = NodePath("MainPage/Tools/Tools/SaveContainer/ToButton")
-_modList = NodePath("MainPage/ModManager/ModsList")
-_gamePickerButton = NodePath("MainPage/ModManager/GameSelection")
 metadata/_edit_use_anchors_ = true
 
 [node name="DarkBG" type="TextureRect" parent="."]
@@ -222,312 +224,16 @@ theme_override_constants/side_margin = 1825
 tab_alignment = 1
 metadata/_edit_use_anchors_ = true
 
-[node name="Installer" type="Control" parent="MainPage"]
+[node name="Installer" parent="MainPage" instance=ExtResource("10_7mm46")]
+layout_mode = 2
+script = ExtResource("11_kv7yl")
+
+[node name="Tools" parent="MainPage" instance=ExtResource("11_27f86")]
+layout_mode = 2
+
+[node name="ModManager" parent="MainPage" instance=ExtResource("12_3uycp")]
 visible = false
 layout_mode = 2
-metadata/_edit_use_anchors_ = true
-
-[node name="ControlsContainer" type="GridContainer" parent="MainPage/Installer"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.05
-anchor_top = 0.12301
-anchor_right = 0.95
-anchor_bottom = 0.437593
-grow_horizontal = 2
-grow_vertical = 2
-columns = 2
-metadata/_edit_use_anchors_ = true
-
-[node name="VersionSelectionLabel" type="Label" parent="MainPage/Installer/ControlsContainer"]
-layout_mode = 2
-text = "Versions:"
-
-[node name="VersionSelectionButton" type="OptionButton" parent="MainPage/Installer/ControlsContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 4
-focus_mode = 0
-alignment = 1
-
-[node name="UseCustomVersionLabel" type="Label" parent="MainPage/Installer/ControlsContainer"]
-layout_mode = 2
-text = "Use custom:"
-
-[node name="CustomVersion" type="HBoxContainer" parent="MainPage/Installer/ControlsContainer"]
-layout_mode = 2
-size_flags_vertical = 4
-
-[node name="CustomVersionCheckBox" type="CheckBox" parent="MainPage/Installer/ControlsContainer/CustomVersion"]
-layout_mode = 2
-focus_mode = 0
-flat = true
-
-[node name="CustomVersionSpinBox" type="SpinBox" parent="MainPage/Installer/ControlsContainer/CustomVersion"]
-layout_mode = 2
-size_flags_horizontal = 3
-min_value = 3090.0
-max_value = 99999.0
-value = 3090.0
-rounded = true
-
-[node name="LocationLabel" type="Label" parent="MainPage/Installer/ControlsContainer"]
-layout_mode = 2
-text = "Install location:"
-
-[node name="LocationButton" type="Button" parent="MainPage/Installer/ControlsContainer"]
-custom_minimum_size = Vector2(100, 0)
-layout_mode = 2
-size_flags_horizontal = 3
-tooltip_text = "Location to intall Yuzu"
-
-[node name="ShaderLocationLabel" type="Label" parent="MainPage/Installer/ControlsContainer"]
-layout_mode = 2
-text = "Shaders location:"
-
-[node name="ShaderLocationButton" type="Button" parent="MainPage/Installer/ControlsContainer"]
-custom_minimum_size = Vector2(100, 0)
-layout_mode = 2
-size_flags_horizontal = 3
-tooltip_text = "Yuzu shaders location"
-
-[node name="ExtractLabel" type="Label" parent="MainPage/Installer/ControlsContainer"]
-layout_mode = 2
-size_flags_horizontal = 0
-text = "Auto unpack:"
-
-[node name="ExtractWarning" type="TextureRect" parent="MainPage/Installer/ControlsContainer/ExtractLabel"]
-layout_mode = 2
-anchor_left = 1.19313
-anchor_top = 0.179487
-anchor_right = 1.33476
-anchor_bottom = 0.897436
-grow_horizontal = 2
-grow_vertical = 2
-texture = ExtResource("10_f00sk")
-expand_mode = 1
-stretch_mode = 4
-metadata/_edit_use_anchors_ = true
-
-[node name="ExtractButton" type="CheckBox" parent="MainPage/Installer/ControlsContainer"]
-layout_mode = 2
-tooltip_text = "(Windows only) WARNING WILL DELETE ALL DATA IN SELECTED INSTALL LOCATION!"
-focus_mode = 0
-text = "Windows only:WARNING WILL DELETE ALL DATA IN INSTALL LOCATION"
-alignment = 1
-text_overrun_behavior = 4
-
-[node name="ClearShadersLabel" type="Label" parent="MainPage/Installer/ControlsContainer"]
-layout_mode = 2
-text = "Clear shaders"
-autowrap_mode = 3
-
-[node name="ClearShadersWarning" type="TextureRect" parent="MainPage/Installer/ControlsContainer/ClearShadersLabel"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.696742
-anchor_top = 0.230769
-anchor_right = 0.774436
-anchor_bottom = 0.897436
-grow_horizontal = 2
-grow_vertical = 2
-texture = ExtResource("10_f00sk")
-expand_mode = 1
-stretch_mode = 4
-metadata/_edit_use_anchors_ = true
-
-[node name="ClearShadersButton" type="CheckBox" parent="MainPage/Installer/ControlsContainer"]
-layout_mode = 2
-tooltip_text = "Clears shaders on install (WARNING DELETES ALL DATA IN SELECTED LOCATION)"
-text = "Clear shaders on install (WARNING DELETES ALL DATA IN SELECTED LOCATION)"
-alignment = 1
-text_overrun_behavior = 4
-clip_text = true
-
-[node name="CreateShortcutLabel" type="Label" parent="MainPage/Installer/ControlsContainer"]
-layout_mode = 2
-text = "Create start shortcut:  "
-
-[node name="CreateShortcutButton" type="CheckBox" parent="MainPage/Installer/ControlsContainer"]
-layout_mode = 2
-tooltip_text = "Creates a start menu shortcut for yuzu-ea (requires auto unpack and admin privleges on windows)"
-focus_mode = 0
-text = "Creates a start menu shortcut for yuzu-ea (requires auto unpack and admin privleges on windows)"
-alignment = 1
-text_overrun_behavior = 4
-
-[node name="DownloadButton" type="Button" parent="MainPage/Installer"]
-custom_minimum_size = Vector2(100, 0)
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.05
-anchor_top = 0.578125
-anchor_right = 0.95
-anchor_bottom = 0.721875
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-focus_next = NodePath(".")
-focus_previous = NodePath(".")
-text = "Download
-"
-metadata/_edit_use_anchors_ = true
-
-[node name="DownloadWarning" type="TextureRect" parent="MainPage/Installer/DownloadButton"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = -0.0416667
-anchor_top = 0.326087
-anchor_right = -0.0127315
-anchor_bottom = 0.688406
-grow_horizontal = 2
-grow_vertical = 2
-texture = ExtResource("10_f00sk")
-expand_mode = 5
-stretch_mode = 4
-metadata/_edit_use_anchors_ = true
-
-[node name="Tools" type="Control" parent="MainPage"]
-visible = false
-layout_mode = 2
-
-[node name="Tools" type="VBoxContainer" parent="MainPage/Tools"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.05
-anchor_top = 0.05
-anchor_right = 0.95
-anchor_bottom = 0.95
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/separation = 18
-
-[node name="ClearInstallFolderButton" type="Button" parent="MainPage/Tools/Tools"]
-custom_minimum_size = Vector2(100, 0)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-tooltip_text = "Clears the selected installation folder of all files"
-focus_mode = 0
-text = "Clear Installation Folder"
-
-[node name="ClearInstallWarning" type="TextureRect" parent="MainPage/Tools/Tools/ClearInstallFolderButton"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = -0.0434028
-anchor_top = 0.310127
-anchor_right = -0.0144676
-anchor_bottom = 0.626582
-grow_horizontal = 2
-grow_vertical = 2
-texture = ExtResource("10_f00sk")
-expand_mode = 5
-stretch_mode = 4
-metadata/_edit_use_anchors_ = true
-
-[node name="ClearShaders" type="Button" parent="MainPage/Tools/Tools"]
-custom_minimum_size = Vector2(100, 0)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-tooltip_text = "Clears the shader folder of all files / previous shaders"
-focus_mode = 0
-text = "Clear Shaders"
-
-[node name="ClearShadersManualWarning" type="TextureRect" parent="MainPage/Tools/Tools/ClearShaders"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = -0.0416667
-anchor_top = 0.329114
-anchor_right = -0.0127315
-anchor_bottom = 0.64557
-grow_horizontal = 2
-grow_vertical = 2
-texture = ExtResource("10_f00sk")
-expand_mode = 5
-stretch_mode = 4
-metadata/_edit_use_anchors_ = true
-
-[node name="BackupSavesButton" type="Button" parent="MainPage/Tools/Tools"]
-custom_minimum_size = Vector2(100, 0)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-tooltip_text = "Creates a backup of all saves from the selected \"From\" directory into the selected \"To\" directory."
-focus_mode = 0
-text = "Backup saves"
-
-[node name="RestoreSavesButton" type="Button" parent="MainPage/Tools/Tools"]
-custom_minimum_size = Vector2(100, 0)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-tooltip_text = "Restores saves from the \"To\" directory into the \"From\" directory."
-focus_mode = 0
-text = "Restore saves (pulls from to and places in from)"
-
-[node name="SaveContainer" type="GridContainer" parent="MainPage/Tools/Tools"]
-layout_mode = 2
-size_flags_vertical = 3
-columns = 2
-
-[node name="FromLabel" type="Label" parent="MainPage/Tools/Tools/SaveContainer"]
-layout_mode = 2
-size_flags_horizontal = 0
-size_flags_vertical = 3
-text = "From:"
-
-[node name="FromButton" type="Button" parent="MainPage/Tools/Tools/SaveContainer"]
-custom_minimum_size = Vector2(100, 0)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-tooltip_text = "Location to pull saves from when backing up, and put saves when restoring."
-focus_mode = 0
-text = "
-"
-
-[node name="ToLabel" type="Label" parent="MainPage/Tools/Tools/SaveContainer"]
-layout_mode = 2
-size_flags_horizontal = 0
-size_flags_vertical = 3
-text = "To:"
-
-[node name="ToButton" type="Button" parent="MainPage/Tools/Tools/SaveContainer"]
-custom_minimum_size = Vector2(100, 0)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-tooltip_text = "Location to store saves when backing up, and retrieve saves from when restoring."
-focus_mode = 0
-
-[node name="ModManager" type="Control" parent="MainPage"]
-layout_mode = 2
-
-[node name="GameSelection" type="OptionButton" parent="MainPage/ModManager"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 1.0
-anchor_bottom = 0.0613306
-grow_horizontal = 2
-metadata/_edit_use_anchors_ = true
-
-[node name="ModsList" type="ItemList" parent="MainPage/ModManager"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.03
-anchor_top = 0.1
-anchor_right = 0.97
-anchor_bottom = 0.97
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/h_separation = 100
-theme_override_constants/v_separation = 10
-text_overrun_behavior = 4
-max_columns = 20
-same_column_width = true
-metadata/_edit_use_anchors_ = true
 
 [node name="ErrorPopup" type="PopupPanel" parent="."]
 initial_position = 2
@@ -560,8 +266,6 @@ metadata/_edit_use_anchors_ = true
 use_threads = true
 
 [node name="ModsRequester" type="HTTPRequest" parent="."]
-
-[node name="TitlesRequester" type="HTTPRequest" parent="."]
 
 [node name="DownloadWindow" type="Panel" parent="."]
 visible = false
@@ -640,13 +344,3 @@ item_1/text = "Cancel"
 item_1/id = 1
 
 [connection signal="toggled" from="Header/Option/MuteButton" to="." method="ToggledMusicButton"]
-[connection signal="toggled" from="MainPage/Installer/ControlsContainer/ClearShadersButton" to="." method="ClearShadersToggle"]
-[connection signal="pressed" from="MainPage/Tools/Tools/ClearInstallFolderButton" to="." method="ClearInstallationFolder"]
-[connection signal="pressed" from="MainPage/Tools/Tools/ClearShaders" to="." method="ClearShaders"]
-[connection signal="pressed" from="MainPage/Tools/Tools/BackupSavesButton" to="." method="OnBackupSavesButtonPressed"]
-[connection signal="pressed" from="MainPage/Tools/Tools/RestoreSavesButton" to="." method="OnRestoreSavesPressed"]
-[connection signal="pressed" from="MainPage/Tools/Tools/SaveContainer/FromButton" to="." method="OnFromSaveDirectoryButtonPressed"]
-[connection signal="pressed" from="MainPage/Tools/Tools/SaveContainer/ToButton" to="." method="OnToSaveDirectoryButtonPressed"]
-[connection signal="item_selected" from="MainPage/ModManager/GameSelection" to="." method="SelectGame"]
-[connection signal="item_activated" from="MainPage/ModManager/ModsList" to="." method="ModClicked"]
-[connection signal="index_pressed" from="ConfirmPopup" to="." method="ConfirmationPressed"]

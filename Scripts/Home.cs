@@ -1,28 +1,20 @@
 using Godot;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Godot.Collections;
-using Gtk;
 using Mono.Unix;
-using Newtonsoft.Json.Linq;
 using ProgressBar = Godot.ProgressBar;
-using Window = Godot.Window;
 using WindowsShortcutFactory;
 using Environment = System.Environment;
-using HttpClient = System.Net.Http.HttpClient;
-using HtmlAgilityPack;
-using Array = System.Array;
 
 public partial class Home : Control
 {
 	[ExportGroup("App")]
 	[Export()] private float _appVersion = 2.2f;
-	[Export()] private float _settingsVersion = 1.9f;
+	[Export()] private float _saveManagerVersion = 1.9f;
 
 	[ExportGroup("Installer")]
 	[Export()] private Godot.Image _icon;
@@ -76,69 +68,51 @@ public partial class Home : Control
 	[Export()] private Godot.Button _restoreSavesButton;
 	[Export()] private Godot.Button _fromSaveDirectoryButton;
 	[Export()] private Godot.Button _toSaveDirectoryButton;
-	
-	[ExportGroup("ModManager")] 
-	[Export()] private ItemList _modList;
-	[Export()] private OptionButton _gamePickerButton;
 
 	// Internal variables
-	private FileChooserDialog _fileChooser;
 	private ResourceSaveManager _saveManager;
 	private SettingsResource _settings;
 	private String _osUsed;
 	private string _yuzuExtensionString;
-	private string _yuzuAppDataPath;
 	private Theme _currentTheme;
-	private bool? _confirmationChoice = null;
-	private string _yuzuModsPath;
-	// string ID, string GameTitle
-	private System.Collections.Generic.Dictionary<string, string> _titles = new System.Collections.Generic.Dictionary<string, string>();
-	// String ID, (string game title, int modId)
-	private System.Collections.Generic.Dictionary<string, (string, int?)> _installedTitles = new System.Collections.Generic.Dictionary<string, (string, int?)>();
-	// int gameId, (int itemIndex, string, modTitle, string modUrl)
-	private System.Collections.Generic.Dictionary<string, List<(int, string, string)>> _availableGameMods = new System.Collections.Generic.Dictionary<string, List<(int, string, string)>>();
-	private string _currentGameId;
+	private Tools _tools = new Tools();
 	
-	
-	//REMOVE TODO
-	private const string Quote = "\"";
 
 	public override void _Ready()
 	{
 		// Sets minimum window size to prevent text clipping and UI breaking at smaller scales.
 		DisplayServer.WindowSetMinSize(new Vector2I(1024, 576));
 		_osUsed = OS.GetName();
+		
+		// Setup save manager and load settings
+		_saveManager = new ResourceSaveManager();
+		_saveManager.Version = _saveManagerVersion;
+		_settings = _saveManager.GetSettings();
+		
 		if (_osUsed == "Linux")
 		{
 			_saveName += ".AppImage";
 			_yuzuExtensionString = ".AppImage";
 			_autoUnpackButton.Disabled = true;
-			_yuzuAppDataPath = $@"{System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData)}/yuzu/";
 		}
 		else if (_osUsed == "Windows")
 		{
 			_saveName += ".zip";
 			_yuzuExtensionString = ".zip";
 			_createShortcutButton.Disabled = true;
-			_yuzuAppDataPath = $@"{System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData)}\yuzu\";
 		}
-
-		_saveManager = new ResourceSaveManager();
-		_saveManager.Version = _settingsVersion;
-		GetSettings();
-		GetInstalledGames();
 
 		if (_settings.ShadersLocation == "")
 		{
-			_settings.ShadersLocation = $@"{_yuzuAppDataPath}shader";
+			_settings.ShadersLocation = $@"{_settings.AppDataPath}shader";
 			SaveSettings();
 		}
 
 		if (_settings.FromSaveDirectory == "")
 		{
 			_settings.FromSaveDirectory = _osUsed == "Linux"
-				? $@"{_yuzuAppDataPath}nand/user/save"
-				: $@"{_yuzuAppDataPath}nand\user\save";
+				? $@"{_settings.AppDataPath}nand/user/save"
+				: $@"{_settings.AppDataPath}nand\user\save";
 			SaveSettings();
 		}
 		
@@ -182,42 +156,6 @@ public partial class Home : Control
 	}
 
 
-	private async void GetInstalledGames()
-	{
-		_yuzuModsPath = $@"{_yuzuAppDataPath}load";
-		_titlesRequester.Request(
-			"https://switchbrew.org/w/index.php?title=Title_list/Games&mobileaction=toggle_view_desktop");
-		await ToSignal(_titlesRequester, "request_completed"); // Waits for titles to be retrieved before checking installed titles against them.
-		
-		foreach (var gameModFolder in Directory.GetDirectories(_yuzuModsPath))
-		{
-			string gameId = gameModFolder.GetFile(); // Gets game id by grabbing the folders name
-			if (_titles.TryGetValue(gameId, out var title)) // Checks if title list contains the id, if so adds it to installed titles.
-			{
-				//TODO redo layouts of installed to not always need to mod id for bananagames
-				//_installedTitles[gameId] = (title, GetGameModId(title));
-				_installedTitles[gameId] = (title, -1);
-				GetAvailableMods(gameId, false);
-				_gamePickerButton.AddItem(title);
-			}
-			else
-			{
-				// TODO better solution for informing user
-				//GD.Print("Cannot find title:" + gameId);
-			}
-
-		}
-		// Sets our default game to be the first of the list, which also sets our _currentGameId variable.
-		SelectGame(0);
-
-		// Testing only
-		// foreach (var game in _installedTitles)
-		// {
-		// 	GD.Print(game.Value);
-		// }
-	}
-
-
 	private void GetTitles(long result, long responseCode, string[] headers, byte[] body)
 	{
 		string[] gamesArray = Encoding.UTF8.GetString(body).Split("<tr>"); // Splits the list into the begginings of each game
@@ -231,7 +169,7 @@ public partial class Home : Control
 			// Splits at every new line
 			var gameSplit = gameCleaned.Split(Environment.NewLine);
 			// Adds the game to our title list with type Dictionary(string ID, string Title, string modID)
-			_titles[gameSplit[1]] = gameSplit[2];
+			_settings.Titles[gameSplit[1]] = gameSplit[2];
 		}
 	}
 
@@ -244,103 +182,6 @@ public partial class Home : Control
 	// 	var jsonContent = JObject.Parse(searchContent);
 	// 	return jsonContent["_aRecords"]?[0]?["_idRow"]!.ToString().ToInt();
 	// }
-
-
-	private void GetAvailableMods(string? gameId, bool useBananaMods)
-	{
-		var htmlWeb = new HtmlWeb();
-		if (gameId == null)
-		{
-			GD.PrintErr("No mod ID given, cannot add game mods.");
-			return;
-		}
-		// Checks if there is a mod list for the given game, if not creates one
-		if (!_availableGameMods.ContainsKey(gameId))
-		{
-			_availableGameMods[gameId] = new List<(int, string, string)>();
-		}
-
-		var modsSourcePage = htmlWeb.Load("https://github.com/yuzu-emu/yuzu/wiki/Switch-Mods");
-		// Mods list
-		var mods = modsSourcePage.DocumentNode.SelectNodes($@"//h3[contains(., {Quote}{_installedTitles[gameId].Item1}{Quote})]/following::table[1]//td//a");
-		if (mods == null)
-		{
-			return;
-		}
-
-		int modIndex = 0;
-		for (int searchIndex = 0; searchIndex < mods.Count; searchIndex++)
-		{
-			var mod = mods[searchIndex];
-			string downloadUrl = mod.GetAttributeValue("href", null).Trim();
-			string modName = mod.InnerText;
-			if (downloadUrl.EndsWith(".rar") || downloadUrl.EndsWith(".zip") || downloadUrl.EndsWith(".7z"))
-			{
-				_availableGameMods[gameId].Add((modIndex, modName, downloadUrl));
-				_modList.AddItem(modName);
-				modIndex++;
-			}
-		}
-
-
-		// Checks if querying banana mods or normal
-		// if (useBananaMods)
-		// {
-		// 	int currentPage = 1;
-		// 	string gameModsSource = httpClient
-		// 		.GetAsync($@"https://gamebanana.com/apiv11/Game/{gameId}/Subfeed?_nPage={currentPage}").Result
-		// 		.Content
-		// 		.ReadAsStringAsync().Result;
-		// 	var jsonMods = JObject.Parse(gameModsSource);
-		//
-		//
-		// 	foreach (var mod in jsonMods["_aRecords"])
-		// 	{
-		// 		modIndex++;
-		//
-		// 		_availableGameMods[(int)gameId].Add((modIndex, mod["_sName"].ToString(), mod["_sProfileUrl"].ToString()));
-		// 		_modList.AddItem(mod["_sName"].ToString());
-		// 	}
-		// }
-
-	}
-
-
-	private async void InstallMod(string gameId, string modName, string modUrl)
-	{
-		HttpClient httpClient = new HttpClient();
-		byte[] modDownload = await httpClient.GetAsync(modUrl).Result.Content.ReadAsByteArrayAsync();
-		// Should really make it so / is different for windows and linux TODO
-		await System.IO.File.WriteAllBytesAsync($@"{_yuzuModsPath}/{gameId}/{modName}", modDownload);
-	}
-
-
-	private void ModClicked(int index)
-	{
-		foreach (var mod in _availableGameMods[_currentGameId])
-		{
-			if (index == mod.Item1)
-			{
-				InstallMod(_currentGameId, mod.Item2, mod.Item3);
-			}
-		}
-	}
-
-
-	private void SelectGame(int gameIndex)
-	{
-		// Gets the keys we can equate as an array
-		var installedKeys = _installedTitles.Keys.ToArray();
-		string gameId = installedKeys[gameIndex];
-		_currentGameId = gameId;
-		// Clears old mods from our list
-		_modList.Clear();
-		// Adds all mods from the designated game.
-		foreach (var mod in _availableGameMods[gameId])
-		{
-			_modList.AddItem(mod.Item2);
-		}
-	}
 
 
 	private void SetTheme(bool enableLight)
@@ -377,7 +218,7 @@ public partial class Home : Control
 	private async void InstallSelectedVersion()
 	{
 		// Launches confirmation window, and cancels if not confirmed.
-		var confirm = await ConfirmationPopup();
+		var confirm = await _tools.ConfirmationPopup(_confirmationPopup);
 		if (confirm != true)
 		{
 			return;
@@ -500,7 +341,7 @@ Categories=Game;Emulator;Qt;
 				catch (Exception shortcutError)
 				{
 					shortcutPath = $@"{_settings.SaveDirectory}/{linuxShortcutName}";
-					ErrorPopup($@"Error creating shortcut, creating new at {shortcutPath}. Error:{shortcutError}");
+					_tools.ErrorPopup($@"Error creating shortcut, creating new at {shortcutPath}. Error:{shortcutError}", _errorLabel, _errorPopup);
 					File.WriteAllText(shortcutPath, shortcutContent);
 					throw;
 				}
@@ -529,7 +370,7 @@ Categories=Game;Emulator;Qt;
 			catch (Exception shortcutError)
 			{
 				yuzuShortcutPath = $@"{_settings.SaveDirectory}/{windowsShortcutName}";
-				ErrorPopup($@"cannot create shortcut, ensure app is running as admin. Placing instead at {yuzuShortcutPath}. Exception:{shortcutError}");
+				_tools.ErrorPopup($@"cannot create shortcut, ensure app is running as admin. Placing instead at {yuzuShortcutPath}. Exception:{shortcutError}", _errorLabel, _errorPopup);
 				windowsShortcut.Save(yuzuShortcutPath);
 				throw;
 			}
@@ -562,7 +403,7 @@ Categories=Game;Emulator;Qt;
 		}
 		else
 		{
-			CallDeferred("ErrorPopup", "Failed to get latest versions error code: " + responseCode);
+			_tools.CallDeferred("ErrorPopup", "Failed to get latest versions error code: " + responseCode, _errorLabel, _errorPopup);
 		}
 	}
 
@@ -619,36 +460,17 @@ Categories=Game;Emulator;Qt;
 				String yuzuWindowsDirectory = $@"{_settings.SaveDirectory}/{_windowsFolderName}";
 				if (Directory.Exists(yuzuWindowsDirectory))
 				{
-					MoveFilesAndDirs(yuzuWindowsDirectory, _settings.SaveDirectory);
+					Tools.MoveFilesAndDirs(yuzuWindowsDirectory, _settings.SaveDirectory);
 				}
 			}
 		}
 	}
 
 	
-	private void GetSettings()
-	{
-		if (ResourceSaveManager.SaveExists())
-		{
-			var lastSave = (ResourceSaveManager)ResourceSaveManager.LoadSaveGame();
-			
-			if (lastSave.Version != _settingsVersion)
-			{
-				CallDeferred("ErrorPopup", $@"Error loading settings, version mismatch detected. Settings have been regenerated.");
-				_saveManager._settings = new SettingsResource();
-				_saveManager.WriteSave();
-			}
-			_settings = lastSave._settings;
-		}
-		else
-		{
-			_settings = new SettingsResource();
-			_saveManager._settings = _settings;
-			_saveManager.WriteSave();
-		}
-		SetTheme(_settings.LightModeEnabled);
 
-	}
+	//	SetTheme(_settings.LightModeEnabled);
+
+	
 
 	private String GetExistingVersion()
 	{
@@ -685,7 +507,7 @@ Categories=Game;Emulator;Qt;
 		{
 			if (_autoUnpackButton.ButtonPressed)
 			{
-				DeleteDirectoryContents(_settings.SaveDirectory);
+				Tools.DeleteDirectoryContents(_settings.SaveDirectory);
 			}
 			else
 			{
@@ -698,38 +520,15 @@ Categories=Game;Emulator;Qt;
 
 		if (_clearShadersButton.ButtonPressed)
 		{
-			ClearShaders();;
+			_tools.ClearShaders(_settings.ShadersLocation);;
 		}
 
-	}
-
-
-	private async void ClearShaders()
-	{
-		if (Directory.Exists(_settings.ShadersLocation))
-		{
-			// Launches confirmation window, and cancels if not confirmed.
-			var confirm = await ConfirmationPopup();
-			if (confirm != true)
-			{
-				return;
-			}
-			
-			DeleteDirectoryContents(_settings.ShadersLocation);
-			_clearShadersButton.Text = "Shaders cleared successfully!";
-			_clearShadersToolButton.Text = "Shaders cleared successfully!";
-		}
-		else
-		{
-			ErrorPopup("failed to find shaders location");
-		}
-			
 	}
 
 
 	private void OnShadersLocationButtonPressed()
 	{
-		OpenFileChooser(ref _settings.ShadersLocation, _settings.ShadersLocation);
+		_tools.OpenFileChooser(ref _settings.ShadersLocation, _settings.ShadersLocation, _errorLabel, _errorPopup);
 		_shadersLocationButton.Text = _settings.ShadersLocation;
 		SaveSettings();
 	}
@@ -737,7 +536,7 @@ Categories=Game;Emulator;Qt;
 	
 	private void OnLocationButtonPressed()
 	{
-		OpenFileChooser(ref _settings.SaveDirectory, _settings.SaveDirectory);
+		_tools.OpenFileChooser(ref _settings.SaveDirectory, _settings.SaveDirectory, _errorLabel, _errorPopup);
 		_locationButton.Text = _settings.SaveDirectory;
 		SaveSettings();
 	}
@@ -747,12 +546,12 @@ Categories=Game;Emulator;Qt;
 	{
 		try
 		{
-			DuplicateDirectoryContents(_settings.FromSaveDirectory, _settings.ToSaveDirectory, true);
+			_tools.DuplicateDirectoryContents(_settings.FromSaveDirectory, _settings.ToSaveDirectory, true);
 			_backupSavesButton.Text = "Backup successful!";
 		}
 		catch (Exception backupError)
-		{
-			ErrorPopup("failed to create save backup exception:" + backupError);
+		{ 
+			_tools.ErrorPopup("failed to create save backup exception:" + backupError, _errorLabel, _errorPopup);
 			throw;
 		}
 
@@ -763,12 +562,12 @@ Categories=Game;Emulator;Qt;
 	{
 		try
 		{
-			DuplicateDirectoryContents(_settings.ToSaveDirectory, _settings.FromSaveDirectory, true);
+			_tools.DuplicateDirectoryContents(_settings.ToSaveDirectory, _settings.FromSaveDirectory, true);
 			_restoreSavesButton.Text = "Saves restored successfully!";
 		}
 		catch (Exception restoreError)
 		{
-			ErrorPopup("failed to restore saves, exception: " + restoreError);
+			_tools.ErrorPopup("failed to restore saves, exception: " + restoreError, _errorLabel, _errorPopup);
 			throw;
 		}
 	}
@@ -776,176 +575,24 @@ Categories=Game;Emulator;Qt;
 	
 	private void OnFromSaveDirectoryButtonPressed()
 	{
-		OpenFileChooser(ref _settings.FromSaveDirectory, _settings.FromSaveDirectory);
+		_tools.OpenFileChooser(ref _settings.FromSaveDirectory, _settings.FromSaveDirectory, _errorLabel, _errorPopup);
 		_fromSaveDirectoryButton.Text = _settings.FromSaveDirectory;
 		SaveSettings();
 	}
 	
 	private void OnToSaveDirectoryButtonPressed()
 	{
-		OpenFileChooser(ref _settings.ToSaveDirectory, _settings.ToSaveDirectory);
+		_tools.OpenFileChooser(ref _settings.ToSaveDirectory, _settings.ToSaveDirectory, _errorLabel, _errorPopup);
 		_toSaveDirectoryButton.Text = _settings.ToSaveDirectory;
 		SaveSettings();
 	}
-	
-	
-	private void OpenFileChooser(ref string returnObject, string startingDirectory)
-	{
-		try
-		{
-			Application.Init();
-		}
-		catch (Exception gtkError)
-		{
-			ErrorPopup("opening GTK window failed. Ensure you have GTK runtime installed: " + gtkError);
-			throw;
-		}
-		_fileChooser = new FileChooserDialog("Select a File", null, FileChooserAction.SelectFolder);
 
-		// Add a "Cancel" button to the dialog
-		_fileChooser.AddButton("Cancel", ResponseType.Cancel);
-
-		// Add an "Open" button to the dialog
-		_fileChooser.AddButton("Open", ResponseType.Ok);
-
-		// Set the initial directory
-		_fileChooser.SetCurrentFolder(startingDirectory);
-
-		// Connect the response signal, I would like to directly pass in the return object, but this isn't possible 
-		// in a lambda, so we create a temp value to hold it and then assign it to that value after.
-		string tempReturnString = returnObject;
-		_fileChooser.Response += (sender, args) => OnFileChooserResponse(sender, args, ref tempReturnString);
-
-		// Show the dialog
-		_fileChooser.Show();
-		Application.Run();
-		
-		// Sets our original object back to be the returned temporary string.
-		returnObject = tempReturnString;
-	}
-
-	private void OnFileChooserResponse(object sender, ResponseArgs args, ref string returnObject)
-	{
-		if (args.ResponseId == ResponseType.Ok)
-		{
-			// The user selected a file
-			returnObject = _fileChooser.File.Path;
-		}
-
-		// Clean up resources
-		_fileChooser.Dispose();
-		Application.Quit();
-	}
-
-
-	static void MoveFilesAndDirs(string sourceDirectory, string targetDirectory)
-	{
-		// Create the target directory if it doesn't exist
-		if (!Directory.Exists(targetDirectory))
-		{
-			Directory.CreateDirectory(targetDirectory);
-		}
-
-		// Get all files and directories from the source directory
-		string[] files = Directory.GetFiles(sourceDirectory);
-		string[] directories = Directory.GetDirectories(sourceDirectory);
-
-		// Move files to the target directory
-		foreach (string file in files)
-		{
-			string fileName = Path.GetFileName(file);
-			string targetPath = Path.Combine(targetDirectory, fileName);
-			File.Move(file, targetPath);
-		}
-
-		// Move directories to the target directory
-		foreach (string directory in directories)
-		{
-			string directoryName = Path.GetFileName(directory);
-			string targetPath = Path.Combine(targetDirectory, directoryName);
-			Directory.Move(directory, targetPath);
-		}
-
-		// Remove the source directory if it is empty
-		if (Directory.GetFiles(sourceDirectory).Length == 0 && Directory.GetDirectories(sourceDirectory).Length == 0)
-		{
-			Directory.Delete(sourceDirectory);
-		}
-	}
-	
-	
-	
-	static void DeleteDirectoryContents(string directoryPath)
-	{
-		// Delete all files within the directory
-		string[] files = Directory.GetFiles(directoryPath);
-		foreach (string file in files)
-		{
-			File.Delete(file);
-		}
-
-		// Delete all subdirectories within the directory
-		string[] directories = Directory.GetDirectories(directoryPath);
-		foreach (string directory in directories)
-		{
-			DeleteDirectoryContents(directory); // Recursively delete subdirectory contents
-			Directory.Delete(directory);
-		}
-	}
-	
-	public void DuplicateDirectoryContents(string sourceDir, string destinationDir, bool overwriteFiles)
-	{
-		// Get all directories in the source directory
-		string[] allDirectories = Directory.GetDirectories(sourceDir, "*", SearchOption.AllDirectories);
-
-		foreach (string dir in allDirectories)
-		{
-			string dirToCreate = dir.Replace(sourceDir, destinationDir);
-			Directory.CreateDirectory(dirToCreate);
-		}
-
-		// Get all files in the source directory
-		string[] allFiles = Directory.GetFiles(sourceDir, "*.*", SearchOption.AllDirectories);
-
-		foreach (string filePath in allFiles)
-		{
-			string newFilePath = filePath.Replace(sourceDir, destinationDir);
-			File.Copy(filePath, newFilePath, overwriteFiles);
-		}
-	}
-
-	private void ErrorPopup(String error)
-	{
-		_errorLabel.Text = $@"Error:{error}";
-		_errorPopup.Visible = true;
-		_errorPopup.InitialPosition = Window.WindowInitialPosition.Absolute;
-		_errorPopup.PopupCentered();
-	}
-
-
-	private async Task<bool?> ConfirmationPopup()
-	{
-		_confirmationPopup.PopupCentered();
-		await ToSignal(_confirmationPopup, "index_pressed");
-		return _confirmationChoice;
-	}
 
 	private void ToggledMusicButton(bool musicEnabled)
 	{
 		AudioServer.SetBusMute(AudioServer.GetBusIndex("Master"), !musicEnabled);
 	}
-
-	private async void ClearInstallationFolder()
-	{
-		// Launches confirmation window, and cancels if not confirmed.
-		var confirm = await ConfirmationPopup();
-		if (confirm != true)
-		{
-			return;
-		}
-		DeleteDirectoryContents(_settings.SaveDirectory);
-		_clearInstallFolderButton.Text = "Cleared install folder successfully!";
-	}
+	
 
 	private void AutoUnpackToggled(bool unpackEnabled)
 	{
@@ -961,12 +608,6 @@ Categories=Game;Emulator;Qt;
 		_clearShadersWarning.Visible = clearEnabled;
 		_downloadWarning.Visible = _extractWarning.Visible || clearEnabled;
 	}
-
-
-	private void ConfirmationPressed(int itemIndex)
-	{
-		_confirmationChoice = itemIndex == 0;
-	}
 	
 
 	private void SaveSettings()
@@ -975,4 +616,3 @@ Categories=Game;Emulator;Qt;
 		_saveManager.WriteSave();
 	}
 }
-

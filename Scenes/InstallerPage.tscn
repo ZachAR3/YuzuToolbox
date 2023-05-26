@@ -1,0 +1,171 @@
+[gd_scene load_steps=3 format=3 uid="uid://cr3wosequvma8"]
+
+[ext_resource type="Script" path="res://Scripts/Installer.cs" id="1_3lw4p"]
+[ext_resource type="Texture2D" uid="uid://e5vtrghoacs2" path="res://WarningSign.png" id="1_xly6n"]
+
+[node name="Installer" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_3lw4p")
+metadata/_edit_use_anchors_ = true
+
+[node name="ControlsContainer" type="GridContainer" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.05
+anchor_top = 0.12301
+anchor_right = 0.95
+anchor_bottom = 0.437593
+grow_horizontal = 2
+grow_vertical = 2
+columns = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="VersionSelectionLabel" type="Label" parent="ControlsContainer"]
+layout_mode = 2
+text = "Versions:"
+
+[node name="VersionSelectionButton" type="OptionButton" parent="ControlsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+focus_mode = 0
+alignment = 1
+
+[node name="UseCustomVersionLabel" type="Label" parent="ControlsContainer"]
+layout_mode = 2
+text = "Use custom:"
+
+[node name="CustomVersion" type="HBoxContainer" parent="ControlsContainer"]
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="CustomVersionCheckBox" type="CheckBox" parent="ControlsContainer/CustomVersion"]
+layout_mode = 2
+focus_mode = 0
+flat = true
+
+[node name="CustomVersionSpinBox" type="SpinBox" parent="ControlsContainer/CustomVersion"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 3090.0
+max_value = 99999.0
+value = 3090.0
+rounded = true
+
+[node name="LocationLabel" type="Label" parent="ControlsContainer"]
+layout_mode = 2
+text = "Install location:"
+
+[node name="LocationButton" type="Button" parent="ControlsContainer"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Location to intall Yuzu"
+
+[node name="ShaderLocationLabel" type="Label" parent="ControlsContainer"]
+layout_mode = 2
+text = "Shaders location:"
+
+[node name="ShaderLocationButton" type="Button" parent="ControlsContainer"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Yuzu shaders location"
+
+[node name="ExtractLabel" type="Label" parent="ControlsContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+text = "Auto unpack:"
+
+[node name="ExtractWarning" type="TextureRect" parent="ControlsContainer/ExtractLabel"]
+layout_mode = 2
+anchor_left = 1.19313
+anchor_top = 0.179487
+anchor_right = 1.33476
+anchor_bottom = 0.897436
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_xly6n")
+expand_mode = 1
+stretch_mode = 4
+metadata/_edit_use_anchors_ = true
+
+[node name="ExtractButton" type="CheckBox" parent="ControlsContainer"]
+layout_mode = 2
+tooltip_text = "(Windows only) WARNING WILL DELETE ALL DATA IN SELECTED INSTALL LOCATION!"
+focus_mode = 0
+text = "Windows only:WARNING WILL DELETE ALL DATA IN INSTALL LOCATION"
+alignment = 1
+text_overrun_behavior = 4
+
+[node name="ClearShadersLabel" type="Label" parent="ControlsContainer"]
+layout_mode = 2
+text = "Clear shaders"
+autowrap_mode = 3
+
+[node name="ClearShadersWarning" type="TextureRect" parent="ControlsContainer/ClearShadersLabel"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.696742
+anchor_top = 0.230769
+anchor_right = 0.774436
+anchor_bottom = 0.897436
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_xly6n")
+expand_mode = 1
+stretch_mode = 4
+metadata/_edit_use_anchors_ = true
+
+[node name="ClearShadersButton" type="CheckBox" parent="ControlsContainer"]
+layout_mode = 2
+tooltip_text = "Clears shaders on install (WARNING DELETES ALL DATA IN SELECTED LOCATION)"
+text = "Clear shaders on install (WARNING DELETES ALL DATA IN SELECTED LOCATION)"
+alignment = 1
+text_overrun_behavior = 4
+clip_text = true
+
+[node name="CreateShortcutLabel" type="Label" parent="ControlsContainer"]
+layout_mode = 2
+text = "Create start shortcut:  "
+
+[node name="CreateShortcutButton" type="CheckBox" parent="ControlsContainer"]
+layout_mode = 2
+tooltip_text = "Creates a start menu shortcut for yuzu-ea (requires auto unpack and admin privleges on windows)"
+focus_mode = 0
+text = "Creates a start menu shortcut for yuzu-ea (requires auto unpack and admin privleges on windows)"
+alignment = 1
+text_overrun_behavior = 4
+
+[node name="DownloadButton" type="Button" parent="."]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.05
+anchor_top = 0.578125
+anchor_right = 0.95
+anchor_bottom = 0.721875
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+focus_next = NodePath(".")
+focus_previous = NodePath(".")
+text = "Download
+"
+metadata/_edit_use_anchors_ = true
+
+[node name="DownloadWarning" type="TextureRect" parent="DownloadButton"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = -0.0416667
+anchor_top = 0.326087
+anchor_right = -0.0127315
+anchor_bottom = 0.688406
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_xly6n")
+expand_mode = 5
+stretch_mode = 4
+metadata/_edit_use_anchors_ = true

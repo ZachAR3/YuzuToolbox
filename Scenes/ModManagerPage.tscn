@@ -1,0 +1,45 @@
+[gd_scene load_steps=2 format=3 uid="uid://bdihe2bmwmgtp"]
+
+[ext_resource type="Script" path="res://Scripts/ModManager.cs" id="1_g8nhx"]
+
+[node name="ModManager" type="Control" node_paths=PackedStringArray("_modList", "_gamePickerButton", "_titleRequester")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_g8nhx")
+_modList = NodePath("ModsList")
+_gamePickerButton = NodePath("GameSelection")
+_titleRequester = NodePath("TitleRequester")
+metadata/_edit_use_anchors_ = true
+
+[node name="GameSelection" type="OptionButton" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 0.0613306
+grow_horizontal = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="ModsList" type="ItemList" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.03
+anchor_top = 0.1
+anchor_right = 0.97
+anchor_bottom = 0.97
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/h_separation = 100
+theme_override_constants/v_separation = 10
+text_overrun_behavior = 4
+max_columns = 20
+same_column_width = true
+metadata/_edit_use_anchors_ = true
+
+[node name="TitleRequester" type="HTTPRequest" parent="."]
+
+[connection signal="item_selected" from="GameSelection" to="." method="SelectGame"]
+[connection signal="item_activated" from="ModsList" to="." method="ModClicked"]
