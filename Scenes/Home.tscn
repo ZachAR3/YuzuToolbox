@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://c7wdbnvnydnxk"]
+[gd_scene load_steps=20 format=3 uid="uid://c7wdbnvnydnxk"]
 
 [ext_resource type="Theme" uid="uid://cnnid0n04kfr7" path="res://Themes/DarkTheme.tres" id="1_c22a4"]
 [ext_resource type="Script" path="res://Scripts/Home.cs" id="1_p51ic"]
@@ -11,7 +11,6 @@
 [ext_resource type="FontFile" uid="uid://bs747wsxnk330" path="res://Fonts/Primary.TTF" id="7_jk62c"]
 [ext_resource type="PackedScene" uid="uid://cr3wosequvma8" path="res://Scenes/InstallerPage.tscn" id="10_7mm46"]
 [ext_resource type="PackedScene" uid="uid://cwwmo68jd12gd" path="res://Scenes/ToolsPage.tscn" id="11_27f86"]
-[ext_resource type="Script" path="res://Scripts/Installer.cs" id="11_kv7yl"]
 [ext_resource type="PackedScene" uid="uid://bdihe2bmwmgtp" path="res://Scenes/ModManagerPage.tscn" id="12_3uycp"]
 
 [sub_resource type="Gradient" id="Gradient_awkjf"]
@@ -226,7 +225,6 @@ metadata/_edit_use_anchors_ = true
 
 [node name="Installer" parent="MainPage" instance=ExtResource("10_7mm46")]
 layout_mode = 2
-script = ExtResource("11_kv7yl")
 
 [node name="Tools" parent="MainPage" instance=ExtResource("11_27f86")]
 layout_mode = 2

@@ -125,8 +125,6 @@ public partial class Home : Control
 		// Call a request to get the latest versions and connect it to our GetNewVersions function
 		_latestReleaseRequester.RequestCompleted += AddVersions;
 		_latestReleaseRequester.Request(_pineappleLatestUrl);
-		
-		_titlesRequester.RequestCompleted += GetTitles;
 
 		_downloadButton.Disabled = true;
 		_downloadButton.Pressed += InstallSelectedVersion;
@@ -154,34 +152,6 @@ public partial class Home : Control
 		// Mute by default the music
 		ToggledMusicButton(false);
 	}
-
-
-	private void GetTitles(long result, long responseCode, string[] headers, byte[] body)
-	{
-		string[] gamesArray = Encoding.UTF8.GetString(body).Split("<tr>"); // Splits the list into the begginings of each game
-		var gameList = gamesArray.ToList(); // Converted to list so first and second item (headers and example text at top) can be removed
-		gameList.RemoveRange(0, 2);
-
-		foreach (string game in gameList)
-		{
-			// Removes the <td> and </td> html from our script for cleaning along with the special TM character otherwise the mod sites won't recognize the title.
-			var gameCleaned = game.Replace("<td>", "").Replace("</td>", "").Replace("™", "");
-			// Splits at every new line
-			var gameSplit = gameCleaned.Split(Environment.NewLine);
-			// Adds the game to our title list with type Dictionary(string ID, string Title, string modID)
-			_settings.Titles[gameSplit[1]] = gameSplit[2];
-		}
-	}
-
-
-	// private int? GetGameModId(string gameName)
-	// {
-	// 	HttpClient httpClient = new HttpClient();
-	// 	// Searches for the game ID using the name from banana mods
-	// 	string searchContent = httpClient.GetAsync("https://gamebanana.com/apiv11/Util/Game/NameMatch?_sName=" + gameName).Result.Content.ReadAsStringAsync().Result;
-	// 	var jsonContent = JObject.Parse(searchContent);
-	// 	return jsonContent["_aRecords"]?[0]?["_idRow"]!.ToString().ToInt();
-	// }
 
 
 	private void SetTheme(bool enableLight)

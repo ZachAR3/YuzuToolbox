@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using HtmlAgilityPack;
 using HttpClient = System.Net.Http.HttpClient;
 
@@ -24,6 +26,7 @@ public partial class ModManager : Control
 	public override void _Ready()
 	{
 		_settings = _saveManager.GetSettings();
+		_titleRequester.Connect("request_completed", new Callable(this, nameof(GetTitles)));
 		
 		// Fix so doesn't overwrite previous saved locations TODO
 		if (OS.GetName() == "Linux")
@@ -39,66 +42,71 @@ public partial class ModManager : Control
 	}
 
 
-	private void GetAvailableMods(string? gameId,  bool useBananaMods)
+	private async Task GetAvailableMods(string? gameId, bool useBananaMods)
 	{
-		var htmlWeb = new HtmlWeb();
-		if (gameId == null)
+		// Used as a task so it is run on a separate thread and doesn't slow down app during startup
+		await Task.Run(() =>
 		{
-			GD.PrintErr("No mod ID given, cannot add game mods.");
-			return;
-		}
-		// Checks if there is a mod list for the given game, if not creates one
-		if (!_availableGameMods.ContainsKey(gameId))
-		{
-			_availableGameMods[gameId] = new List<(int, string, string)>();
-		}
-
-		var modsSourcePage = htmlWeb.Load("https://github.com/yuzu-emu/yuzu/wiki/Switch-Mods");
-		// List of elements, which MOSTLY contain mods (not all)
-		var mods = modsSourcePage.DocumentNode.SelectNodes($@"//h3[contains(., {Quote}{_settings.InstalledTitles[gameId]}{Quote})]/following::table[1]//td//a");
-		if (mods == null)
-		{
-			return;
-		}
-
-		int modIndex = 0;
-		for (int searchIndex = 0; searchIndex < mods.Count; searchIndex++)
-		{
-			var mod = mods[searchIndex];
-			string downloadUrl = mod.GetAttributeValue("href", null).Trim();
-			string modName = mod.InnerText;
-			if (downloadUrl.EndsWith(".rar") || downloadUrl.EndsWith(".zip") || downloadUrl.EndsWith(".7z"))
+			var htmlWeb = new HtmlWeb();
+			if (gameId == null)
 			{
-				_availableGameMods[gameId].Add((modIndex, modName, downloadUrl));
-				_modList.AddItem(modName);
-				modIndex++;
+				GD.PrintErr("No mod ID given, cannot add game mods.");
+				return;
 			}
-		}
+
+			// Checks if there is a mod list for the given game, if not creates one
+			if (!_availableGameMods.ContainsKey(gameId))
+			{
+				_availableGameMods[gameId] = new List<(int, string, string)>();
+			}
+
+			var modsSourcePage = htmlWeb.Load("https://github.com/yuzu-emu/yuzu/wiki/Switch-Mods");
+			// List of elements, which MOSTLY contain mods (not all)
+			var mods = modsSourcePage.DocumentNode.SelectNodes(
+				$@"//h3[contains(., {Quote}{_settings.InstalledTitles[gameId]}{Quote})]/following::table[1]//td//a");
+			if (mods == null)
+			{
+				return;
+			}
+
+			int modIndex = 0;
+			for (int searchIndex = 0; searchIndex < mods.Count; searchIndex++)
+			{
+				var mod = mods[searchIndex];
+				string downloadUrl = mod.GetAttributeValue("href", null).Trim();
+				string modName = mod.InnerText;
+				if (downloadUrl.EndsWith(".rar") || downloadUrl.EndsWith(".zip") || downloadUrl.EndsWith(".7z"))
+				{
+					_availableGameMods[gameId].Add((modIndex, modName, downloadUrl));
+					_modList.AddItem(modName);
+					modIndex++;
+				}
+			}
 
 
-		// Checks if querying banana mods or normal
-		// if (useBananaMods)
-		// {
-		// 	int currentPage = 1;
-		// 	string gameModsSource = httpClient
-		// 		.GetAsync($@"https://gamebanana.com/apiv11/Game/{gameId}/Subfeed?_nPage={currentPage}").Result
-		// 		.Content
-		// 		.ReadAsStringAsync().Result;
-		// 	var jsonMods = JObject.Parse(gameModsSource);
-		//
-		//
-		// 	foreach (var mod in jsonMods["_aRecords"])
-		// 	{
-		// 		modIndex++;
-		//
-		// 		_availableGameMods[(int)gameId].Add((modIndex, mod["_sName"].ToString(), mod["_sProfileUrl"].ToString()));
-		// 		_modList.AddItem(mod["_sName"].ToString());
-		// 	}
-		// }
-
+			// Checks if querying banana mods or normal
+			// if (useBananaMods)
+			// {
+			// 	int currentPage = 1;
+			// 	string gameModsSource = httpClient
+			// 		.GetAsync($@"https://gamebanana.com/apiv11/Game/{gameId}/Subfeed?_nPage={currentPage}").Result
+			// 		.Content
+			// 		.ReadAsStringAsync().Result;
+			// 	var jsonMods = JObject.Parse(gameModsSource);
+			//
+			//
+			// 	foreach (var mod in jsonMods["_aRecords"])
+			// 	{
+			// 		modIndex++;
+			//
+			// 		_availableGameMods[(int)gameId].Add((modIndex, mod["_sName"].ToString(), mod["_sProfileUrl"].ToString()));
+			// 		_modList.AddItem(mod["_sName"].ToString());
+			// 	}
+			// }
+		});
 	}
-	
-	
+
+
 	private async void GetInstalledGames()
 	{
 		_titleRequester.Request(
@@ -113,7 +121,7 @@ public partial class ModManager : Control
 				//TODO redo layouts of installed to not always need to mod id for bananagames
 				//_settings.InstalledTitles[gameId] = (title, GetGameModId(title));
 				_settings.InstalledTitles[gameId] = title;
-				GetAvailableMods(gameId, false);
+				await GetAvailableMods(gameId, false);
 				_gamePickerButton.AddItem(title);
 			}
 			else
@@ -124,6 +132,34 @@ public partial class ModManager : Control
 
 		}
 	}
+	
+	
+	private void GetTitles(long result, long responseCode, string[] headers, byte[] body)
+	{
+		string[] gamesArray = Encoding.UTF8.GetString(body).Split("<tr>"); // Splits the list into the begginings of each game
+		var gameList = gamesArray.ToList(); // Converted to list so first and second item (headers and example text at top) can be removed
+		gameList.RemoveRange(0, 2);
+
+		foreach (string game in gameList)
+		{
+			// Removes the <td> and </td> html from our script for cleaning along with the special TM character otherwise the mod sites won't recognize the title.
+			var gameCleaned = game.Replace("<td>", "").Replace("</td>", "").Replace("™", "");
+			// Splits at every new line
+			var gameSplit = gameCleaned.Split(System.Environment.NewLine);
+			// Adds the game to our title list with type Dictionary(string ID, string Title, string modID)
+			_settings.Titles[gameSplit[1]] = gameSplit[2];
+		}
+	}
+
+
+	// private int? GetGameModId(string gameName)
+	// {
+	// 	HttpClient httpClient = new HttpClient();
+	// 	// Searches for the game ID using the name from banana mods
+	// 	string searchContent = httpClient.GetAsync("https://gamebanana.com/apiv11/Util/Game/NameMatch?_sName=" + gameName).Result.Content.ReadAsStringAsync().Result;
+	// 	var jsonContent = JObject.Parse(searchContent);
+	// 	return jsonContent["_aRecords"]?[0]?["_idRow"]!.ToString().ToInt();
+	// }
 	
 	
 	private async void InstallMod(string gameId, string modName, string modUrl)
