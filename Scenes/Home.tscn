@@ -43,7 +43,7 @@ bg_color = Color(0.184314, 0.196078, 0.203922, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jo4ax"]
 bg_color = Color(0.168627, 0.180392, 0.188235, 0.529412)
 
-[node name="Home" type="Control" node_paths=PackedStringArray("_confirmationPopup", "_backgroundAudio", "_muteButton", "_header", "_headerLabel", "_darkBg", "_lightBg", "_headerSeparator", "_versionButton", "_createShortcutButton", "_locationButton", "_downloadButton", "_clearShadersButton", "_shadersLocationButton", "_downloadWindow", "_downloadWindowApp", "_downloadLabel", "_autoUnpackButton", "_downloadProgressBar", "_customVersionCheckBox", "_customVersionSpinBox", "_downloadUpdateTimer", "_enableLightTheme", "_errorPopup", "_errorLabel", "_latestVersionLabel", "_latestReleaseRequester", "_titlesRequester", "_modsRequester", "_downloadRequester", "_extractWarning", "_downloadWarning", "_clearShadersWarning", "_clearInstallFolderButton", "_clearShadersToolButton", "_backupSavesButton", "_restoreSavesButton", "_fromSaveDirectoryButton", "_toSaveDirectoryButton")]
+[node name="Home" type="Control" node_paths=PackedStringArray("_confirmationPopup", "_backgroundAudio", "_muteButton", "_header", "_headerLabel", "_darkBg", "_lightBg", "_headerSeparator", "_versionButton", "_createShortcutButton", "_locationButton", "_downloadButton", "_clearShadersButton", "_shadersLocationButton", "_downloadWindow", "_downloadWindowApp", "_downloadLabel", "_autoUnpackButton", "_downloadProgressBar", "_customVersionCheckBox", "_customVersionSpinBox", "_downloadUpdateTimer", "_enableLightTheme", "_errorPopup", "_errorLabel", "_latestVersionLabel", "_latestReleaseRequester", "_titlesRequester", "_modsRequester", "_downloadRequester", "_extractWarning", "_downloadWarning", "_clearShadersWarning")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -97,12 +97,6 @@ _themesSeparator = Array[StyleBoxLine]([ExtResource("5_qxukt"), ExtResource("7_i
 _extractWarning = NodePath("MainPage/Installer/ControlsContainer/ExtractLabel/ExtractWarning")
 _downloadWarning = NodePath("MainPage/Installer/DownloadButton/DownloadWarning")
 _clearShadersWarning = NodePath("MainPage/Installer/ControlsContainer/ClearShadersLabel/ClearShadersWarning")
-_clearInstallFolderButton = NodePath("MainPage/Tools/Tools/ClearInstallFolderButton")
-_clearShadersToolButton = NodePath("MainPage/Tools/Tools/ClearShaders")
-_backupSavesButton = NodePath("MainPage/Tools/Tools/BackupSavesButton")
-_restoreSavesButton = NodePath("MainPage/Tools/Tools/RestoreSavesButton")
-_fromSaveDirectoryButton = NodePath("MainPage/Tools/Tools/SaveContainer/FromButton")
-_toSaveDirectoryButton = NodePath("MainPage/Tools/Tools/SaveContainer/ToButton")
 metadata/_edit_use_anchors_ = true
 
 [node name="DarkBG" type="TextureRect" parent="."]
@@ -226,8 +220,12 @@ metadata/_edit_use_anchors_ = true
 [node name="Installer" parent="MainPage" instance=ExtResource("10_7mm46")]
 layout_mode = 2
 
-[node name="Tools" parent="MainPage" instance=ExtResource("11_27f86")]
+[node name="Tools" parent="MainPage" node_paths=PackedStringArray("_errorPopup", "_errorLabel", "_confirmationPopup") instance=ExtResource("11_27f86")]
+visible = false
 layout_mode = 2
+_errorPopup = NodePath("../../ErrorPopup")
+_errorLabel = NodePath("../../ErrorPopup/ErrorLabel")
+_confirmationPopup = NodePath("../../ConfirmPopup")
 
 [node name="ModManager" parent="MainPage" instance=ExtResource("12_3uycp")]
 visible = false
@@ -245,8 +243,10 @@ anchor_left = 0.00666667
 anchor_top = 0.0133333
 anchor_right = 0.993333
 anchor_bottom = 0.986667
-offset_right = 600.0
-offset_bottom = 300.0
+offset_left = -4.0
+offset_top = -3.99999
+offset_right = 4.00018
+offset_bottom = 3.99991
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3

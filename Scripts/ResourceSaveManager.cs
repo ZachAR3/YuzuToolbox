@@ -9,8 +9,10 @@ public partial class ResourceSaveManager : Resource
 	[Export()] public float Version;
 	[Export()] public SettingsResource _settings;
 
-	public void WriteSave()
+	public void WriteSave(SettingsResource settings = null)
 	{
+		// If no settings are passed, use the current settings
+		settings ??= _settings;
 		ResourceSaver.Save(this, GetSavePath());
 	}
 	

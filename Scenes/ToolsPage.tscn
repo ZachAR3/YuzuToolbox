@@ -3,11 +3,16 @@
 [ext_resource type="Script" path="res://Scripts/ToolsPage.cs" id="1_1ei58"]
 [ext_resource type="Texture2D" uid="uid://e5vtrghoacs2" path="res://WarningSign.png" id="1_pfmpv"]
 
-[node name="Tools" type="Control"]
-visible = false
+[node name="Tools" type="Control" node_paths=PackedStringArray("_clearInstallFolderButton", "_clearShadersToolButton", "_backupSavesButton", "_restoreSavesButton", "_fromSaveDirectoryButton", "_toSaveDirectoryButton")]
 layout_mode = 3
 anchors_preset = 0
 script = ExtResource("1_1ei58")
+_clearInstallFolderButton = NodePath("Tools/ClearInstallFolderButton")
+_clearShadersToolButton = NodePath("Tools/ClearShaders")
+_backupSavesButton = NodePath("Tools/BackupSavesButton")
+_restoreSavesButton = NodePath("Tools/RestoreSavesButton")
+_fromSaveDirectoryButton = NodePath("Tools/SaveContainer/FromButton")
+_toSaveDirectoryButton = NodePath("Tools/SaveContainer/ToButton")
 
 [node name="Tools" type="VBoxContainer" parent="."]
 layout_mode = 1
@@ -118,3 +123,10 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 tooltip_text = "Location to store saves when backing up, and retrieve saves from when restoring."
 focus_mode = 0
+
+[connection signal="pressed" from="Tools/ClearInstallFolderButton" to="." method="ClearInstallFolderButtonPressed"]
+[connection signal="pressed" from="Tools/ClearShaders" to="." method="ClearShaderButtonPressed"]
+[connection signal="pressed" from="Tools/BackupSavesButton" to="." method="OnBackupSavesButtonPressed"]
+[connection signal="pressed" from="Tools/RestoreSavesButton" to="." method="OnRestoreSavesPressed"]
+[connection signal="pressed" from="Tools/SaveContainer/FromButton" to="." method="OnFromSaveDirectoryButtonPressed"]
+[connection signal="pressed" from="Tools/SaveContainer/ToButton" to="." method="OnToSaveDirectoryButtonPressed"]

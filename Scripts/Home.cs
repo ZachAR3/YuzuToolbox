@@ -61,18 +61,11 @@ public partial class Home : Control
 	[Export()] private TextureRect _downloadWarning;
 	[Export()] private TextureRect _clearShadersWarning;
 	
-	[ExportGroup("Tools")] 
-	[Export()] private Godot.Button _clearInstallFolderButton;
-	[Export()] private Godot.Button _clearShadersToolButton;
-	[Export()] private Godot.Button _backupSavesButton;
-	[Export()] private Godot.Button _restoreSavesButton;
-	[Export()] private Godot.Button _fromSaveDirectoryButton;
-	[Export()] private Godot.Button _toSaveDirectoryButton;
 
 	// Internal variables
 	private ResourceSaveManager _saveManager;
 	private SettingsResource _settings;
-	private String _osUsed;
+	private String _osUsed = OS.GetName();
 	private string _yuzuExtensionString;
 	private Theme _currentTheme;
 	private Tools _tools = new Tools();
@@ -82,8 +75,7 @@ public partial class Home : Control
 	{
 		// Sets minimum window size to prevent text clipping and UI breaking at smaller scales.
 		DisplayServer.WindowSetMinSize(new Vector2I(1024, 576));
-		_osUsed = OS.GetName();
-		
+
 		// Setup save manager and load settings
 		_saveManager = new ResourceSaveManager();
 		_saveManager.Version = _saveManagerVersion;
@@ -102,25 +94,8 @@ public partial class Home : Control
 			_createShortcutButton.Disabled = true;
 		}
 
-		if (_settings.ShadersLocation == "")
-		{
-			_settings.ShadersLocation = $@"{_settings.AppDataPath}shader";
-			SaveSettings();
-		}
-
-		if (_settings.FromSaveDirectory == "")
-		{
-			_settings.FromSaveDirectory = _osUsed == "Linux"
-				? $@"{_settings.AppDataPath}nand/user/save"
-				: $@"{_settings.AppDataPath}nand\user\save";
-			SaveSettings();
-		}
-		
-
 		_shadersLocationButton.Text = _settings.ShadersLocation;
 		_locationButton.Text = _settings.SaveDirectory;
-		_fromSaveDirectoryButton.Text = _settings.FromSaveDirectory;
-		_toSaveDirectoryButton.Text = _settings.ToSaveDirectory;
 
 		// Call a request to get the latest versions and connect it to our GetNewVersions function
 		_latestReleaseRequester.RequestCompleted += AddVersions;
@@ -496,7 +471,7 @@ Categories=Game;Emulator;Qt;
 	{
 		_tools.OpenFileChooser(ref _settings.ShadersLocation, _settings.ShadersLocation, _errorLabel, _errorPopup);
 		_shadersLocationButton.Text = _settings.ShadersLocation;
-		SaveSettings();
+		_saveManager.WriteSave(_settings);
 	}
 	
 	
@@ -504,53 +479,7 @@ Categories=Game;Emulator;Qt;
 	{
 		_tools.OpenFileChooser(ref _settings.SaveDirectory, _settings.SaveDirectory, _errorLabel, _errorPopup);
 		_locationButton.Text = _settings.SaveDirectory;
-		SaveSettings();
-	}
-
-
-	private void OnBackupSavesButtonPressed()
-	{
-		try
-		{
-			_tools.DuplicateDirectoryContents(_settings.FromSaveDirectory, _settings.ToSaveDirectory, true);
-			_backupSavesButton.Text = "Backup successful!";
-		}
-		catch (Exception backupError)
-		{ 
-			_tools.ErrorPopup("failed to create save backup exception:" + backupError, _errorLabel, _errorPopup);
-			throw;
-		}
-
-	}
-
-
-	private void OnRestoreSavesPressed()
-	{
-		try
-		{
-			_tools.DuplicateDirectoryContents(_settings.ToSaveDirectory, _settings.FromSaveDirectory, true);
-			_restoreSavesButton.Text = "Saves restored successfully!";
-		}
-		catch (Exception restoreError)
-		{
-			_tools.ErrorPopup("failed to restore saves, exception: " + restoreError, _errorLabel, _errorPopup);
-			throw;
-		}
-	}
-	
-	
-	private void OnFromSaveDirectoryButtonPressed()
-	{
-		_tools.OpenFileChooser(ref _settings.FromSaveDirectory, _settings.FromSaveDirectory, _errorLabel, _errorPopup);
-		_fromSaveDirectoryButton.Text = _settings.FromSaveDirectory;
-		SaveSettings();
-	}
-	
-	private void OnToSaveDirectoryButtonPressed()
-	{
-		_tools.OpenFileChooser(ref _settings.ToSaveDirectory, _settings.ToSaveDirectory, _errorLabel, _errorPopup);
-		_toSaveDirectoryButton.Text = _settings.ToSaveDirectory;
-		SaveSettings();
+		_saveManager.WriteSave(_settings);
 	}
 
 
@@ -575,10 +504,4 @@ Categories=Game;Emulator;Qt;
 		_downloadWarning.Visible = _extractWarning.Visible || clearEnabled;
 	}
 	
-
-	private void SaveSettings()
-	{
-		_saveManager._settings = _settings;
-		_saveManager.WriteSave();
-	}
 }

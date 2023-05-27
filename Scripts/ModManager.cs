@@ -139,28 +139,36 @@ public partial class ModManager : Control
 		// Add online mods
 		foreach (var gameId in _settings.InstalledTitles.Keys)
 		{
-			// If the game has no available mods, skip it
-			if (!_availableGameMods.ContainsKey(gameId))
+			// Adds installed mods to the list
+			if (_installedMods.TryGetValue(gameId, out var installedMods))
 			{
-				continue;
+				foreach (var installedMod in installedMods)
+				{
+					_modList.AddItem(installedMod, icon: _installedIcon);
+				}
+
 			}
-			// Adds available mods to list
-			foreach (var onlineMod in _availableGameMods[gameId])
+
+			// Adds non-installed mods to the list
+			if (_availableGameMods.TryGetValue(gameId, out var gameMods))
 			{
-				_modList.AddItem(onlineMod.Item2);
+				foreach (var mod in gameMods)
+				{
+					// Checks if the mod is already installed, if so returns.
+					if (_installedMods.TryGetValue(gameId, out var modValue))
+					{
+						if (modValue.Contains(mod.Item2))
+						{
+							continue;
+						}
+					}
+					_modList.AddItem(mod.Item2);
+				}
 			}
-			
-			// foreach (var localMod in _installedMods[gameId])
-			// {
-			// 	if (_installedMods[gameId].Contains(localMod))
-			// 	{
-			// 		_modList.AddItem(localMod);
-			// 	}
-			// }
 		}
 	}
-	
-	
+
+
 	private void GetTitles(long result, long responseCode, string[] headers, byte[] body)
 	{
 		string[] gamesArray = Encoding.UTF8.GetString(body).Split("<tr>"); // Splits the list into the begginings of each game
@@ -195,32 +203,47 @@ public partial class ModManager : Control
 		_currentGameId = Tools.GetKeyFromValue(_gamePickerButton.GetItemText(gameIndex), _settings.InstalledTitles);
 		// Clears old mods from our list
 		_modList.Clear();
-		// Adds all mods from the designated game.
-		if (_availableGameMods.ContainsKey(_currentGameId))
+
+		// Adds installed mods to the list
+		if (_installedMods.TryGetValue(_currentGameId, out var installedMod))
 		{
-			foreach (var mod in _availableGameMods[_currentGameId])
+			foreach (var mod in installedMod)
 			{
-				Texture2D installedIcon = null;
-				if (_installedMods.ContainsKey(_currentGameId))
+				_modList.AddItem(mod, icon: _installedIcon);
+			}
+		}
+		
+		// Adds non-installed mods to the list
+		if (_availableGameMods.TryGetValue(_currentGameId, out var gameMod))
+		{
+			foreach (var mod in gameMod)
+			{
+				// Checks if the mod is already installed, if so returns.
+				if (_installedMods.TryGetValue(_currentGameId, out var modValue))
 				{
-					installedIcon = _installedMods[_currentGameId].Contains(mod.Item2) ? _installedIcon : null;
+					if (modValue.Contains(mod.Item2))
+					{
+						continue;
+					}
 				}
-				_modList.AddItem(mod.Item2, icon: installedIcon);
+				_modList.AddItem(mod.Item2);
 			}
 		}
 	}
 	
 	
 	// Signal functions
-	private void ModClicked(int index)
+	private void ModClicked(int modIndex)
 	{
+		// Finds mod with the same name as the one clicked and installs it
 		foreach (var mod in _availableGameMods[_currentGameId])
 		{
-			if (index == mod.Item1)
+			if (_modList.GetItemText(modIndex) == mod.Item2)
 			{
 				InstallMod(_currentGameId, mod.Item2, mod.Item3);
 			}
 		}
 	}
+
 }
 
