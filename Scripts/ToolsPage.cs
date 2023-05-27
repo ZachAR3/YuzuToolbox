@@ -22,7 +22,7 @@ public partial class ToolsPage : Control
 	private string _osUsed = OS.GetName();
 	
 	
-	// Functions
+	// Godot Functions
 	public override void _Ready()
 	{
 		_settings = _saveManager.GetSettings();

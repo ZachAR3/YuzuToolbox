@@ -1,9 +1,8 @@
-[gd_scene load_steps=20 format=3 uid="uid://c7wdbnvnydnxk"]
+[gd_scene load_steps=19 format=3 uid="uid://c7wdbnvnydnxk"]
 
 [ext_resource type="Theme" uid="uid://cnnid0n04kfr7" path="res://Themes/DarkTheme.tres" id="1_c22a4"]
 [ext_resource type="Script" path="res://Scripts/Home.cs" id="1_p51ic"]
 [ext_resource type="Theme" uid="uid://dky537toysr34" path="res://Themes/LightTheme.tres" id="3_a1ctt"]
-[ext_resource type="Image" uid="uid://dt3aq1jm2e2ds" path="res://Icon.png" id="3_ltbvi"]
 [ext_resource type="Texture2D" uid="uid://dtcak8d8m61be" path="res://PineappleIconSmall.png" id="5_4ib1e"]
 [ext_resource type="StyleBox" uid="uid://tcrn2c2voh4i" path="res://Themes/Styleboxes/DarkVSeparator.tres" id="5_qxukt"]
 [ext_resource type="AudioStream" uid="uid://bfqr7fmwq62ku" path="res://Audio/BackgroundAudio.mp3" id="5_v4a5s"]
@@ -43,7 +42,7 @@ bg_color = Color(0.184314, 0.196078, 0.203922, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jo4ax"]
 bg_color = Color(0.168627, 0.180392, 0.188235, 0.529412)
 
-[node name="Home" type="Control" node_paths=PackedStringArray("_confirmationPopup", "_backgroundAudio", "_muteButton", "_header", "_headerLabel", "_darkBg", "_lightBg", "_headerSeparator", "_versionButton", "_createShortcutButton", "_locationButton", "_downloadButton", "_clearShadersButton", "_shadersLocationButton", "_downloadWindow", "_downloadWindowApp", "_downloadLabel", "_autoUnpackButton", "_downloadProgressBar", "_customVersionCheckBox", "_customVersionSpinBox", "_downloadUpdateTimer", "_enableLightTheme", "_errorPopup", "_errorLabel", "_latestVersionLabel", "_latestReleaseRequester", "_titlesRequester", "_modsRequester", "_downloadRequester", "_extractWarning", "_downloadWarning", "_clearShadersWarning")]
+[node name="Home" type="Control" node_paths=PackedStringArray("_darkBg", "_lightBg", "_downloadWindowApp", "_backgroundAudio", "_muteButton", "_enableLightTheme", "_header", "_headerLabel", "_latestVersionLabel")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -56,47 +55,17 @@ theme = ExtResource("1_c22a4")
 script = ExtResource("1_p51ic")
 _appVersion = 2.3
 _saveManagerVersion = 2.0
-_icon = ExtResource("3_ltbvi")
-_confirmationPopup = NodePath("ConfirmPopup")
-_backgroundAudio = NodePath("BackgroundAudio")
-_muteButton = NodePath("Header/Option/MuteButton")
-_header = NodePath("Header")
-_headerLabel = NodePath("Header/HeaderLabels/HeaderLabel")
 _darkBg = NodePath("DarkBG")
 _lightBg = NodePath("LightBG")
-_headerSeparator = NodePath("Header/HeaderLabels/VSeparator")
-_versionButton = NodePath("MainPage/Installer/ControlsContainer/VersionSelectionButton")
-_createShortcutButton = NodePath("MainPage/Installer/ControlsContainer/CreateShortcutButton")
-_locationButton = NodePath("MainPage/Installer/ControlsContainer/LocationButton")
-_downloadButton = NodePath("MainPage/Installer/DownloadButton")
-_clearShadersButton = NodePath("MainPage/Installer/ControlsContainer/ClearShadersButton")
-_shadersLocationButton = NodePath("MainPage/Installer/ControlsContainer/ShaderLocationButton")
-_downloadWindow = NodePath("DownloadWindow")
-_downloadWindowApp = NodePath("DownloadWindow/Window")
-_downloadLabel = NodePath("DownloadWindow/Window/DownloadLabelBox")
-_autoUnpackButton = NodePath("MainPage/Installer/ControlsContainer/ExtractButton")
-_downloadProgressBar = NodePath("DownloadWindow/Window/DownloadProgress")
-_customVersionCheckBox = NodePath("MainPage/Installer/ControlsContainer/CustomVersion/CustomVersionCheckBox")
-_customVersionSpinBox = NodePath("MainPage/Installer/ControlsContainer/CustomVersion/CustomVersionSpinBox")
-_downloadUpdateTimer = NodePath("DownloadWindow/Window/DownloadProgressUpdater")
+_downloadWindowApp = NodePath("ProgressWindow/Window")
+_backgroundAudio = NodePath("BackgroundAudio")
+_muteButton = NodePath("Header/Option/MuteButton")
 _enableLightTheme = NodePath("Header/Option/LightMode")
-_errorPopup = NodePath("ErrorPopup")
-_errorLabel = NodePath("ErrorPopup/ErrorLabel")
-_latestVersionLabel = NodePath("Header/HeaderLabels/LastestVersion")
-_latestReleaseRequester = NodePath("ReleaseRequester")
-_titlesRequester = NodePath("")
-_modsRequester = NodePath("ModsRequester")
-_downloadRequester = NodePath("DownloadRequester")
-_pineappleLatestUrl = "https://api.github.com/repos/pineappleEA/pineapple-src/releases/latest"
-_pineappleDownloadBaseUrl = "https://github.com/pineappleEA/pineapple-src/releases/download/EA-"
-_titlesKeySite = "https://switchbrew.org/w/index.php?title=Title_list/Games&mobileaction=toggle_view_desktop"
-_saveName = "Yuzu"
-_previousVersionsToAdd = 20
 _themes = Array[Theme]([ExtResource("1_c22a4"), ExtResource("3_a1ctt")])
 _themesSeparator = Array[StyleBoxLine]([ExtResource("5_qxukt"), ExtResource("7_iauax")])
-_extractWarning = NodePath("MainPage/Installer/ControlsContainer/ExtractLabel/ExtractWarning")
-_downloadWarning = NodePath("MainPage/Installer/DownloadButton/DownloadWarning")
-_clearShadersWarning = NodePath("MainPage/Installer/ControlsContainer/ClearShadersLabel/ClearShadersWarning")
+_header = NodePath("Header")
+_headerLabel = NodePath("Header/HeaderLabels/HeaderLabel")
+_latestVersionLabel = NodePath("Header/HeaderLabels/LastestVersion")
 metadata/_edit_use_anchors_ = true
 
 [node name="DarkBG" type="TextureRect" parent="."]
@@ -217,8 +186,17 @@ theme_override_constants/side_margin = 1825
 tab_alignment = 1
 metadata/_edit_use_anchors_ = true
 
-[node name="Installer" parent="MainPage" instance=ExtResource("10_7mm46")]
+[node name="Installer" parent="MainPage" node_paths=PackedStringArray("_errorPopup", "_errorLabel", "_confirmationPopup", "_downloadWindow", "_downloadLabel", "_downloadUpdateTimer", "_downloadProgressBar", "_latestVersionLabel") instance=ExtResource("10_7mm46")]
+visible = false
 layout_mode = 2
+_errorPopup = NodePath("../../ErrorPopup")
+_errorLabel = NodePath("../../ErrorPopup/ErrorLabel")
+_confirmationPopup = NodePath("../../ConfirmPopup")
+_downloadWindow = NodePath("../../ProgressWindow")
+_downloadLabel = NodePath("../../ProgressWindow/Window/ProgressLabelBox")
+_downloadUpdateTimer = NodePath("../../ProgressWindow/Window/ProgressProgressUpdater")
+_downloadProgressBar = NodePath("../../ProgressWindow/Window/ProgressProgress")
+_latestVersionLabel = NodePath("../../Header/HeaderLabels/LastestVersion")
 
 [node name="Tools" parent="MainPage" node_paths=PackedStringArray("_errorPopup", "_errorLabel", "_confirmationPopup") instance=ExtResource("11_27f86")]
 visible = false
@@ -228,7 +206,6 @@ _errorLabel = NodePath("../../ErrorPopup/ErrorLabel")
 _confirmationPopup = NodePath("../../ConfirmPopup")
 
 [node name="ModManager" parent="MainPage" instance=ExtResource("12_3uycp")]
-visible = false
 layout_mode = 2
 
 [node name="ErrorPopup" type="PopupPanel" parent="."]
@@ -256,14 +233,7 @@ text = "Error:"
 autowrap_mode = 3
 metadata/_edit_use_anchors_ = true
 
-[node name="ReleaseRequester" type="HTTPRequest" parent="."]
-
-[node name="DownloadRequester" type="HTTPRequest" parent="."]
-use_threads = true
-
-[node name="ModsRequester" type="HTTPRequest" parent="."]
-
-[node name="DownloadWindow" type="Panel" parent="."]
+[node name="ProgressWindow" type="Panel" parent="."]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -273,7 +243,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_jo4ax")
 
-[node name="Window" type="ColorRect" parent="DownloadWindow"]
+[node name="Window" type="ColorRect" parent="ProgressWindow"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -288,7 +258,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.168627, 0.180392, 0.188235, 1)
 
-[node name="DownloadLabelBox" type="Label" parent="DownloadWindow/Window"]
+[node name="ProgressLabelBox" type="Label" parent="ProgressWindow/Window"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -307,7 +277,7 @@ text = "Download..."
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="DownloadProgress" type="ProgressBar" parent="DownloadWindow/Window"]
+[node name="ProgressProgress" type="ProgressBar" parent="ProgressWindow/Window"]
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
@@ -324,7 +294,7 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 rounded = true
 
-[node name="DownloadProgressUpdater" type="Timer" parent="DownloadWindow/Window"]
+[node name="ProgressProgressUpdater" type="Timer" parent="ProgressWindow/Window"]
 wait_time = 0.1
 
 [node name="ConfirmPopup" type="PopupMenu" parent="."]

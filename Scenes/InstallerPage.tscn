@@ -1,12 +1,33 @@
-[gd_scene load_steps=3 format=3 uid="uid://cr3wosequvma8"]
+[gd_scene load_steps=4 format=3 uid="uid://cr3wosequvma8"]
 
 [ext_resource type="Script" path="res://Scripts/Installer.cs" id="1_3lw4p"]
 [ext_resource type="Texture2D" uid="uid://e5vtrghoacs2" path="res://WarningSign.png" id="1_xly6n"]
+[ext_resource type="Image" uid="uid://dt3aq1jm2e2ds" path="res://Icon.png" id="2_efmk0"]
 
-[node name="Installer" type="Control"]
+[node name="Installer" type="Control" node_paths=PackedStringArray("_versionButton", "_createShortcutButton", "_installLocationButton", "_downloadButton", "_clearShadersButton", "_shadersLocationButton", "_autoUnpackButton", "_customVersionCheckBox", "_customVersionSpinBox", "_latestReleaseRequester", "_downloadRequester", "_extractWarning", "_downloadWarning", "_clearShadersWarning")]
 layout_mode = 3
 anchors_preset = 0
 script = ExtResource("1_3lw4p")
+_icon = ExtResource("2_efmk0")
+_versionButton = NodePath("ControlsContainer/VersionSelectionButton")
+_createShortcutButton = NodePath("ControlsContainer/CreateShortcutButton")
+_installLocationButton = NodePath("ControlsContainer/LocationButton")
+_downloadButton = NodePath("DownloadButton")
+_clearShadersButton = NodePath("ControlsContainer/ClearShadersButton")
+_shadersLocationButton = NodePath("ControlsContainer/ShaderLocationButton")
+_autoUnpackButton = NodePath("ControlsContainer/ExtractButton")
+_customVersionCheckBox = NodePath("ControlsContainer/CustomVersion/CustomVersionCheckBox")
+_customVersionSpinBox = NodePath("ControlsContainer/CustomVersion/CustomVersionSpinBox")
+_latestReleaseRequester = NodePath("ReleaseRequester")
+_downloadRequester = NodePath("DownloadRequester")
+_extractWarning = NodePath("ControlsContainer/ExtractLabel/ExtractWarning")
+_downloadWarning = NodePath("DownloadButton/DownloadWarning")
+_clearShadersWarning = NodePath("ControlsContainer/ClearShadersLabel/ClearShadersWarning")
+_pineappleLatestUrl = "https://api.github.com/repos/pineappleEA/pineapple-src/releases/latest"
+_pineappleDownloadBaseUrl = "https://github.com/pineappleEA/pineapple-src/releases/download/EA-"
+_titlesKeySite = "https://switchbrew.org/w/index.php?title=Title_list/Games&mobileaction=toggle_view_desktop"
+_saveName = "Yuzu"
+_previousVersionsToAdd = 20
 metadata/_edit_use_anchors_ = true
 
 [node name="ControlsContainer" type="GridContainer" parent="."]
@@ -169,3 +190,7 @@ texture = ExtResource("1_xly6n")
 expand_mode = 5
 stretch_mode = 4
 metadata/_edit_use_anchors_ = true
+
+[node name="DownloadRequester" type="HTTPRequest" parent="."]
+
+[node name="ReleaseRequester" type="HTTPRequest" parent="."]

@@ -25,7 +25,7 @@ public partial class ModManager : Control
 	private ResourceSaveManager _saveManager = new ResourceSaveManager();
 	private string _modsPath;
 	
-	// Functions
+	// Godot Functions
 	public override void _Ready()
 	{
 		_settings = _saveManager.GetSettings();
@@ -46,6 +46,7 @@ public partial class ModManager : Control
 	}
 
 
+	// Custom functions
 	private async Task GetAvailableMods(string? gameId, bool useBananaMods)
 	{
 		// Used as a task so it is run on a separate thread and doesn't slow down app during startup
