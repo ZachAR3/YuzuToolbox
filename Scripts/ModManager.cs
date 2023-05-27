@@ -14,8 +14,10 @@ public partial class ModManager : Control
 	[Export()] private ItemList _modList;
 	[Export()] private OptionButton _gamePickerButton;
 	[Export()] private HttpRequest _titleRequester;
+	[Export()] private Texture2D _installedIcon;
 	
 	private readonly System.Collections.Generic.Dictionary<string, List<(int, string, string)>> _availableGameMods = new System.Collections.Generic.Dictionary<string, List<(int, string, string)>>();
+	private Dictionary<string,  List<string>> _installedMods = new Dictionary<string, List<string>>();
 	private const string Quote = "\"";
 	private string _currentGameId;
 	private SettingsResource _settings;
@@ -78,7 +80,7 @@ public partial class ModManager : Control
 				if (downloadUrl.EndsWith(".rar") || downloadUrl.EndsWith(".zip") || downloadUrl.EndsWith(".7z"))
 				{
 					_availableGameMods[gameId].Add((modIndex, modName, downloadUrl));
-					_modList.AddItem(modName);
+					_modList.AddItem(modName, icon: (!_installedMods.ContainsKey(gameId) || !_installedMods[gameId].Contains(modName)) ? _installedIcon : null);
 					modIndex++;
 				}
 			}
@@ -104,9 +106,12 @@ public partial class ModManager : Control
 			// 	}
 			// }
 		});
+		
+		SelectGame(0);
 	}
 
 
+	// Rename to be more accurate abt how it also gets installed / available mods
 	private async void GetInstalledGames()
 	{
 		_titleRequester.Request(
@@ -121,6 +126,7 @@ public partial class ModManager : Control
 				//TODO redo layouts of installed to not always need to mod id for bananagames
 				//_settings.InstalledTitles[gameId] = (title, GetGameModId(title));
 				_settings.InstalledTitles[gameId] = title;
+				GetInstalledMods(gameId);
 				await GetAvailableMods(gameId, false);
 				_gamePickerButton.AddItem(title);
 			}
@@ -130,6 +136,20 @@ public partial class ModManager : Control
 				GD.Print("Cannot find title:" + gameId);
 			}
 
+		}
+	}
+
+	
+	private void GetInstalledMods(string gameId)
+	{
+		foreach (var mod in Directory.GetDirectories($@"{_modsPath}/{gameId}"))
+		{
+			string modName = mod.GetFile();
+			if (!_installedMods.ContainsKey(gameId))
+			{
+				_installedMods[gameId] = new List<string>();
+			}
+			_installedMods[gameId].Add(modName);
 		}
 	}
 	
@@ -182,7 +202,12 @@ public partial class ModManager : Control
 		// Adds all mods from the designated game.
 		foreach (var mod in _availableGameMods[gameId])
 		{
-			_modList.AddItem(mod.Item2);
+			Texture2D installedIcon = null;
+			if (_installedMods.ContainsKey(gameId))
+			{
+				installedIcon = _installedMods[gameId].Contains(mod.Item2) ? _installedIcon : null;
+			}
+			_modList.AddItem(mod.Item2, icon: installedIcon);
 		}
 	}
 	
