@@ -151,6 +151,7 @@ public partial class Home : Control
 
 		// Mute by default the music
 		ToggledMusicButton(false);
+		SetTheme(_settings.LightModeEnabled);
 	}
 
 
@@ -435,11 +436,6 @@ Categories=Game;Emulator;Qt;
 			}
 		}
 	}
-
-	
-
-	//	SetTheme(_settings.LightModeEnabled);
-
 	
 
 	private String GetExistingVersion()

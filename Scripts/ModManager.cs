@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
+using WindowsShortcutFactory;
 using HttpClient = System.Net.Http.HttpClient;
 
 public partial class ModManager : Control
@@ -40,7 +41,8 @@ public partial class ModManager : Control
 			_settings.AppDataPath = $@"{System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData)}\yuzu\";
 		}
 		_modsPath = $@"{_settings.AppDataPath}load";
-		GetInstalledGames();
+		GetGamesAndMods();
+		AddMods();
 	}
 
 
@@ -80,39 +82,16 @@ public partial class ModManager : Control
 				if (downloadUrl.EndsWith(".rar") || downloadUrl.EndsWith(".zip") || downloadUrl.EndsWith(".7z"))
 				{
 					_availableGameMods[gameId].Add((modIndex, modName, downloadUrl));
-					_modList.AddItem(modName, icon: (!_installedMods.ContainsKey(gameId) || !_installedMods[gameId].Contains(modName)) ? _installedIcon : null);
 					modIndex++;
 				}
 			}
-
-
-			// Checks if querying banana mods or normal
-			// if (useBananaMods)
-			// {
-			// 	int currentPage = 1;
-			// 	string gameModsSource = httpClient
-			// 		.GetAsync($@"https://gamebanana.com/apiv11/Game/{gameId}/Subfeed?_nPage={currentPage}").Result
-			// 		.Content
-			// 		.ReadAsStringAsync().Result;
-			// 	var jsonMods = JObject.Parse(gameModsSource);
-			//
-			//
-			// 	foreach (var mod in jsonMods["_aRecords"])
-			// 	{
-			// 		modIndex++;
-			//
-			// 		_availableGameMods[(int)gameId].Add((modIndex, mod["_sName"].ToString(), mod["_sProfileUrl"].ToString()));
-			// 		_modList.AddItem(mod["_sName"].ToString());
-			// 	}
-			// }
 		});
 		
-		SelectGame(0);
 	}
 
 
 	// Rename to be more accurate abt how it also gets installed / available mods
-	private async void GetInstalledGames()
+	private async void GetGamesAndMods()
 	{
 		_titleRequester.Request(
 			"https://switchbrew.org/w/index.php?title=Title_list/Games&mobileaction=toggle_view_desktop");
@@ -123,8 +102,6 @@ public partial class ModManager : Control
 			string gameId = gameModFolder.GetFile(); // Gets game id by grabbing the folders name
 			if (_settings.Titles.TryGetValue(gameId, out var title)) // Checks if title list contains the id, if so adds it to installed titles.
 			{
-				//TODO redo layouts of installed to not always need to mod id for bananagames
-				//_settings.InstalledTitles[gameId] = (title, GetGameModId(title));
 				_settings.InstalledTitles[gameId] = title;
 				GetInstalledMods(gameId);
 				await GetAvailableMods(gameId, false);
@@ -137,6 +114,8 @@ public partial class ModManager : Control
 			}
 
 		}
+		// Sets the first game as selected by default
+		SelectGame(0);
 	}
 
 	
@@ -150,6 +129,34 @@ public partial class ModManager : Control
 				_installedMods[gameId] = new List<string>();
 			}
 			_installedMods[gameId].Add(modName);
+		}
+	}
+
+
+	// Adds available and local mods to mod list
+	private void AddMods()
+	{
+		// Add online mods
+		foreach (var gameId in _settings.InstalledTitles.Keys)
+		{
+			// If the game has no available mods, skip it
+			if (!_availableGameMods.ContainsKey(gameId))
+			{
+				continue;
+			}
+			// Adds available mods to list
+			foreach (var onlineMod in _availableGameMods[gameId])
+			{
+				_modList.AddItem(onlineMod.Item2);
+			}
+			
+			// foreach (var localMod in _installedMods[gameId])
+			// {
+			// 	if (_installedMods[gameId].Contains(localMod))
+			// 	{
+			// 		_modList.AddItem(localMod);
+			// 	}
+			// }
 		}
 	}
 	
@@ -172,16 +179,6 @@ public partial class ModManager : Control
 	}
 
 
-	// private int? GetGameModId(string gameName)
-	// {
-	// 	HttpClient httpClient = new HttpClient();
-	// 	// Searches for the game ID using the name from banana mods
-	// 	string searchContent = httpClient.GetAsync("https://gamebanana.com/apiv11/Util/Game/NameMatch?_sName=" + gameName).Result.Content.ReadAsStringAsync().Result;
-	// 	var jsonContent = JObject.Parse(searchContent);
-	// 	return jsonContent["_aRecords"]?[0]?["_idRow"]!.ToString().ToInt();
-	// }
-	
-	
 	private async void InstallMod(string gameId, string modName, string modUrl)
 	{
 		HttpClient httpClient = new HttpClient();
@@ -195,19 +192,21 @@ public partial class ModManager : Control
 	{
 		// Gets the keys we can equate as an array
 		var installedKeys = _settings.InstalledTitles.Keys.ToArray();
-		string gameId = installedKeys[gameIndex];
-		_currentGameId = gameId;
+		_currentGameId = Tools.GetKeyFromValue(_gamePickerButton.GetItemText(gameIndex), _settings.InstalledTitles);
 		// Clears old mods from our list
 		_modList.Clear();
 		// Adds all mods from the designated game.
-		foreach (var mod in _availableGameMods[gameId])
+		if (_availableGameMods.ContainsKey(_currentGameId))
 		{
-			Texture2D installedIcon = null;
-			if (_installedMods.ContainsKey(gameId))
+			foreach (var mod in _availableGameMods[_currentGameId])
 			{
-				installedIcon = _installedMods[gameId].Contains(mod.Item2) ? _installedIcon : null;
+				Texture2D installedIcon = null;
+				if (_installedMods.ContainsKey(_currentGameId))
+				{
+					installedIcon = _installedMods[_currentGameId].Contains(mod.Item2) ? _installedIcon : null;
+				}
+				_modList.AddItem(mod.Item2, icon: installedIcon);
 			}
-			_modList.AddItem(mod.Item2, icon: installedIcon);
 		}
 	}
 	
