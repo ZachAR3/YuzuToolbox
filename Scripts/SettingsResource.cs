@@ -1,6 +1,8 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using Godot.Collections;
 
 public partial class SettingsResource : Resource
 {
@@ -12,6 +14,9 @@ public partial class SettingsResource : Resource
 	[Export()] public bool LightModeEnabled = false;
 	[Export()] public bool Muted = true;
 	[Export()] public String AppDataPath = "";
-	[Export()] public Godot.Collections.Dictionary<string, string> InstalledTitles = new Godot.Collections.Dictionary<string, string>();
+	// Game id, game name
 	[Export()] public Godot.Collections.Dictionary<string, string> Titles = new Godot.Collections.Dictionary<string, string>();
+	[Export()] public Godot.Collections.Dictionary<string, string> InstalledTitles = new Godot.Collections.Dictionary<string, string>();
+	// Game id, mod names array
+	[Export()] public Godot.Collections.Dictionary<string, Array<string>> InstalledMods = new Godot.Collections.Dictionary<string, Array<string>>();
 }

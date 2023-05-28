@@ -17,7 +17,9 @@ public partial class ModManager : Control
 	[Export()] private HttpRequest _titleRequester;
 	[Export()] private Texture2D _installedIcon;
 	
-	private readonly System.Collections.Generic.Dictionary<string, List<(int, string, string)>> _availableGameMods = new System.Collections.Generic.Dictionary<string, List<(int, string, string)>>();
+	// Game id List<modname, modurl>
+	private readonly System.Collections.Generic.Dictionary<string, List<(string, string)>> _availableGameMods = new System.Collections.Generic.Dictionary<string, List<(string, string)>>();
+	// Game ID list <modname>
 	private Dictionary<string,  List<string>> _installedMods = new Dictionary<string, List<string>>();
 	private const string Quote = "\"";
 	private string _currentGameId;
@@ -62,7 +64,7 @@ public partial class ModManager : Control
 			// Checks if there is a mod list for the given game, if not creates one
 			if (!_availableGameMods.ContainsKey(gameId))
 			{
-				_availableGameMods[gameId] = new List<(int, string, string)>();
+				_availableGameMods[gameId] = new List<(string, string)>();
 			}
 
 			var modsSourcePage = htmlWeb.Load("https://github.com/yuzu-emu/yuzu/wiki/Switch-Mods");
@@ -73,8 +75,7 @@ public partial class ModManager : Control
 			{
 				return;
 			}
-
-			int modIndex = 0;
+			
 			for (int searchIndex = 0; searchIndex < mods.Count; searchIndex++)
 			{
 				var mod = mods[searchIndex];
@@ -82,8 +83,7 @@ public partial class ModManager : Control
 				string modName = mod.InnerText;
 				if (downloadUrl.EndsWith(".rar") || downloadUrl.EndsWith(".zip") || downloadUrl.EndsWith(".7z"))
 				{
-					_availableGameMods[gameId].Add((modIndex, modName, downloadUrl));
-					modIndex++;
+					_availableGameMods[gameId].Add((modName, downloadUrl));
 				}
 			}
 		});
@@ -222,12 +222,12 @@ public partial class ModManager : Control
 				// Checks if the mod is already installed, if so returns.
 				if (_installedMods.TryGetValue(_currentGameId, out var modValue))
 				{
-					if (modValue.Contains(mod.Item2))
+					if (modValue.Contains(mod.Item1))
 					{
 						continue;
 					}
 				}
-				_modList.AddItem(mod.Item2);
+				_modList.AddItem(mod.Item1);
 			}
 		}
 	}
@@ -239,9 +239,9 @@ public partial class ModManager : Control
 		// Finds mod with the same name as the one clicked and installs it
 		foreach (var mod in _availableGameMods[_currentGameId])
 		{
-			if (_modList.GetItemText(modIndex) == mod.Item2)
+			if (_modList.GetItemText(modIndex) == mod.Item1)
 			{
-				InstallMod(_currentGameId, mod.Item2, mod.Item3);
+				InstallMod(_currentGameId, mod.Item1, mod.Item2);
 			}
 		}
 	}
