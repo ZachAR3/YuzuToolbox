@@ -8,8 +8,8 @@ public partial class YuzuMod : Node
     public string ModName;
     public string ModUrl;
     public Array<string> CompatibleVersions;
-    public string CurrentVersion;
     public bool IsInstalled;
+    public string CurrentVersion;
     
     
     public YuzuMod(string modName, string modUrl, Array<string> compatibleVersions, string currentVersion, bool isInstalled)

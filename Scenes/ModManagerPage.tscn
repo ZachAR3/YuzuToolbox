@@ -29,10 +29,10 @@ metadata/_edit_use_anchors_ = true
 clip_contents = false
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.03
+anchor_left = 0.0302083
 anchor_top = 0.1
-anchor_right = 0.97
-anchor_bottom = 0.97
+anchor_right = 0.792708
+anchor_bottom = 0.97037
 grow_horizontal = 2
 grow_vertical = 2
 text_overrun_behavior = 4
@@ -42,5 +42,29 @@ metadata/_edit_use_anchors_ = true
 
 [node name="TitleRequester" type="HTTPRequest" parent="."]
 
+[node name="SideBar" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.795833
+anchor_top = 0.1
+anchor_right = 1.0
+anchor_bottom = 0.966667
+grow_horizontal = 0
+grow_vertical = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="UpdateAll" type="Button" parent="SideBar"]
+layout_mode = 2
+text = "Update all"
+metadata/_edit_use_anchors_ = true
+
+[node name="UpdateSelected" type="Button" parent="SideBar"]
+layout_mode = 2
+text = "Update selected
+"
+metadata/_edit_use_anchors_ = true
+
 [connection signal="item_selected" from="GameSelection" to="." method="SelectGame"]
 [connection signal="item_activated" from="ModsList" to="." method="ModClicked"]
+[connection signal="pressed" from="SideBar/UpdateAll" to="." method="UpdateAll"]
+[connection signal="pressed" from="SideBar/UpdateSelected" to="." method="UpdateSelectedPressed"]

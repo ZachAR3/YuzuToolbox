@@ -135,8 +135,8 @@ public partial class ModManager : Control
 						versions.Add(version.InnerText);
 					}
 					titleIndex++;
-					
-					_yuzuModsList[gameId].Add(new YuzuMod(modName, downloadUrl, versions, null, false));
+
+					_yuzuModsList[gameId].Add(new YuzuMod(modName, downloadUrl, versions, versions.Last(), false));
 				}
 			}
 		});
@@ -187,7 +187,7 @@ public partial class ModManager : Control
 		{
 			if (mod.IsInstalled)
 			{
-				_modList.AddItem($@"  {mod.ModName} - Supports:{mod.CurrentVersion}  ", icon: _installedIcon);
+				_modList.AddItem($@"  {mod.ModName} - Supports:{mod.CompatibleVersions}  ", icon: _installedIcon);
 			}
 			else
 			{
@@ -215,8 +215,26 @@ public partial class ModManager : Control
 		}
 	}
 
+	
+	private async void UpdateAll()
+	{
+		foreach (var installedGame in _installedGames)
+		{
+			foreach (var mod in _yuzuModsList[installedGame.Key])
+			{
+				if (mod.IsInstalled && mod.ModUrl != null)
+				{
+					await UpdateMod(installedGame.Key, mod.ModName, mod.ModUrl, mod.CompatibleVersions, mod.CurrentVersion);
+					_modList.AddItem($@"  {mod.ModName} - Supports:{mod.CompatibleVersions}  ", icon: _installedIcon);
+					// Used to update UI with installed icon
+					SelectGame(_gamePickerButton.Selected);
+				}
+			}
+		}
+	}
+	
 
-	private async Task<bool> InstallMod(string gameId, string modName, string modUrl, string modVersion)
+	private async Task<bool> InstallMod(string gameId, string modName, string modUrl, Array<string> compatibleVersions)
 	{
 		try
 		{
@@ -224,7 +242,7 @@ public partial class ModManager : Control
 			{
 				// Downloads mod zip
 				string downloadPath = $@"{_modsPath}/{gameId}/{modName}-Download";
-				string installPath = $@"{_modsPath}/{gameId}/{modName}|{modVersion}";
+				string installPath = $@"{_modsPath}/{gameId}/{modName}|{compatibleVersions.Last()}";
 				HttpClient httpClient = new HttpClient();
 				byte[] downloadData = await httpClient.GetAsync(modUrl).Result.Content.ReadAsByteArrayAsync();
 				// Should really make it so / is different for windows and linux TODO
@@ -250,9 +268,29 @@ public partial class ModManager : Control
 	}
 
 
-	private async Task<bool> RemoveMod(string gameId, string modName, string modVersion)
+	private async Task<bool> UpdateMod(string gameId, string modName, string modUrl, Array<string> compatibleVersions, string currentVersion)
 	{
-		string modNameEnding = modVersion == "N/A" ? "" : $"|{modVersion}";
+		try
+		{
+			await Task.Run(async () =>
+			{
+				await RemoveMod(gameId, modName, currentVersion, compatibleVersions);
+				await InstallMod(gameId, modName, modUrl, compatibleVersions);
+			});
+		}
+		catch (Exception updateError)
+		{
+			_tools.ErrorPopup($@"failed to update mod:{updateError}", _errorLabel, _errorPopup);
+			throw;
+		}
+
+		return true;
+	}
+
+
+	private async Task<bool> RemoveMod(string gameId, string modName, string currentVersion, Array<string> compatibleVersions)
+	{
+		string modNameEnding = currentVersion == "N/A" ? "" : $"|{currentVersion}";
 		string removePath = $@"{_modsPath}/{gameId}/{modName}{modNameEnding}";
 		try
 		{
@@ -328,17 +366,15 @@ public partial class ModManager : Control
 		{
 			foreach (var mod in _yuzuModsList[_currentGameId])
 			{
-				GD.Print(mod.ModName.Split(" -")[0]);
 				if (_modList.GetItemText(modIndex).Split("-")[0].Trim() == (mod.ModName))
 				{
 					if (mod.IsInstalled)
 					{
-						mod.IsInstalled = !await RemoveMod(_currentGameId, mod.ModName, mod.CurrentVersion);
+						mod.IsInstalled = !await RemoveMod(_currentGameId, mod.ModName, mod.CurrentVersion, mod.CompatibleVersions);
 					}
 					else
 					{
-						mod.CurrentVersion ??= mod.CompatibleVersions.Last();
-						mod.IsInstalled = await InstallMod(_currentGameId, mod.ModName, mod.ModUrl, mod.CurrentVersion);
+						mod.IsInstalled = await InstallMod(_currentGameId, mod.ModName, mod.ModUrl, mod.CompatibleVersions);
 					}
 
 					// Used to update UI with installed icon
@@ -347,6 +383,33 @@ public partial class ModManager : Control
 			}
 		}
 	}
+	
+	
+	private async void UpdateSelectedPressed()
+	{
+		foreach (var mod in _yuzuModsList[_currentGameId])
+		{
+			var selectedMods = _modList.GetSelectedItems();
+			if (selectedMods.Length <= 0)
+			{
+				return;
+			}
+			
+			if (_modList.GetItemText(selectedMods[0]).Split("-")[0].Trim() == (mod.ModName))
+			{
+				if (mod.IsInstalled && mod.ModUrl != null)
+				{
+					await UpdateMod(_currentGameId, mod.ModName, mod.ModUrl, mod.CompatibleVersions, mod.CurrentVersion);
+				}
+
+				// Used to update UI with installed icon
+				SelectGame(_gamePickerButton.Selected);
+			}
+		}
+	}
 
 }
+
+
+
 
