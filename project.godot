@@ -19,6 +19,10 @@ boot_splash/fullsize=false
 config/icon="res://PineappleIcon.png"
 boot_splash/minimum_display_time=3000
 
+[autoload]
+
+Globals="*res://Scripts/Globals.cs"
+
 [display]
 
 window/size/viewport_width=1920
