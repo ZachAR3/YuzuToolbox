@@ -224,10 +224,20 @@ public partial class ModManager : Control
 			{
 				if (mod.IsInstalled && mod.ModUrl != null)
 				{
-					await UpdateMod(installedGame.Key, mod.ModName, mod.ModUrl, mod.CompatibleVersions, mod.CurrentVersion);
-					_modList.AddItem($@"  {mod.ModName} - Supports:{mod.CompatibleVersions}  ", icon: _installedIcon);
-					// Used to update UI with installed icon
-					SelectGame(_gamePickerButton.Selected);
+					await Task.Run(async () =>
+					{
+						var modUpdated = await UpdateMod(installedGame.Key, mod.ModName, mod.ModUrl,
+							mod.CompatibleVersions, mod.CurrentVersion);
+						if (modUpdated != true)
+						{
+							return;
+						}
+
+						_modList.AddItem($@"  {mod.ModName} - Supports:{mod.CompatibleVersions}  ",
+							icon: _installedIcon);
+						// Used to update UI with installed icon
+						SelectGame(_gamePickerButton.Selected);
+					});
 				}
 			}
 		}
@@ -272,19 +282,19 @@ public partial class ModManager : Control
 	{
 		try
 		{
-			await Task.Run(async () =>
+			var removedMod = RemoveMod(gameId, modName, currentVersion, compatibleVersions).Result;
+			if (removedMod != true)
 			{
-				await RemoveMod(gameId, modName, currentVersion, compatibleVersions);
-				await InstallMod(gameId, modName, modUrl, compatibleVersions);
-			});
+				return false;
+			}
+			await InstallMod(gameId, modName, modUrl, compatibleVersions);
+			return true;
 		}
 		catch (Exception updateError)
 		{
 			_tools.ErrorPopup($@"failed to update mod:{updateError}", _errorLabel, _errorPopup);
 			throw;
 		}
-
-		return true;
 	}
 
 
@@ -294,44 +304,41 @@ public partial class ModManager : Control
 		string removePath = $@"{_modsPath}/{gameId}/{modName}{modNameEnding}";
 		try
 		{
-			await Task.Run(async () =>
+			var confirm = await _tools.ConfirmationPopup(_confirmationPopup, $@"Delete {modName}?");
+			if (confirm == false)
 			{
-				var confirm = await _tools.ConfirmationPopup(_confirmationPopup, $@"Delete {modName}?");
-				if (confirm == false)
-				{
-					return;
-				}
+				return false;
+			}
 
-				// Checks if the game is available for download, if not sets the bool to remove the game from the list
-				YuzuMod modToRemove = null;
-				foreach (var availableMod in _yuzuModsList[gameId])
+			// Checks if the game is available for download, if not sets the bool to remove the game from the list
+			YuzuMod modToRemove = null;
+			foreach (var availableMod in _yuzuModsList[gameId])
+			{
+				if (availableMod.ModName == modName && availableMod.ModUrl != null)
 				{
-					if (availableMod.ModName == modName && availableMod.ModUrl != null)
-					{
-						modToRemove = null;
-						break;
-					}
-					modToRemove = availableMod;
+					modToRemove = null;
+					break;
 				}
-				
-				// If the mod was locally installed, removes it from the list of available mods.
-				if (modToRemove != null)
-				{
-					_yuzuModsList[gameId].Remove(modToRemove);
-				}
+				modToRemove = availableMod;
+			}
+			
+			// If the mod was locally installed, removes it from the list of available mods.
+			if (modToRemove != null)
+			{
+				_yuzuModsList[gameId].Remove(modToRemove);
+			}
 
-				// Deletes directory contents, then the directory itself.
-				Tools.DeleteDirectoryContents(removePath);
-				Directory.Delete(removePath, true);
-			});
+			// Deletes directory contents, then the directory itself.
+			Tools.DeleteDirectoryContents(removePath);
+			Directory.Delete(removePath, true);
+			
+			return true;
 		}
 		catch (Exception removeError)
 		{
 			_tools.ErrorPopup("failed to remove mod:" + removeError, _errorLabel, _errorPopup);
 			return false;
 		}
-
-		return true;
 	}
 	
 	
@@ -395,16 +402,20 @@ public partial class ModManager : Control
 				return;
 			}
 			
-			if (_modList.GetItemText(selectedMods[0]).Split("-")[0].Trim() == (mod.ModName))
+			await Task.Run(async () =>
 			{
-				if (mod.IsInstalled && mod.ModUrl != null)
+				if (_modList.GetItemText(selectedMods[0]).Split("-")[0].Trim() == (mod.ModName))
 				{
-					await UpdateMod(_currentGameId, mod.ModName, mod.ModUrl, mod.CompatibleVersions, mod.CurrentVersion);
-				}
+					if (mod.IsInstalled && mod.ModUrl != null)
+					{
+						await UpdateMod(_currentGameId, mod.ModName, mod.ModUrl, mod.CompatibleVersions,
+							mod.CurrentVersion);
+					}
 
-				// Used to update UI with installed icon
-				SelectGame(_gamePickerButton.Selected);
-			}
+					// Used to update UI with installed icon
+					SelectGame(_gamePickerButton.Selected);
+				}
+			});
 		}
 	}
 

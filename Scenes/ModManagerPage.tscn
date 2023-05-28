@@ -55,11 +55,13 @@ metadata/_edit_use_anchors_ = true
 
 [node name="UpdateAll" type="Button" parent="SideBar"]
 layout_mode = 2
-text = "Update all"
+tooltip_text = "Updates all mods from every game"
+text = "Update all mods"
 metadata/_edit_use_anchors_ = true
 
 [node name="UpdateSelected" type="Button" parent="SideBar"]
 layout_mode = 2
+tooltip_text = "Updates the selected mod (if installed)."
 text = "Update selected
 "
 metadata/_edit_use_anchors_ = true
