@@ -24,6 +24,9 @@ public partial class Home : Control
 	[Export()] private ColorRect _header;
 	[Export()] private Godot.Label _headerLabel;
 	[Export()] private Godot.Label _latestVersionLabel;
+	
+	[ExportGroup("ModManager")]
+	[Export()] private ItemList _modList;
 
 
 	// Internal variables
@@ -72,6 +75,7 @@ public partial class Home : Control
 	private void WindowResized()
 	{
 		float scaleRatio = (((float)GetWindow().Size.X / 1920) + ((float)GetWindow().Size.Y / 1080)) / 2;
+		_modList.IconScale = scaleRatio;
 		_headerLabel.AddThemeFontSizeOverride("font_size", (int)(scaleRatio * 76));
 		_latestVersionLabel.AddThemeFontSizeOverride("font_size", (int)(scaleRatio * 32));
 		_currentTheme.DefaultFontSize = Mathf.Clamp((int)(scaleRatio * 35), 20, 50);

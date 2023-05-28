@@ -4,13 +4,14 @@ using System.Threading;
 
 public partial class ResourceSaveManager : Resource
 {
-	public const String SaveGameBasePath = "user://InternalSave";
+	public const String SaveGameBasePath = "user://DInternalSave";
 	
 	[Export()] public float Version;
 	[Export()] public SettingsResource _settings;
 
 	public void WriteSave(SettingsResource settings = null)
 	{
+		GD.Print("Saved");
 		// If no settings are passed, use the current settings
 		settings ??= _settings;
 		ResourceSaver.Save(this, GetSavePath());
@@ -38,17 +39,17 @@ public partial class ResourceSaveManager : Resource
 		{
 			var lastSave = (ResourceSaveManager)LoadSaveGame();
 			
-			// If the save is from a previous version, reset the settings
-			if (lastSave.Version != Version)
-			{
-				GD.Print("Save version is different, resetting settings");
-				_settings = new SettingsResource();
-				WriteSave();
-			}
-			else
-			{
-				_settings = lastSave._settings;
-			}
+			// // If the save is from a previous version, reset the settings
+			// if (lastSave.Version != Version)
+			// {
+			// 	GD.Print("Save version is different, resetting settings");
+			// 	_settings = new SettingsResource();
+			// 	WriteSave();
+			// }
+			// else
+			// {
+			_settings = lastSave._settings;
+			//}
 		}
 		else
 		{

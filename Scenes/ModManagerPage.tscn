@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://bdihe2bmwmgtp"]
 
 [ext_resource type="Script" path="res://Scripts/ModManager.cs" id="1_g8nhx"]
-[ext_resource type="Texture2D" uid="uid://b3hykj31h1xfo" path="res://PineappleIcon.png" id="2_3k15l"]
+[ext_resource type="Texture2D" uid="uid://duqgfmchd1v45" path="res://blue-check-mark-icon.svg" id="2_2ngo2"]
 
 [node name="ModManager" type="Control" node_paths=PackedStringArray("_modList", "_gamePickerButton", "_titleRequester")]
 layout_mode = 3
@@ -14,7 +14,7 @@ script = ExtResource("1_g8nhx")
 _modList = NodePath("ModsList")
 _gamePickerButton = NodePath("GameSelection")
 _titleRequester = NodePath("TitleRequester")
-_installedIcon = ExtResource("2_3k15l")
+_installedIcon = ExtResource("2_2ngo2")
 metadata/_edit_use_anchors_ = true
 
 [node name="GameSelection" type="OptionButton" parent="."]
@@ -37,8 +37,7 @@ grow_horizontal = 2
 grow_vertical = 2
 text_overrun_behavior = 4
 max_columns = 5
-same_column_width = true
-fixed_icon_size = Vector2i(50, 50)
+fixed_icon_size = Vector2i(30, 30)
 metadata/_edit_use_anchors_ = true
 
 [node name="TitleRequester" type="HTTPRequest" parent="."]

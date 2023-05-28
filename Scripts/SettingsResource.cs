@@ -14,9 +14,4 @@ public partial class SettingsResource : Resource
 	[Export()] public bool LightModeEnabled = false;
 	[Export()] public bool Muted = true;
 	[Export()] public String AppDataPath = "";
-	// Game id, game name
-	[Export()] public Godot.Collections.Dictionary<string, string> Titles = new Godot.Collections.Dictionary<string, string>();
-	// Game id, mod names array
-	[Export()] public Godot.Collections.Dictionary<string, Game> InstalledGames = new Godot.Collections.Dictionary<string, Game>();
-	[Export()] public Godot.Collections.Dictionary<string, Array<YuzuMod>> YuzuModsList = new Godot.Collections.Dictionary<string, Array<YuzuMod>>();
 }

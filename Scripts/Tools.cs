@@ -13,13 +13,15 @@ public partial class Tools : Godot.Node
 
 
 	// General functions
-	public async Task<bool?> ConfirmationPopup(PopupMenu confirmationPopup)
+	public async Task<bool?> ConfirmationPopup(PopupMenu confirmationPopup, string titleText = "Are you sure?")
 	{
 		// Checks if the confirmationPopup is already connected to the ConfirmationPressed signal, if not, connect it.
 		if (!confirmationPopup.IsConnected("index_pressed", new Callable(this, nameof(ConfirmationPressed))))
 		{
 			confirmationPopup.Connect("index_pressed", new Callable(this, nameof(ConfirmationPressed)));
 		}
+
+		confirmationPopup.Title = titleText;
 		confirmationPopup.PopupCentered();
 		await ToSignal(confirmationPopup, "index_pressed");
 		return _confirmationChoice;

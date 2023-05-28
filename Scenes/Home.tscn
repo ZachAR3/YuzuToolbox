@@ -42,7 +42,7 @@ bg_color = Color(0.184314, 0.196078, 0.203922, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jo4ax"]
 bg_color = Color(0.168627, 0.180392, 0.188235, 0.529412)
 
-[node name="Home" type="Control" node_paths=PackedStringArray("_darkBg", "_lightBg", "_downloadWindowApp", "_backgroundAudio", "_muteButton", "_enableLightTheme", "_header", "_headerLabel", "_latestVersionLabel")]
+[node name="Home" type="Control" node_paths=PackedStringArray("_darkBg", "_lightBg", "_downloadWindowApp", "_backgroundAudio", "_muteButton", "_enableLightTheme", "_header", "_headerLabel", "_latestVersionLabel", "_modList")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -66,6 +66,7 @@ _themesSeparator = Array[StyleBoxLine]([ExtResource("5_qxukt"), ExtResource("7_i
 _header = NodePath("Header")
 _headerLabel = NodePath("Header/HeaderLabels/HeaderLabel")
 _latestVersionLabel = NodePath("Header/HeaderLabels/LastestVersion")
+_modList = NodePath("MainPage/ModManager/ModsList")
 metadata/_edit_use_anchors_ = true
 
 [node name="DarkBG" type="TextureRect" parent="."]
@@ -204,11 +205,12 @@ _errorPopup = NodePath("../../ErrorPopup")
 _errorLabel = NodePath("../../ErrorPopup/ErrorLabel")
 _confirmationPopup = NodePath("../../ConfirmPopup")
 
-[node name="ModManager" parent="MainPage" node_paths=PackedStringArray("_errorPopup", "_errorLabel") instance=ExtResource("12_3uycp")]
+[node name="ModManager" parent="MainPage" node_paths=PackedStringArray("_errorPopup", "_errorLabel", "_confirmationPopup") instance=ExtResource("12_3uycp")]
 visible = false
 layout_mode = 2
 _errorPopup = NodePath("../../ErrorPopup")
 _errorLabel = NodePath("../../ErrorPopup/ErrorLabel")
+_confirmationPopup = NodePath("../../ConfirmPopup")
 
 [node name="ErrorPopup" type="PopupPanel" parent="."]
 initial_position = 2
@@ -312,3 +314,5 @@ item_1/text = "Cancel"
 item_1/id = 1
 
 [connection signal="toggled" from="Header/Option/MuteButton" to="." method="ToggledMusicButton"]
+
+[editable path="MainPage/ModManager"]
