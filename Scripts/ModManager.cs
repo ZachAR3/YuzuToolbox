@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Godot.Collections;
 using HtmlAgilityPack;
 using WindowsShortcutFactory;
 using HttpClient = System.Net.Http.HttpClient;
@@ -17,16 +18,14 @@ public partial class ModManager : Control
 	[Export()] private HttpRequest _titleRequester;
 	[Export()] private Texture2D _installedIcon;
 	
-	// Game id List<modname, modurl>
 	private readonly System.Collections.Generic.Dictionary<string, List<(string, string)>> _availableGameMods = new System.Collections.Generic.Dictionary<string, List<(string, string)>>();
-	// Game ID list <modname>
-	private Dictionary<string,  List<string>> _installedMods = new Dictionary<string, List<string>>();
+	
 	private const string Quote = "\"";
 	private string _currentGameId;
 	private SettingsResource _settings;
 	private ResourceSaveManager _saveManager = new ResourceSaveManager();
 	private string _modsPath;
-	
+
 	// Godot Functions
 	public override void _Ready()
 	{
@@ -70,7 +69,7 @@ public partial class ModManager : Control
 			var modsSourcePage = htmlWeb.Load("https://github.com/yuzu-emu/yuzu/wiki/Switch-Mods");
 			// List of elements, which MOSTLY contain mods (not all)
 			var mods = modsSourcePage.DocumentNode.SelectNodes(
-				$@"//h3[contains(., {Quote}{_settings.InstalledTitles[gameId]}{Quote})]/following::table[1]//td//a");
+				$@"//h3[contains(., {Quote}{_settings.InstalledGames[gameId].GameName}{Quote})]/following::table[1]//td//a");
 			if (mods == null)
 			{
 				return;
@@ -101,12 +100,17 @@ public partial class ModManager : Control
 		foreach (var gameModFolder in Directory.GetDirectories(_modsPath))
 		{
 			string gameId = gameModFolder.GetFile(); // Gets game id by grabbing the folders name
-			if (_settings.Titles.TryGetValue(gameId, out var title)) // Checks if title list contains the id, if so adds it to installed titles.
+			if (_settings.Titles.TryGetValue(gameId, out var gameName))
 			{
-				_settings.InstalledTitles[gameId] = title;
+				// Checks if title id is in installed games, if not adds it.
+				if (!_settings.InstalledGames.ContainsKey(gameId))
+				{
+					_settings.InstalledGames[gameId] = new Game(gameName, new Godot.Collections.Dictionary<string, YuzuMod>());
+				}
+				_settings.InstalledGames[gameId].GameName = gameName;
 				GetInstalledMods(gameId);
 				await GetAvailableMods(gameId, false);
-				_gamePickerButton.AddItem(title);
+				_gamePickerButton.AddItem(gameName);
 			}
 			else
 			{
@@ -125,11 +129,7 @@ public partial class ModManager : Control
 		foreach (var mod in Directory.GetDirectories($@"{_modsPath}/{gameId}"))
 		{
 			string modName = mod.GetFile();
-			if (!_installedMods.ContainsKey(gameId))
-			{
-				_installedMods[gameId] = new List<string>();
-			}
-			_installedMods[gameId].Add(modName);
+			_settings.InstalledGames[gameId].YuzuModsList.Add(modName, new YuzuMod("", 1f));
 		}
 	}
 
@@ -138,16 +138,11 @@ public partial class ModManager : Control
 	private void AddMods()
 	{
 		// Add online mods
-		foreach (var gameId in _settings.InstalledTitles.Keys)
+		foreach (var gameId in _settings.InstalledGames.Keys)
 		{
-			// Adds installed mods to the list
-			if (_installedMods.TryGetValue(gameId, out var installedMods))
+			foreach (var installedMod in _settings.InstalledGames[gameId].YuzuModsList)
 			{
-				foreach (var installedMod in installedMods)
-				{
-					_modList.AddItem(installedMod, icon: _installedIcon);
-				}
-
+				_modList.AddItem(installedMod.Key, icon: _installedIcon);
 			}
 
 			// Adds non-installed mods to the list
@@ -156,9 +151,9 @@ public partial class ModManager : Control
 				foreach (var mod in gameMods)
 				{
 					// Checks if the mod is already installed, if so returns.
-					if (_installedMods.TryGetValue(gameId, out var modValue))
+					if (_settings.InstalledGames.TryGetValue(gameId, out var game))
 					{
-						if (modValue.Contains(mod.Item2))
+						if (game.YuzuModsList.ContainsKey(mod.Item2))
 						{
 							continue;
 						}
@@ -200,17 +195,17 @@ public partial class ModManager : Control
 	private void SelectGame(int gameIndex)
 	{
 		// Gets the keys we can equate as an array
-		var installedKeys = _settings.InstalledTitles.Keys.ToArray();
-		_currentGameId = Tools.GetKeyFromValue(_gamePickerButton.GetItemText(gameIndex), _settings.InstalledTitles);
+		var installedKeys = _settings.InstalledGames.Keys.ToArray();
+		_currentGameId = GetGameIdFromValue(_gamePickerButton.GetItemText(gameIndex), _settings.InstalledGames);
 		// Clears old mods from our list
 		_modList.Clear();
 
 		// Adds installed mods to the list
-		if (_installedMods.TryGetValue(_currentGameId, out var installedMod))
+		if (_settings.InstalledGames.TryGetValue(_currentGameId, out var installedGame))
 		{
-			foreach (var mod in installedMod)
+			foreach (var mod in installedGame.YuzuModsList)
 			{
-				_modList.AddItem(mod, icon: _installedIcon);
+				_modList.AddItem(mod.Key, icon: _installedIcon);
 			}
 		}
 		
@@ -220,9 +215,9 @@ public partial class ModManager : Control
 			foreach (var mod in gameMod)
 			{
 				// Checks if the mod is already installed, if so returns.
-				if (_installedMods.TryGetValue(_currentGameId, out var modValue))
+				if (_settings.InstalledGames.TryGetValue(_currentGameId, out var installedGameToCompare))
 				{
-					if (modValue.Contains(mod.Item1))
+					if (installedGameToCompare.YuzuModsList.ContainsKey(mod.Item1))
 					{
 						continue;
 					}
@@ -230,6 +225,19 @@ public partial class ModManager : Control
 				_modList.AddItem(mod.Item1);
 			}
 		}
+	}
+	
+	
+	static string GetGameIdFromValue(string value, Godot.Collections.Dictionary<string, Game> installedGames)
+	{
+		foreach (string gameId in installedGames.Keys)
+		{
+			if (installedGames[gameId].GameName == value)
+			{
+				return gameId;
+			}
+		}
+		return null;
 	}
 	
 	

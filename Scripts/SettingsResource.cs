@@ -16,7 +16,8 @@ public partial class SettingsResource : Resource
 	[Export()] public String AppDataPath = "";
 	// Game id, game name
 	[Export()] public Godot.Collections.Dictionary<string, string> Titles = new Godot.Collections.Dictionary<string, string>();
-	[Export()] public Godot.Collections.Dictionary<string, string> InstalledTitles = new Godot.Collections.Dictionary<string, string>();
+	//[Export()] public Godot.Collections.Dictionary<string, string> InstalledTitles = new Godot.Collections.Dictionary<string, string>();
 	// Game id, mod names array
-	[Export()] public Godot.Collections.Dictionary<string, Array<string>> InstalledMods = new Godot.Collections.Dictionary<string, Array<string>>();
+	//[Export()] public Godot.Collections.Dictionary<string, Array<string>> InstalledMods = new Godot.Collections.Dictionary<string, Array<string>>();
+	[Export()] public Godot.Collections.Dictionary<string, Game> InstalledGames = new Godot.Collections.Dictionary<string, Game>();
 }

@@ -4,17 +4,15 @@ using System.Collections.Generic;
 
 public partial class Game : Node
 {
-	public string GameId;
 	public string GameName;
-	// Mod name, List<mod url, mod version
-	public Dictionary<string, List<(string, float)>> Mods;
-	
-	
-	public Game (string gameId, string gameName, Dictionary<string, List<(string, float)>> mods)
+	// Mod name, mod item
+	public Godot.Collections.Dictionary<string, YuzuMod> YuzuModsList;
+
+
+	public Game (string gameName, Godot.Collections.Dictionary<string, YuzuMod> yuzuModsList)
 	{
-		GameId = gameId;
 		GameName = gameName;
-		Mods = mods;
+		YuzuModsList = yuzuModsList;
 	}
 	
 }

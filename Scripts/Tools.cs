@@ -138,23 +138,7 @@ public partial class Tools : Godot.Node
 		errorPopup.InitialPosition = Godot.Window.WindowInitialPosition.Absolute;
 		errorPopup.PopupCentered();
 	}
-	
-	
-	
 
-	public static string GetKeyFromValue(string value, Dictionary<string, string> dictionary)
-	{
-		foreach (string keyVar in dictionary.Keys)
-		{
-			if (dictionary[keyVar] == value)
-			{
-				return keyVar;
-			}
-		}
-		return null;
-	}
-
-	
 	
 	// File chooser functions
 	public void OpenFileChooser(ref string returnObject, string startingDirectory, Godot.Label errorLabel, Popup errorPopup)
