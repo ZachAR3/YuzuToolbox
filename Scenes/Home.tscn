@@ -187,7 +187,6 @@ tab_alignment = 1
 metadata/_edit_use_anchors_ = true
 
 [node name="Installer" parent="MainPage" node_paths=PackedStringArray("_errorPopup", "_errorLabel", "_confirmationPopup", "_downloadWindow", "_downloadLabel", "_downloadUpdateTimer", "_downloadProgressBar", "_latestVersionLabel") instance=ExtResource("10_7mm46")]
-visible = false
 layout_mode = 2
 _errorPopup = NodePath("../../ErrorPopup")
 _errorLabel = NodePath("../../ErrorPopup/ErrorLabel")
@@ -205,8 +204,11 @@ _errorPopup = NodePath("../../ErrorPopup")
 _errorLabel = NodePath("../../ErrorPopup/ErrorLabel")
 _confirmationPopup = NodePath("../../ConfirmPopup")
 
-[node name="ModManager" parent="MainPage" instance=ExtResource("12_3uycp")]
+[node name="ModManager" parent="MainPage" node_paths=PackedStringArray("_errorPopup", "_errorLabel") instance=ExtResource("12_3uycp")]
+visible = false
 layout_mode = 2
+_errorPopup = NodePath("../../ErrorPopup")
+_errorLabel = NodePath("../../ErrorPopup/ErrorLabel")
 
 [node name="ErrorPopup" type="PopupPanel" parent="."]
 initial_position = 2

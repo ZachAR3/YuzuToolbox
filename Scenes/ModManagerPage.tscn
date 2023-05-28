@@ -26,6 +26,7 @@ grow_horizontal = 2
 metadata/_edit_use_anchors_ = true
 
 [node name="ModsList" type="ItemList" parent="."]
+clip_contents = false
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.03
@@ -34,10 +35,8 @@ anchor_right = 0.97
 anchor_bottom = 0.97
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/h_separation = 100
-theme_override_constants/v_separation = 10
 text_overrun_behavior = 4
-max_columns = 20
+max_columns = 5
 same_column_width = true
 fixed_icon_size = Vector2i(50, 50)
 metadata/_edit_use_anchors_ = true
