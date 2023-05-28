@@ -23,6 +23,7 @@ anchors_preset = -1
 anchor_right = 1.0
 anchor_bottom = 0.0613306
 grow_horizontal = 2
+text_overrun_behavior = 4
 metadata/_edit_use_anchors_ = true
 
 [node name="ModsList" type="ItemList" parent="."]

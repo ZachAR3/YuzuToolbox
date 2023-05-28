@@ -77,7 +77,7 @@ public partial class ModManager : Control
 				
 				await GetAvailableMods(gameId, false);
 				GetInstalledMods(gameId);
-				_gamePickerButton.AddItem(gameName);
+				_gamePickerButton.AddItem($@"    {gameName}");
 			}
 			else
 			{
@@ -187,7 +187,7 @@ public partial class ModManager : Control
 		{
 			if (mod.IsInstalled)
 			{
-				_modList.AddItem($@"  {mod.ModName} - Supports:{mod.CompatibleVersions}  ", icon: _installedIcon);
+				_modList.AddItem($@"  {mod.ModName} - Supports:{string.Join(", ", mod.CompatibleVersions)}  ", icon: _installedIcon);
 			}
 			else
 			{
@@ -345,7 +345,7 @@ public partial class ModManager : Control
 	private void SelectGame(int gameIndex)
 	{
 		// Gets the keys we can equate as an array
-		_currentGameId = GetGameIdFromValue(_gamePickerButton.GetItemText(gameIndex), _installedGames);
+		_currentGameId = GetGameIdFromValue(_gamePickerButton.GetItemText(gameIndex).Trim(), _installedGames);
 		// Clears old mods from our list
 		_modList.Clear();
 		AddMods(_currentGameId);
@@ -369,9 +369,9 @@ public partial class ModManager : Control
 	private async void ModClicked(int modIndex)
 	{
 		// Finds mod with the same name as the one clicked and installs it
-		if (_yuzuModsList.ContainsKey(_currentGameId))
+		if (_yuzuModsList.TryGetValue(_currentGameId, out var value))
 		{
-			foreach (var mod in _yuzuModsList[_currentGameId])
+			foreach (var mod in value)
 			{
 				if (_modList.GetItemText(modIndex).Split("-")[0].Trim() == (mod.ModName))
 				{
