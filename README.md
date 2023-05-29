@@ -5,8 +5,8 @@ Windows: https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Install
 Linux: Distro-dependent but should be included in your distros mono package. Or you can download it by itself e.g libgtk-3-0 on debian or gtk3 for Arch.
 
 
-![](https://github.com/ZachAR3/PineappleEA-GUI/blob/main/DemoImages/DarkInstaller.png?raw=true)![](https://github.com/ZachAR3/PineappleEA-GUI/blob/main/DemoImages/DarkTools.png?raw=true)
-![](https://github.com/ZachAR3/PineappleEA-GUI/blob/main/DemoImages/LightInstaller.png?raw=true)![](https://github.com/ZachAR3/PineappleEA-GUI/blob/main/DemoImages/LightTools.png?raw=true)
+![](https://github.com/ZachAR3/PineappleEA-GUI/blob/main/DemoImages/DarkInstaller.png?raw=true)![](https://github.com/ZachAR3/PineappleEA-GUI/blob/main/DemoImages/DarkTools.png?raw=true)![](https://github.com/ZachAR3/PineappleEA-GUI/blob/main/DemoImages/DarkModManager.png?raw=true)
+![](https://github.com/ZachAR3/PineappleEA-GUI/blob/main/DemoImages/LightInstaller.png?raw=true)![](https://github.com/ZachAR3/PineappleEA-GUI/blob/main/DemoImages/LightTools.png?raw=true)![](https://github.com/ZachAR3/PineappleEA-GUI/blob/main/DemoImages/LightModManager.png?raw=true)
 
 
 # Resources:
