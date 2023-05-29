@@ -27,6 +27,17 @@ public partial class ToolsPage : Control
 	public override void _Ready()
 	{
 		_settings = _saveManager.GetSettings();
+		if (_settings.AppDataPath == null)
+		{
+			if (_osUsed == "Linux")
+			{
+				_settings.AppDataPath = $@"{System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData)}/yuzu/";
+			}
+			else if (_osUsed == "Windows")
+			{
+				_settings.AppDataPath = $@"{System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData)}\yuzu\";
+			}
+		}
 		if (_settings.ShadersLocation == "")
 		{
 			_settings.ShadersLocation = $@"{_settings.AppDataPath}shader";

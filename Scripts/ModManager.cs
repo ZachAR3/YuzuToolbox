@@ -53,7 +53,10 @@ public partial class ModManager : Control
 			_settings.AppDataPath = $@"{System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData)}\yuzu\";
 		}
 
-		_settings.ModsLocation ??= $@"{_settings.AppDataPath}load";
+		if (_settings.ModsLocation == null)
+		{
+			_settings.ModsLocation = $@"{_settings.AppDataPath}load";
+		}
 		_modLocationButton.Text = _settings.ModsLocation.PadLeft(_settings.ModsLocation.Length + 4, ' ');
 
 		GetGamesAndMods();
