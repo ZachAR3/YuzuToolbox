@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://cwwmo68jd12gd"]
 
 [ext_resource type="Script" path="res://Scripts/ToolsPage.cs" id="1_1ei58"]
-[ext_resource type="Texture2D" uid="uid://e5vtrghoacs2" path="res://WarningSign.png" id="1_pfmpv"]
+[ext_resource type="Texture2D" uid="uid://e5vtrghoacs2" path="res://ImageAssets/WarningSign.png" id="1_pfmpv"]
 
 [node name="Tools" type="Control" node_paths=PackedStringArray("_clearInstallFolderButton", "_clearShadersToolButton", "_backupSavesButton", "_restoreSavesButton", "_fromSaveDirectoryButton", "_toSaveDirectoryButton")]
 layout_mode = 3

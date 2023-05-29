@@ -11,7 +11,6 @@ public partial class ResourceSaveManager : Resource
 
 	public void WriteSave(SettingsResource settings = null)
 	{
-		GD.Print("Saved");
 		// If no settings are passed, use the current settings
 		settings ??= _settings;
 		ResourceSaver.Save(this, GetSavePath());

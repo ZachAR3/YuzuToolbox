@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b3hykj31h1xfo"
-path="res://.godot/imported/PineappleIcon.png-fd43bda7af11d4bc31ddc5cf37d78eed.ctex"
+uid="uid://ccifk7x5lw2wc"
+path="res://.godot/imported/LightModManager.png-c90f301e67ff8434e5d576d4c3d958f1.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://PineappleIcon.png"
-dest_files=["res://.godot/imported/PineappleIcon.png-fd43bda7af11d4bc31ddc5cf37d78eed.ctex"]
+source_file="res://DemoImages/LightModManager.png"
+dest_files=["res://.godot/imported/LightModManager.png-c90f301e67ff8434e5d576d4c3d958f1.ctex"]
 
 [params]
 

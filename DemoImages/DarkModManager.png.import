@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://duqgfmchd1v45"
-path="res://.godot/imported/blue-check-mark-icon.svg-6cd9e0c62d67ae18fedf44392f264cc4.ctex"
+uid="uid://dr82l2um8mux2"
+path="res://.godot/imported/DarkModManager.png-f1dcf1236c3963a990467431fb11ba4c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://blue-check-mark-icon.svg"
-dest_files=["res://.godot/imported/blue-check-mark-icon.svg-6cd9e0c62d67ae18fedf44392f264cc4.ctex"]
+source_file="res://DemoImages/DarkModManager.png"
+dest_files=["res://.godot/imported/DarkModManager.png-f1dcf1236c3963a990467431fb11ba4c.ctex"]
 
 [params]
 
@@ -32,6 +32,3 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
-svg/scale=1.0
-editor/scale_with_editor_scale=false
-editor/convert_colors_with_editor_theme=false

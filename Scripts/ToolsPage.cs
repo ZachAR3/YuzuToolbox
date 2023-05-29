@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Threading.Tasks;
 
 public partial class ToolsPage : Control
 {
@@ -120,18 +121,25 @@ public partial class ToolsPage : Control
 	}
 	
 	
-	private void OnFromSaveDirectoryButtonPressed()
+	private async void OnFromSaveDirectoryButtonPressed()
 	{
-		_tools.OpenFileChooser(ref _settings.FromSaveDirectory, _settings.FromSaveDirectory, _errorLabel, _errorPopup);
-		_fromSaveDirectoryButton.Text = _settings.FromSaveDirectory;
-		_saveManager.WriteSave(_settings);
+		await Task.Run(() =>
+		{
+			_tools.OpenFileChooser(ref _settings.FromSaveDirectory, _settings.FromSaveDirectory, _errorLabel,
+				_errorPopup);
+			_fromSaveDirectoryButton.Text = _settings.FromSaveDirectory;
+			_saveManager.WriteSave(_settings);
+		});
 	}
 	
-	private void OnToSaveDirectoryButtonPressed()
+	private async void OnToSaveDirectoryButtonPressed()
 	{
-		_tools.OpenFileChooser(ref _settings.ToSaveDirectory, _settings.ToSaveDirectory, _errorLabel, _errorPopup);
-		_toSaveDirectoryButton.Text = _settings.ToSaveDirectory;
-		_saveManager.WriteSave(_settings);
+		await Task.Run(() =>
+		{
+			_tools.OpenFileChooser(ref _settings.ToSaveDirectory, _settings.ToSaveDirectory, _errorLabel, _errorPopup);
+			_toSaveDirectoryButton.Text = _settings.ToSaveDirectory;
+			_saveManager.WriteSave(_settings);
+		});
 	}
 
 

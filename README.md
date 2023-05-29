@@ -7,3 +7,12 @@ Linux: Distro-dependent but should be included in your distros mono package. Or 
 
 ![](https://github.com/ZachAR3/PineappleEA-GUI/blob/main/DemoImages/DarkInstaller.png?raw=true)![](https://github.com/ZachAR3/PineappleEA-GUI/blob/main/DemoImages/DarkTools.png?raw=true)
 ![](https://github.com/ZachAR3/PineappleEA-GUI/blob/main/DemoImages/LightInstaller.png?raw=true)![](https://github.com/ZachAR3/PineappleEA-GUI/blob/main/DemoImages/LightTools.png?raw=true)
+
+
+# Resources:
+Big thanks to the repo owners of:
+* https://github.com/pilout/YuzuUpdater/blob/master/YuzuEAUpdater/
+* https://github.com/amakvana/YuzuModDownloader/blob/main/source/YuzuModDownloader/classes/OfficialYuzuModDownloader.cs
+
+I was able to use a lot of their code for the mod managing, sections which I found difficult (Especially figuring out the XPaths).
+

@@ -1,8 +1,8 @@
 [gd_scene load_steps=4 format=3 uid="uid://cr3wosequvma8"]
 
 [ext_resource type="Script" path="res://Scripts/Installer.cs" id="1_3lw4p"]
-[ext_resource type="Texture2D" uid="uid://e5vtrghoacs2" path="res://WarningSign.png" id="1_xly6n"]
-[ext_resource type="Image" uid="uid://dt3aq1jm2e2ds" path="res://Icon.png" id="2_efmk0"]
+[ext_resource type="Texture2D" uid="uid://e5vtrghoacs2" path="res://ImageAssets/WarningSign.png" id="1_xly6n"]
+[ext_resource type="Image" uid="uid://dt3aq1jm2e2ds" path="res://ImageAssets/Icon.png" id="2_efmk0"]
 
 [node name="Installer" type="Control" node_paths=PackedStringArray("_versionButton", "_createShortcutButton", "_installLocationButton", "_downloadButton", "_clearShadersButton", "_shadersLocationButton", "_autoUnpackButton", "_customVersionCheckBox", "_customVersionSpinBox", "_latestReleaseRequester", "_downloadRequester", "_extractWarning", "_downloadWarning", "_clearShadersWarning")]
 layout_mode = 3
@@ -194,3 +194,6 @@ metadata/_edit_use_anchors_ = true
 [node name="DownloadRequester" type="HTTPRequest" parent="."]
 
 [node name="ReleaseRequester" type="HTTPRequest" parent="."]
+
+[connection signal="toggled" from="ControlsContainer/ExtractButton" to="." method="AutoUnpackToggled"]
+[connection signal="toggled" from="ControlsContainer/ClearShadersButton" to="." method="ClearShadersToggle"]

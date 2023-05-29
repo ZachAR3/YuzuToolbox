@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b7we85cma1deu"
-path="res://.godot/imported/SplashScreen.png-03ea4a6ff005982cad16c5dab536893e.ctex"
+uid="uid://dtcak8d8m61be"
+path="res://.godot/imported/PineappleIconSmall.png-97332d2ed4e3412745c57dc8bcff82c0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://SplashScreen.png"
-dest_files=["res://.godot/imported/SplashScreen.png-03ea4a6ff005982cad16c5dab536893e.ctex"]
+source_file="res://ImageAssets/PineappleIconSmall.png"
+dest_files=["res://.godot/imported/PineappleIconSmall.png-97332d2ed4e3412745c57dc8bcff82c0.ctex"]
 
 [params]
 

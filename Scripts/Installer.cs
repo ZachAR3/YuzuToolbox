@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using Mono.Unix;
 using WindowsShortcutFactory;
 
@@ -384,19 +385,25 @@ Categories=Game;Emulator;Qt;
 
 
 	// Signal functions
-	private void OnShadersLocationButtonPressed()
+	private async void OnShadersLocationButtonPressed()
 	{
-		_tools.OpenFileChooser(ref _settings.ShadersLocation, _settings.ShadersLocation, _errorLabel, _errorPopup);
-		_shadersLocationButton.Text = _settings.ShadersLocation;
-		_saveManager.WriteSave(_settings);
+		await Task.Run(() =>
+		{
+			_tools.OpenFileChooser(ref _settings.ShadersLocation, _settings.ShadersLocation, _errorLabel, _errorPopup);
+			_shadersLocationButton.Text = _settings.ShadersLocation;
+			_saveManager.WriteSave(_settings);
+		});
 	}
 	
 	
-	private void OnInstallLocationButtonPressed()
+	private async void OnInstallLocationButtonPressed()
 	{
-		_tools.OpenFileChooser(ref _settings.SaveDirectory, _settings.SaveDirectory, _errorLabel, _errorPopup);
-		_installLocationButton.Text = _settings.SaveDirectory;
-		_saveManager.WriteSave(_settings);
+		await Task.Run(() =>
+		{
+			_tools.OpenFileChooser(ref _settings.SaveDirectory, _settings.SaveDirectory, _errorLabel, _errorPopup);
+			_installLocationButton.Text = _settings.SaveDirectory;
+			_saveManager.WriteSave(_settings);
+		});
 	}
 
 
