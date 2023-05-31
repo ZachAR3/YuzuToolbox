@@ -39,7 +39,6 @@ public partial class Globals : Node
 		// Sets shaders location default for first startup
 		if (Settings.ShadersLocation == null)
 		{
-			GD.Print("Shader location = " + Settings.ShadersLocation);
 			Settings.ShadersLocation = $@"{Settings.AppDataPath}shader";
 			SaveManager.WriteSave(Settings);
 		}

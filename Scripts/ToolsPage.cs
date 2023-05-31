@@ -112,25 +112,19 @@ public partial class ToolsPage : Control
 	}
 	
 	
-	private async void OnFromSaveDirectoryButtonPressed()
+	private void OnFromSaveDirectoryButtonPressed()
 	{
-		await Task.Run(() =>
-		{
-			_tools.OpenFileChooser(ref Globals.Instance.Settings.FromSaveDirectory, Globals.Instance.Settings.FromSaveDirectory, _errorLabel,
-				_errorPopup);
-			_fromSaveDirectoryButton.Text = Globals.Instance.Settings.FromSaveDirectory;
-			Globals.Instance.SaveManager.WriteSave(Globals.Instance.Settings);
-		});
+		_tools.OpenFileChooser(ref Globals.Instance.Settings.FromSaveDirectory, Globals.Instance.Settings.FromSaveDirectory, _errorLabel,
+			_errorPopup);
+		_fromSaveDirectoryButton.Text = Globals.Instance.Settings.FromSaveDirectory;
+		Globals.Instance.SaveManager.WriteSave(Globals.Instance.Settings);
 	}
 	
-	private async void OnToSaveDirectoryButtonPressed()
+	private void OnToSaveDirectoryButtonPressed()
 	{
-		await Task.Run(() =>
-		{
-			_tools.OpenFileChooser(ref Globals.Instance.Settings.ToSaveDirectory, Globals.Instance.Settings.ToSaveDirectory, _errorLabel, _errorPopup);
-			_toSaveDirectoryButton.Text = Globals.Instance.Settings.ToSaveDirectory;
-			Globals.Instance.SaveManager.WriteSave(Globals.Instance.Settings);
-		});
+		_tools.OpenFileChooser(ref Globals.Instance.Settings.ToSaveDirectory, Globals.Instance.Settings.ToSaveDirectory, _errorLabel, _errorPopup);
+		_toSaveDirectoryButton.Text = Globals.Instance.Settings.ToSaveDirectory;
+		Globals.Instance.SaveManager.WriteSave(Globals.Instance.Settings);
 	}
 
 

@@ -169,7 +169,9 @@ public partial class Tools : Godot.Node
 		// Connect the response signal, I would like to directly pass in the return object, but this isn't possible 
 		// in a lambda, so we create a temp value to hold it and then assign it to that value after.
 		string tempReturnString = returnObject;
+
 		_fileChooser.Response += (sender, args) => OnFileChooserResponse(sender, args, ref tempReturnString);
+		_fileChooser.FocusOutEvent += (sender, args) => OnFileChooserResponse(sender, null, ref tempReturnString);
 
 		// Show the dialog
 		_fileChooser.Show();
@@ -189,7 +191,8 @@ public partial class Tools : Godot.Node
 
 	private void OnFileChooserResponse(object sender, ResponseArgs args, ref string returnObject)
 	{
-		if (args.ResponseId == ResponseType.Ok)
+		// Ensures response args aren't null, and checks if it was given ok (means a file was selected)
+		if (args is { ResponseId: ResponseType.Ok })
 		{
 			// The user selected a file
 			returnObject = _fileChooser.File.Path;

@@ -379,25 +379,19 @@ Categories=Game;Emulator;Qt;
 
 
 	// Signal functions
-	private async void OnShadersLocationButtonPressed()
+	private  void OnShadersLocationButtonPressed()
 	{
-		await Task.Run(() =>
-		{
-			_tools.OpenFileChooser(ref Globals.Instance.Settings.ShadersLocation, Globals.Instance.Settings.ShadersLocation, _errorLabel, _errorPopup);
-			_shadersLocationButton.Text = Globals.Instance.Settings.ShadersLocation;
-			Globals.Instance.SaveManager.WriteSave(Globals.Instance.Settings);
-		});
+		_tools.OpenFileChooser(ref Globals.Instance.Settings.ShadersLocation, Globals.Instance.Settings.ShadersLocation, _errorLabel, _errorPopup);
+		_shadersLocationButton.Text = Globals.Instance.Settings.ShadersLocation;
+		Globals.Instance.SaveManager.WriteSave(Globals.Instance.Settings);
 	}
 	
 	
-	private async void OnInstallLocationButtonPressed()
+	private void OnInstallLocationButtonPressed()
 	{
-		await Task.Run(() =>
-		{
-			_tools.OpenFileChooser(ref Globals.Instance.Settings.SaveDirectory, Globals.Instance.Settings.SaveDirectory, _errorLabel, _errorPopup);
-			_installLocationButton.Text = Globals.Instance.Settings.SaveDirectory;
-			Globals.Instance.SaveManager.WriteSave(Globals.Instance.Settings);
-		});
+		_tools.OpenFileChooser(ref Globals.Instance.Settings.SaveDirectory, Globals.Instance.Settings.SaveDirectory, _errorLabel, _errorPopup);
+		_installLocationButton.Text = Globals.Instance.Settings.SaveDirectory;
+		Globals.Instance.SaveManager.WriteSave(Globals.Instance.Settings);
 	}
 
 

@@ -38,17 +38,18 @@ public partial class ResourceSaveManager : Resource
 		{
 			var lastSave = (ResourceSaveManager)LoadSaveGame();
 			
+			//TODO: Fix this
 			// If the save is from a previous version, reset the settings
-			if (lastSave.Version != Version)
-			{
-				GD.Print("Save version is different, resetting settings");
-				_settings = new SettingsResource();
-				WriteSave();
-			}
-			else
-			{
+			// if (lastSave.Version != Version)
+			// {
+			// 	GD.Print("Save version is different, resetting settings");
+			// 	_settings = new SettingsResource();
+			// 	WriteSave();
+			// }
+			// else
+			//{
 				_settings = lastSave._settings;
-			}
+			//}
 		}
 		else
 		{
