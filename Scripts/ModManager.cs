@@ -168,13 +168,14 @@ public partial class ModManager : Control
 		{
 			foreach (var modDirectory in Directory.GetDirectories($@"{Globals.Instance.Settings.ModsLocation}/{gameId}"))
 			{
-				string[] modInfo = modDirectory.GetFile().Split("|");
+				string[] modInfo = modDirectory.GetFile().Split("!");
 				string modName = modInfo[0];
 				string modVersion = modInfo.Length > 1 ? modInfo[1] : "N/A";
 				bool available = false;
 				foreach (var availableMod in _yuzuModsList[gameId])
 				{
-					if (availableMod.ModName.Contains(modName))
+					// Extra replacements are used since Windows can't handle ":" we need to convert it back and forth in names to periods.
+					if (availableMod.ModName.Contains(modName) || availableMod.ModName.Contains(modName.Replace(".", ":")))
 					{
 						availableMod.IsInstalled = true;
 						availableMod.CurrentVersion = modVersion;
@@ -296,11 +297,11 @@ public partial class ModManager : Control
 			{
 				// Gets download path, and if using windows replaces /'s with \'s
 				string downloadPath = $@"{Globals.Instance.Settings.ModsLocation}/{gameId}/{modName}-Download";
-				downloadPath = _osUsed == "Windows" ? downloadPath.Replace("/", "\\") : downloadPath;
+				downloadPath = _osUsed == "Windows" ? downloadPath.Replace("/", "\\").Replace(":", ".") : downloadPath;
 				
 				// Gets install path, and if using windows replaces /'s with \'s
-				string installPath = $@"{Globals.Instance.Settings.ModsLocation}/{gameId}/{modName}|{compatibleVersions.Last()}";
-				installPath = _osUsed == "Windows" ? installPath.Replace("/", "\\") : installPath;
+				string installPath = $@"{Globals.Instance.Settings.ModsLocation}/{gameId}/{modName}!{compatibleVersions.Last()}";
+				installPath = _osUsed == "Windows" ? installPath.Replace("/", "\\").Replace(":", ".") : installPath;
 				
 				HttpClient httpClient = new HttpClient();
 				byte[] downloadData = await httpClient.GetAsync(modUrl).Result.Content.ReadAsByteArrayAsync();
@@ -357,7 +358,7 @@ public partial class ModManager : Control
 
 	private async Task<bool> RemoveMod(string gameId, string modName, string currentVersion, Array<string> compatibleVersions, bool noConfirmation = false)
 	{
-		string modNameEnding = currentVersion == "N/A" ? "" : $"|{currentVersion}";
+		string modNameEnding = currentVersion == "N/A" ? "" : $"!{currentVersion}";
 		string removePath = $@"{Globals.Instance.Settings.ModsLocation}/{gameId}/{modName}{modNameEnding}";
 		try
 		{
