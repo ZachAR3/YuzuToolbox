@@ -361,7 +361,9 @@ public partial class ModManager : Control
 	private async Task<bool> RemoveMod(string gameId, string modName, string currentVersion, Array<string> compatibleVersions, bool noConfirmation = false)
 	{
 		string modNameEnding = currentVersion == "N/A" ? "" : $"!{currentVersion}";
-		string removePath = $@"{Globals.Instance.Settings.ModsLocation}/{gameId}/{modName}{modNameEnding}";
+		string removePath = _osUsed == "Linux" 
+			? $@"{Globals.Instance.Settings.ModsLocation}/{gameId}/{modName}!{compatibleVersions.Last()}" 
+			: $@"{Globals.Instance.Settings.ModsLocation}\{gameId}\{modName.Replace(":", ".")}!{compatibleVersions.Last()}";;
 		try
 		{
 			if (!noConfirmation)
