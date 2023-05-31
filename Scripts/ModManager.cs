@@ -36,6 +36,7 @@ public partial class ModManager : Control
 	// Godot Functions
 	private void Initiate()
 	{
+		GD.Print("Initiate");
 		_titleRequester.Connect("request_completed", new Callable(this, nameof(GetTitles)));
 
 		if (Globals.Instance.Settings.ModsLocation == null)
@@ -46,7 +47,6 @@ public partial class ModManager : Control
 		_modLocationButton.Text = Globals.Instance.Settings.ModsLocation.PadLeft(Globals.Instance.Settings.ModsLocation.Length + 4, ' ');
 
 		GetGamesAndMods();
-		AddMods(_currentGameId);
 	}
 
 
@@ -84,7 +84,7 @@ public partial class ModManager : Control
 						_yuzuModsList[gameId] = new Array<YuzuMod>();
 					}
 
-					Task.Run(() => GetAvailableMods(gameId, false));
+					await Task.Run(() => GetAvailableMods(gameId, false));
 					GetInstalledMods(gameId);
 					_gamePickerButton.AddItem($@"    {gameName}");
 				}
@@ -151,7 +151,6 @@ public partial class ModManager : Control
 					versions.Add(version.InnerText);
 				}
 				titleIndex++;
-
 				_yuzuModsList[gameId].Add(new YuzuMod(modName, downloadUrl, versions, versions.Last(), false));
 			}
 		}
@@ -200,11 +199,13 @@ public partial class ModManager : Control
 	{
 		if (!_yuzuModsList.ContainsKey(gameId))
 		{
+			GD.Print("Cannot find games for:" + gameId);
 			return;
 		}
 		
 		foreach (var mod in _yuzuModsList[gameId])
 		{
+			GD.Print("Add mod item");
 			if (mod.IsInstalled)
 			{
 				_modList.AddItem($@"  {mod.ModName} - Supports:{string.Join(", ", mod.CompatibleVersions)}  ", icon: _installedIcon);
@@ -214,6 +215,11 @@ public partial class ModManager : Control
 				_modList.AddItem($@"  {mod.ModName} - Supports:{string.Join(", ", mod.CompatibleVersions)}  ");
 			}
 		}
+
+		// for (int modIndex = 0; modIndex <= _modList.ItemCount; modIndex++)
+		// {
+		// 	GD.Print(_modList.GetItemText(modIndex));
+		// }
 		
 	}
 
@@ -485,6 +491,5 @@ public partial class ModManager : Control
 
 		// Re-grabs and adds the mods
 		GetGamesAndMods();
-		AddMods(_currentGameId);
 	}
 }
