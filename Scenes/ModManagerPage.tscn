@@ -63,7 +63,7 @@ text = "Update selected
 "
 metadata/_edit_use_anchors_ = true
 
-[node name="Header" type="VBoxContainer" parent="."]
+[node name="Header" type="GridContainer" parent="."]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.0130208
@@ -71,18 +71,37 @@ anchor_top = 0.00833333
 anchor_right = 0.991667
 anchor_bottom = 0.126852
 grow_horizontal = 2
+columns = 2
 metadata/_edit_use_anchors_ = true
+
+[node name="GameSelectedLabel" type="Label" parent="Header"]
+layout_mode = 2
+size_flags_horizontal = 0
+text = "Selected game:"
 
 [node name="GameSelection" type="OptionButton" parent="Header"]
 layout_mode = 2
+size_flags_horizontal = 3
 size_flags_vertical = 3
+tooltip_text = "Button to change the currently selected game."
 text_overrun_behavior = 4
 metadata/_edit_use_anchors_ = true
+
+[node name="ModsLocationLabel" type="Label" parent="Header"]
+layout_mode = 2
+size_flags_horizontal = 0
+text = "Mods location:
+"
 
 [node name="ModLocationButton" type="Button" parent="Header"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+tooltip_text = "Button to change the mods folder. 
+Linux something like: 
+/home/username/.local/share/yuzu/load/.
+Windows it should be something like
+C:\\Users\\username\\AppData\\Roaming\\yuzu\\load"
 alignment = 0
 text_overrun_behavior = 4
 
