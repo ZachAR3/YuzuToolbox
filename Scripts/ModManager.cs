@@ -14,18 +14,21 @@ public partial class ModManager : Control
 	[Export()] private Popup _errorPopup;
 	[Export()] private Label _errorLabel;
 	[Export()] private PopupMenu _confirmationPopup;
-	
+
 	[ExportGroup("ModManager")] 
 	[Export()] private ItemList _modList;
 	[Export()] private OptionButton _gamePickerButton;
 	[Export()] private HttpRequest _titleRequester;
 	[Export()] private Texture2D _installedIcon;
 	[Export()] private Button _modLocationButton;
+	[Export()] private Panel _loadingPanel;
+	[Export()] private Label _loadingLabel;
+	[Export()] private AnimatedSprite2D _loadingSprite;	
 
 	private const string Quote = "\"";
 	private string _currentGameId;
 	private Tools _tools = new Tools();
-	private string osUsed = OS.GetName();
+	private string _osUsed = OS.GetName();
 	
 	// Game id, game name
 	private Godot.Collections.Dictionary<string, string> _titles = new Godot.Collections.Dictionary<string, string>();
@@ -35,8 +38,7 @@ public partial class ModManager : Control
 
 	// Godot Functions
 	private void Initiate()
-	{
-		GD.Print("Initiate");
+	{	
 		_titleRequester.Connect("request_completed", new Callable(this, nameof(GetTitles)));
 
 		if (Globals.Instance.Settings.ModsLocation == null)
@@ -45,7 +47,7 @@ public partial class ModManager : Control
 			Globals.Instance.SaveManager.WriteSave(Globals.Instance.Settings);
 		}
 		_modLocationButton.Text = Globals.Instance.Settings.ModsLocation.PadLeft(Globals.Instance.Settings.ModsLocation.Length + 4, ' ');
-
+		
 		GetGamesAndMods();
 	}
 
@@ -55,9 +57,11 @@ public partial class ModManager : Control
 	{
 		await Task.Run(async () =>
 		{
+			_loadingPanel.Visible = true;
 			if (!Directory.Exists(Globals.Instance.Settings.ModsLocation))
 			{
 				_tools.ErrorPopup($@"mods directory not found", _errorLabel, _errorPopup);
+				_loadingPanel.Visible = false;
 				return;
 			}
 			
@@ -70,6 +74,7 @@ public partial class ModManager : Control
 			if (_titles.Count <= 0)
 			{
 				_tools.ErrorPopup("failed to retrieve titles list, check connection and try again later.", _errorLabel, _errorPopup);
+				_loadingPanel.Visible = false;
 				return;
 			}
 			
@@ -115,6 +120,7 @@ public partial class ModManager : Control
 		if (gameId == null || !_installedGames.ContainsKey(gameId))
 		{
 			_tools.ErrorPopup("no game ID given, or game ID invalid, cancelling", _errorLabel, _errorPopup);
+			_loadingPanel.Visible = false;
 			return;
 		}
 
@@ -132,6 +138,7 @@ public partial class ModManager : Control
 		if (mods == null)
 		{
 			_tools.ErrorPopup($@"failed to retrieve mod list for ID:{gameId} | Title:{_titles[gameId]}. The game may not have available mods.", _errorLabel, _errorPopup);
+			_loadingPanel.Visible = false;
 			return;
 		}
 
@@ -200,6 +207,7 @@ public partial class ModManager : Control
 		if (!_yuzuModsList.ContainsKey(gameId))
 		{
 			GD.Print("Cannot find games for:" + gameId);
+			_loadingPanel.Visible = false;
 			return;
 		}
 		
@@ -215,12 +223,6 @@ public partial class ModManager : Control
 				_modList.AddItem($@"  {mod.ModName} - Supports:{string.Join(", ", mod.CompatibleVersions)}  ");
 			}
 		}
-
-		// for (int modIndex = 0; modIndex <= _modList.ItemCount; modIndex++)
-		// {
-		// 	GD.Print(_modList.GetItemText(modIndex));
-		// }
-		
 	}
 
 
@@ -240,6 +242,7 @@ public partial class ModManager : Control
 			if (gameSplit.Length < 2)
 			{
 				_tools.ErrorPopup("unable to parse titles list, check connection and try again later.", _errorLabel, _errorPopup);
+				_loadingPanel.Visible = false;
 				return;
 			}
 			// Adds the game to our title list with type Dictionary(string ID, string Title, string modID)
@@ -264,10 +267,12 @@ public partial class ModManager : Control
 				{
 					await Task.Run(async () =>
 					{
+						_loadingPanel.Visible = true;
 						var modUpdated = await UpdateMod(installedGame.Key, mod.ModName, mod.ModUrl,
 							mod.CompatibleVersions, mod.CurrentVersion, true);
 						if (modUpdated != true)
 						{
+							_loadingPanel.Visible = false;
 							return;
 						}
 
@@ -275,6 +280,8 @@ public partial class ModManager : Control
 							icon: _installedIcon);
 						// Used to update UI with installed icon
 						SelectGame(_gamePickerButton.Selected);
+						
+						_loadingPanel.Visible = false;
 					});
 				}
 			}
@@ -290,11 +297,11 @@ public partial class ModManager : Control
 			{
 				// Gets download path, and if using windows replaces /'s with \'s
 				string downloadPath = $@"{Globals.Instance.Settings.ModsLocation}/{gameId}/{modName}-Download";
-				downloadPath = osUsed == "Windows" ? downloadPath.Replace("/", "\\") : downloadPath;
+				downloadPath = _osUsed == "Windows" ? downloadPath.Replace("/", "\\") : downloadPath;
 				
 				// Gets install path, and if using windows replaces /'s with \'s
 				string installPath = $@"{Globals.Instance.Settings.ModsLocation}/{gameId}/{modName}|{compatibleVersions.Last()}";
-				installPath = osUsed == "Windows" ? installPath.Replace("/", "\\") : installPath;
+				installPath = _osUsed == "Windows" ? installPath.Replace("/", "\\") : installPath;
 				
 				HttpClient httpClient = new HttpClient();
 				byte[] downloadData = await httpClient.GetAsync(modUrl).Result.Content.ReadAsByteArrayAsync();
@@ -456,6 +463,8 @@ public partial class ModManager : Control
 				return;
 			}
 			
+			_loadingPanel.Visible = true;
+			
 			if (_modList.GetItemText(selectedMods[0]).Split("-")[0].Trim() == (mod.ModName))
 			{
 				if (mod.IsInstalled && mod.ModUrl != null)
@@ -466,6 +475,7 @@ public partial class ModManager : Control
 
 				// Used to update UI with installed icon
 				SelectGame(_gamePickerButton.Selected);
+				_loadingPanel.Visible = false;
 			}
 		}
 	}
@@ -473,7 +483,13 @@ public partial class ModManager : Control
 	
 	private void ModLocationPressed()
 	{
-		_tools.OpenFileChooser(ref Globals.Instance.Settings.ModsLocation, Globals.Instance.Settings.ModsLocation, _errorLabel, _errorPopup);
+		var modLocationInput = _tools.OpenFileChooser(Globals.Instance.Settings.ModsLocation, _errorLabel, _errorPopup)
+			.Result;
+		if (modLocationInput != null)
+		{
+			Globals.Instance.Settings.ModsLocation = modLocationInput;
+		}
+		
 		_modLocationButton.Text = Globals.Instance.Settings.ModsLocation.PadLeft(Globals.Instance.Settings.ModsLocation.Length + 4, ' ');
 		
 		Globals.Instance.SaveManager.WriteSave(Globals.Instance.Settings);

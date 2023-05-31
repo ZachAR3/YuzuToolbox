@@ -1,9 +1,152 @@
-[gd_scene load_steps=3 format=3 uid="uid://bdihe2bmwmgtp"]
+[gd_scene load_steps=38 format=3 uid="uid://bdihe2bmwmgtp"]
 
 [ext_resource type="Script" path="res://Scripts/ModManager.cs" id="1_g8nhx"]
 [ext_resource type="Texture2D" uid="uid://duqgfmchd1v45" path="res://ImageAssets/blue-check-mark-icon.svg" id="2_2ngo2"]
+[ext_resource type="Texture2D" uid="uid://6v2ifgmyp6yp" path="res://ImageAssets/LoadingCircleAnimation/frame-1.png" id="3_m1c4w"]
+[ext_resource type="Texture2D" uid="uid://5thiqdc0a2hi" path="res://ImageAssets/LoadingCircleAnimation/frame-2.png" id="4_suxsp"]
+[ext_resource type="Texture2D" uid="uid://by13358t2kich" path="res://ImageAssets/LoadingCircleAnimation/frame-3.png" id="5_v3vdp"]
+[ext_resource type="Texture2D" uid="uid://d4mxpw35xmlax" path="res://ImageAssets/LoadingCircleAnimation/frame-4.png" id="6_ruh65"]
+[ext_resource type="Texture2D" uid="uid://wnpgyjmnnoet" path="res://ImageAssets/LoadingCircleAnimation/frame-5.png" id="7_8ddj2"]
+[ext_resource type="Texture2D" uid="uid://df5vjnet6id83" path="res://ImageAssets/LoadingCircleAnimation/frame-6.png" id="8_duivn"]
+[ext_resource type="Texture2D" uid="uid://5o3fvcmp1pvu" path="res://ImageAssets/LoadingCircleAnimation/frame-7.png" id="9_mtk5j"]
+[ext_resource type="Texture2D" uid="uid://csinyp5jrblvw" path="res://ImageAssets/LoadingCircleAnimation/frame-8.png" id="10_udqee"]
+[ext_resource type="Texture2D" uid="uid://ij445okwlco6" path="res://ImageAssets/LoadingCircleAnimation/frame-9.png" id="11_jsupf"]
+[ext_resource type="Texture2D" uid="uid://dpkeio6v2yu0k" path="res://ImageAssets/LoadingCircleAnimation/frame-10.png" id="12_hkhsd"]
+[ext_resource type="Texture2D" uid="uid://bnvtq2no1j8ru" path="res://ImageAssets/LoadingCircleAnimation/frame-11.png" id="13_exv8c"]
+[ext_resource type="Texture2D" uid="uid://2sw5afdhbno7" path="res://ImageAssets/LoadingCircleAnimation/frame-12.png" id="14_fvywn"]
+[ext_resource type="Texture2D" uid="uid://c4dmpw3d24sw3" path="res://ImageAssets/LoadingCircleAnimation/frame-13.png" id="15_en65g"]
+[ext_resource type="Texture2D" uid="uid://csomaqbrp7pm1" path="res://ImageAssets/LoadingCircleAnimation/frame-14.png" id="16_o535n"]
+[ext_resource type="Texture2D" uid="uid://5nxa4amx1ctg" path="res://ImageAssets/LoadingCircleAnimation/frame-15.png" id="17_ae313"]
+[ext_resource type="Texture2D" uid="uid://buj451wqmieg2" path="res://ImageAssets/LoadingCircleAnimation/frame-16.png" id="18_41won"]
+[ext_resource type="Texture2D" uid="uid://vl1mcomcokw0" path="res://ImageAssets/LoadingCircleAnimation/frame-17.png" id="19_o0ufr"]
+[ext_resource type="Texture2D" uid="uid://66wajqj8hf02" path="res://ImageAssets/LoadingCircleAnimation/frame-18.png" id="20_vy1cs"]
+[ext_resource type="Texture2D" uid="uid://b3ee0h7icrrm" path="res://ImageAssets/LoadingCircleAnimation/frame-19.png" id="21_c5rj8"]
+[ext_resource type="Texture2D" uid="uid://dj618to1c1bjp" path="res://ImageAssets/LoadingCircleAnimation/frame-20.png" id="22_yku3t"]
+[ext_resource type="Texture2D" uid="uid://bsmue6kwurrr6" path="res://ImageAssets/LoadingCircleAnimation/frame-21.png" id="23_f21n4"]
+[ext_resource type="Texture2D" uid="uid://curutnnl7a2cg" path="res://ImageAssets/LoadingCircleAnimation/frame-22.png" id="24_4pw7b"]
+[ext_resource type="Texture2D" uid="uid://clyp8kt2bw73i" path="res://ImageAssets/LoadingCircleAnimation/frame-23.png" id="25_flcqx"]
+[ext_resource type="Texture2D" uid="uid://bjwofdiel6fxb" path="res://ImageAssets/LoadingCircleAnimation/frame-24.png" id="26_ppm80"]
+[ext_resource type="Texture2D" uid="uid://c7ub38jlgb0yd" path="res://ImageAssets/LoadingCircleAnimation/frame-25.png" id="27_xjb5n"]
+[ext_resource type="Texture2D" uid="uid://cu62qg7q7884c" path="res://ImageAssets/LoadingCircleAnimation/frame-26.png" id="28_wmr0s"]
+[ext_resource type="Texture2D" uid="uid://cynapsche3thd" path="res://ImageAssets/LoadingCircleAnimation/frame-27.png" id="29_r4uts"]
+[ext_resource type="Texture2D" uid="uid://cgvdx2iyuq0fy" path="res://ImageAssets/LoadingCircleAnimation/frame-28.png" id="30_pn2mq"]
+[ext_resource type="Texture2D" uid="uid://bh8ii4gn2cjdt" path="res://ImageAssets/LoadingCircleAnimation/frame-29.png" id="31_d1suf"]
+[ext_resource type="Texture2D" uid="uid://bcadb74q5qh20" path="res://ImageAssets/LoadingCircleAnimation/frame-30.png" id="32_s8fb7"]
+[ext_resource type="Texture2D" uid="uid://lxh2fqgq76w6" path="res://ImageAssets/LoadingCircleAnimation/frame-31.png" id="33_qet02"]
+[ext_resource type="Texture2D" uid="uid://coa1tpiuy4cbs" path="res://ImageAssets/LoadingCircleAnimation/frame-32.png" id="34_47yqt"]
+[ext_resource type="Texture2D" uid="uid://clkgpge7ql6qp" path="res://ImageAssets/LoadingCircleAnimation/frame-33.png" id="35_8s16e"]
 
-[node name="ModManager" type="Control" node_paths=PackedStringArray("_modList", "_gamePickerButton", "_titleRequester", "_modLocationButton") groups=["Initiate"]]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_thbu4"]
+bg_color = Color(0.168627, 0.180392, 0.188235, 0.529412)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_2s7oa"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_m1c4w")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_suxsp")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_v3vdp")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_ruh65")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_8ddj2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_duivn")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_mtk5j")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_udqee")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_jsupf")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_hkhsd")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_exv8c")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_fvywn")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_en65g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("16_o535n")
+}, {
+"duration": 1.0,
+"texture": ExtResource("17_ae313")
+}, {
+"duration": 1.0,
+"texture": ExtResource("18_41won")
+}, {
+"duration": 1.0,
+"texture": ExtResource("19_o0ufr")
+}, {
+"duration": 1.0,
+"texture": ExtResource("20_vy1cs")
+}, {
+"duration": 1.0,
+"texture": ExtResource("21_c5rj8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("22_yku3t")
+}, {
+"duration": 1.0,
+"texture": ExtResource("23_f21n4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("24_4pw7b")
+}, {
+"duration": 1.0,
+"texture": ExtResource("25_flcqx")
+}, {
+"duration": 1.0,
+"texture": ExtResource("26_ppm80")
+}, {
+"duration": 1.0,
+"texture": ExtResource("27_xjb5n")
+}, {
+"duration": 1.0,
+"texture": ExtResource("28_wmr0s")
+}, {
+"duration": 1.0,
+"texture": ExtResource("29_r4uts")
+}, {
+"duration": 1.0,
+"texture": ExtResource("30_pn2mq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("31_d1suf")
+}, {
+"duration": 1.0,
+"texture": ExtResource("32_s8fb7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("33_qet02")
+}, {
+"duration": 1.0,
+"texture": ExtResource("34_47yqt")
+}, {
+"duration": 1.0,
+"texture": ExtResource("35_8s16e")
+}],
+"loop": true,
+"name": &"default",
+"speed": 30.0
+}]
+
+[node name="ModManager" type="Control" node_paths=PackedStringArray("_modList", "_gamePickerButton", "_titleRequester", "_modLocationButton", "_loadingPanel") groups=["Initiate"]]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -16,6 +159,7 @@ _gamePickerButton = NodePath("Header/GameSelection")
 _titleRequester = NodePath("TitleRequester")
 _installedIcon = ExtResource("2_2ngo2")
 _modLocationButton = NodePath("Header/ModLocationButton")
+_loadingPanel = NodePath("LoadingWindow")
 metadata/_edit_use_anchors_ = true
 
 [node name="ModsList" type="ItemList" parent="."]
@@ -104,6 +248,47 @@ Windows it should be something like
 C:\\Users\\username\\AppData\\Roaming\\yuzu\\load"
 alignment = 0
 text_overrun_behavior = 4
+
+[node name="LoadingWindow" type="Panel" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_thbu4")
+
+[node name="LoadingBarControl" type="Control" parent="LoadingWindow"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LoadingBarSprite" type="AnimatedSprite2D" parent="LoadingWindow/LoadingBarControl"]
+process_mode = 3
+sprite_frames = SubResource("SpriteFrames_2s7oa")
+autoplay = "default"
+frame_progress = 0.432685
+
+[node name="LoadingLabelBox" type="Label" parent="LoadingWindow/LoadingBarControl"]
+layout_mode = 1
+offset_left = -246.5
+offset_top = -46.0
+offset_right = 246.5
+offset_bottom = 46.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 2
+theme_override_font_sizes/font_size = 64
+text = "Loading:"
+horizontal_alignment = 1
+vertical_alignment = 1
+metadata/_edit_use_anchors_ = true
 
 [connection signal="item_activated" from="ModsList" to="." method="ModClicked"]
 [connection signal="pressed" from="SideBar/RefreshButton" to="." method="RefreshPressed"]

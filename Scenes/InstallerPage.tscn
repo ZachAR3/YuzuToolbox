@@ -1,10 +1,13 @@
-[gd_scene load_steps=4 format=3 uid="uid://cr3wosequvma8"]
+[gd_scene load_steps=5 format=3 uid="uid://cr3wosequvma8"]
 
 [ext_resource type="Script" path="res://Scripts/Installer.cs" id="1_3lw4p"]
 [ext_resource type="Texture2D" uid="uid://e5vtrghoacs2" path="res://ImageAssets/WarningSign.png" id="1_xly6n"]
 [ext_resource type="Image" uid="uid://dt3aq1jm2e2ds" path="res://ImageAssets/Icon.png" id="2_efmk0"]
 
-[node name="Installer" type="Control" node_paths=PackedStringArray("_versionButton", "_createShortcutButton", "_installLocationButton", "_downloadButton", "_clearShadersButton", "_shadersLocationButton", "_autoUnpackButton", "_customVersionCheckBox", "_customVersionSpinBox", "_latestReleaseRequester", "_downloadRequester", "_extractWarning", "_downloadWarning", "_clearShadersWarning") groups=["Initiate"]]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7am6t"]
+bg_color = Color(0.168627, 0.180392, 0.188235, 0.529412)
+
+[node name="Installer" type="Control" node_paths=PackedStringArray("_versionButton", "_createShortcutButton", "_installLocationButton", "_downloadButton", "_downloadWindow", "_downloadLabel", "_downloadUpdateTimer", "_downloadProgressBar", "_clearShadersButton", "_shadersLocationButton", "_autoUnpackButton", "_customVersionCheckBox", "_customVersionSpinBox", "_latestReleaseRequester", "_downloadRequester", "_extractWarning", "_downloadWarning", "_clearShadersWarning") groups=["Initiate"]]
 layout_mode = 3
 anchors_preset = 0
 script = ExtResource("1_3lw4p")
@@ -13,6 +16,10 @@ _versionButton = NodePath("ControlsContainer/VersionSelectionButton")
 _createShortcutButton = NodePath("ControlsContainer/CreateShortcutButton")
 _installLocationButton = NodePath("ControlsContainer/LocationButton")
 _downloadButton = NodePath("DownloadButton")
+_downloadWindow = NodePath("DownloadWindow")
+_downloadLabel = NodePath("DownloadWindow/Window/DownloadLabelBox")
+_downloadUpdateTimer = NodePath("DownloadWindow/Window/DownloadProgressUpdater")
+_downloadProgressBar = NodePath("DownloadWindow/Window/DownloadProgress")
 _clearShadersButton = NodePath("ControlsContainer/ClearShadersButton")
 _shadersLocationButton = NodePath("ControlsContainer/ShaderLocationButton")
 _autoUnpackButton = NodePath("ControlsContainer/ExtractButton")
@@ -194,6 +201,70 @@ metadata/_edit_use_anchors_ = true
 [node name="DownloadRequester" type="HTTPRequest" parent="."]
 
 [node name="ReleaseRequester" type="HTTPRequest" parent="."]
+
+[node name="DownloadWindow" type="Panel" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_7am6t")
+
+[node name="Window" type="ColorRect" parent="DownloadWindow"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -505.0
+offset_top = -125.0
+offset_right = 505.0
+offset_bottom = 127.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.168627, 0.180392, 0.188235, 1)
+
+[node name="DownloadLabelBox" type="Label" parent="DownloadWindow/Window"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -246.5
+offset_top = -93.0
+offset_right = 246.5
+offset_bottom = -1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 2
+theme_override_font_sizes/font_size = 64
+text = "Downloading..."
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="DownloadProgress" type="ProgressBar" parent="DownloadWindow/Window"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -491.0
+offset_top = -101.0
+offset_right = 491.0
+offset_bottom = -50.0
+grow_horizontal = 2
+grow_vertical = 0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+rounded = true
+
+[node name="DownloadProgressUpdater" type="Timer" parent="DownloadWindow/Window"]
+wait_time = 0.1
 
 [connection signal="toggled" from="ControlsContainer/ExtractButton" to="." method="AutoUnpackToggled"]
 [connection signal="toggled" from="ControlsContainer/ClearShadersButton" to="." method="ClearShadersToggle"]

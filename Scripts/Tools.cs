@@ -120,17 +120,9 @@ public partial class Tools : Godot.Node
 		{
 			Tools.DeleteDirectoryContents(shaderLocation);
 			return true;
-			// Move to tools script when made
-			// _clearShadersButton.Text = "Shaders cleared successfully!";
-			// _clearShadersToolButton.Text = "Shaders cleared successfully!";
+
 		}
-		else
-		{
-			// Move to tools caller
-			//ErrorPopup("failed to find shaders location");
-			return false;
-		}
-			
+		return false;
 	}
 	
 	
@@ -144,7 +136,7 @@ public partial class Tools : Godot.Node
 
 	
 	// File chooser functions
-	public void OpenFileChooser(ref string returnObject, string startingDirectory, Godot.Label errorLabel, Popup errorPopup)
+	public async Task<string> OpenFileChooser(string startingDirectory, Godot.Label errorLabel, Popup errorPopup)
 	{
 		try
 		{
@@ -168,17 +160,17 @@ public partial class Tools : Godot.Node
 
 		// Connect the response signal, I would like to directly pass in the return object, but this isn't possible 
 		// in a lambda, so we create a temp value to hold it and then assign it to that value after.
-		string tempReturnString = returnObject;
+		string returnString = null;
 
-		_fileChooser.Response += (sender, args) => OnFileChooserResponse(sender, args, ref tempReturnString);
-		_fileChooser.FocusOutEvent += (sender, args) => OnFileChooserResponse(sender, null, ref tempReturnString);
+		_fileChooser.Response += (sender, args) => OnFileChooserResponse(sender, args, ref returnString);
+		_fileChooser.FocusOutEvent += (sender, args) => OnFileChooserResponse(sender, null, ref returnString);
 
 		// Show the dialog
 		_fileChooser.Show();
 		Application.Run();
 		
 		// Sets our original object back to be the returned temporary string.
-		returnObject = tempReturnString;
+		return returnString;
 	}
 
 

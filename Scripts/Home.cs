@@ -17,14 +17,14 @@ public partial class Home : Control
 	[Export()] private TextureRect _lightBg;
 	[Export()] private ColorRect _downloadWindowApp;
 	[Export()] private AudioStreamPlayer _backgroundAudio;
-	[Export()] private Godot.CheckButton _muteButton;
+	[Export()] private CheckButton _muteButton;
 	[Export()] private CheckBox _enableLightTheme;
 	[Export()] private Array<Theme> _themes;
 	[Export()] private Array<StyleBoxLine> _themesSeparator;
 	[Export()] private ColorRect _header;
-	[Export()] private Godot.Label _headerLabel;
-	[Export()] private Godot.Label _latestVersionLabel;
-	
+	[Export()] private Label _headerLabel;
+	[Export()] private Label _latestVersionLabel;
+
 	[ExportGroup("ModManager")]
 	[Export()] private ItemList _modList;
 

@@ -14,10 +14,6 @@ public partial class Installer : Control
 	[Export()] private Popup _errorPopup;
 	[Export()] private Label _errorLabel;
 	[Export()] private PopupMenu _confirmationPopup;
-	[Export()] private Panel _downloadWindow;
-	[Export()] private Label _downloadLabel;
-	[Export()] private Timer _downloadUpdateTimer;
-	[Export()] private ProgressBar _downloadProgressBar;
 	[Export()] private Label _latestVersionLabel;
 
 	[ExportGroup("Installer")] [Export()] private Godot.Image _icon;
@@ -25,6 +21,10 @@ public partial class Installer : Control
 	[Export()] private CheckBox _createShortcutButton;
 	[Export()] private Button _installLocationButton;
 	[Export()] private Button _downloadButton;
+	[Export()] private Panel _downloadWindow;
+	[Export()] private Label _downloadLabel;
+	[Export()] private Timer _downloadUpdateTimer;
+	[Export()] private ProgressBar _downloadProgressBar;
 	[Export()] private CheckBox _clearShadersButton;
 	[Export()] private Button _shadersLocationButton;
 	[Export()] private CheckBox _autoUnpackButton;
@@ -133,6 +133,7 @@ public partial class Installer : Control
 		_downloadRequester.Request(
 			$@"{_pineappleDownloadBaseUrl}{version}/{_osUsed}-{_yuzuBaseString}{version}{_yuzuExtensionString}");
 		_downloadUpdateTimer.Start();
+		_downloadLabel.Text = "Downloading...";
 	}
 
 
@@ -381,16 +382,25 @@ Categories=Game;Emulator;Qt;
 	// Signal functions
 	private  void OnShadersLocationButtonPressed()
 	{
-		_tools.OpenFileChooser(ref Globals.Instance.Settings.ShadersLocation, Globals.Instance.Settings.ShadersLocation, _errorLabel, _errorPopup);
-		_shadersLocationButton.Text = Globals.Instance.Settings.ShadersLocation;
+		var shadersLocationInput = _tools
+			.OpenFileChooser(Globals.Instance.Settings.ShadersLocation, _errorLabel, _errorPopup).Result;
+		if (shadersLocationInput != null)
+		{
+			Globals.Instance.Settings.ShadersLocation = shadersLocationInput;
+		}
+
 		Globals.Instance.SaveManager.WriteSave(Globals.Instance.Settings);
 	}
 	
 	
 	private void OnInstallLocationButtonPressed()
 	{
-		_tools.OpenFileChooser(ref Globals.Instance.Settings.SaveDirectory, Globals.Instance.Settings.SaveDirectory, _errorLabel, _errorPopup);
-		_installLocationButton.Text = Globals.Instance.Settings.SaveDirectory;
+		var saveDirectoryLocationInput = _tools
+			.OpenFileChooser(Globals.Instance.Settings.SaveDirectory, _errorLabel, _errorPopup).Result;
+		if (saveDirectoryLocationInput != null)
+		{
+			Globals.Instance.Settings.SaveDirectory = saveDirectoryLocationInput;
+		}
 		Globals.Instance.SaveManager.WriteSave(Globals.Instance.Settings);
 	}
 

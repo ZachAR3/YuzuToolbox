@@ -114,15 +114,26 @@ public partial class ToolsPage : Control
 	
 	private void OnFromSaveDirectoryButtonPressed()
 	{
-		_tools.OpenFileChooser(ref Globals.Instance.Settings.FromSaveDirectory, Globals.Instance.Settings.FromSaveDirectory, _errorLabel,
-			_errorPopup);
+		var fromSaveDirectoryInput = _tools
+			.OpenFileChooser(Globals.Instance.Settings.FromSaveDirectory, _errorLabel, _errorPopup).Result;
+		if (fromSaveDirectoryInput != null)
+		{
+			Globals.Instance.Settings.FromSaveDirectory = fromSaveDirectoryInput;
+		}
+
 		_fromSaveDirectoryButton.Text = Globals.Instance.Settings.FromSaveDirectory;
 		Globals.Instance.SaveManager.WriteSave(Globals.Instance.Settings);
 	}
 	
 	private void OnToSaveDirectoryButtonPressed()
 	{
-		_tools.OpenFileChooser(ref Globals.Instance.Settings.ToSaveDirectory, Globals.Instance.Settings.ToSaveDirectory, _errorLabel, _errorPopup);
+		var toSaveDirectoryInput = _tools
+			.OpenFileChooser(Globals.Instance.Settings.ToSaveDirectory, _errorLabel, _errorPopup).Result;
+		if (toSaveDirectoryInput != null)
+		{
+			Globals.Instance.Settings.ToSaveDirectory = toSaveDirectoryInput;
+		}
+
 		_toSaveDirectoryButton.Text = Globals.Instance.Settings.ToSaveDirectory;
 		Globals.Instance.SaveManager.WriteSave(Globals.Instance.Settings);
 	}

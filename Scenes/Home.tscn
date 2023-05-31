@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://c7wdbnvnydnxk"]
+[gd_scene load_steps=17 format=3 uid="uid://c7wdbnvnydnxk"]
 
 [ext_resource type="Theme" uid="uid://cnnid0n04kfr7" path="res://Themes/DarkTheme.tres" id="1_c22a4"]
 [ext_resource type="Script" path="res://Scripts/Home.cs" id="1_p51ic"]
@@ -36,12 +36,6 @@ border_width_right = 3
 border_width_bottom = 3
 border_color = Color(0.8, 0.8, 0.8, 0)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7ft08"]
-bg_color = Color(0.184314, 0.196078, 0.203922, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jo4ax"]
-bg_color = Color(0.168627, 0.180392, 0.188235, 0.529412)
-
 [node name="Home" type="Control" node_paths=PackedStringArray("_darkBg", "_lightBg", "_downloadWindowApp", "_backgroundAudio", "_muteButton", "_enableLightTheme", "_header", "_headerLabel", "_latestVersionLabel", "_modList") groups=["Initiate"]]
 layout_mode = 3
 anchors_preset = 15
@@ -57,7 +51,7 @@ _appVersion = 2.4
 _saveManagerVersion = 2.0
 _darkBg = NodePath("DarkBG")
 _lightBg = NodePath("LightBG")
-_downloadWindowApp = NodePath("ProgressWindow/Window")
+_downloadWindowApp = NodePath("MainPage/Installer/DownloadWindow/Window")
 _backgroundAudio = NodePath("BackgroundAudio")
 _muteButton = NodePath("Header/Option/MuteButton")
 _enableLightTheme = NodePath("Header/Option/LightMode")
@@ -186,15 +180,11 @@ grow_vertical = 2
 tab_alignment = 1
 metadata/_edit_use_anchors_ = true
 
-[node name="Installer" parent="MainPage" node_paths=PackedStringArray("_errorPopup", "_errorLabel", "_confirmationPopup", "_downloadWindow", "_downloadLabel", "_downloadUpdateTimer", "_downloadProgressBar", "_latestVersionLabel") instance=ExtResource("10_7mm46")]
+[node name="Installer" parent="MainPage" node_paths=PackedStringArray("_errorPopup", "_errorLabel", "_confirmationPopup", "_latestVersionLabel") instance=ExtResource("10_7mm46")]
 layout_mode = 2
 _errorPopup = NodePath("../../ErrorPopup")
 _errorLabel = NodePath("../../ErrorPopup/ErrorLabel")
 _confirmationPopup = NodePath("../../ConfirmPopup")
-_downloadWindow = NodePath("../../ProgressWindow")
-_downloadLabel = NodePath("../../ProgressWindow/Window/ProgressLabelBox")
-_downloadUpdateTimer = NodePath("../../ProgressWindow/Window/ProgressProgressUpdater")
-_downloadProgressBar = NodePath("../../ProgressWindow/Window/ProgressProgress")
 _latestVersionLabel = NodePath("../../Header/HeaderLabels/LastestVersion")
 
 [node name="Tools" parent="MainPage" node_paths=PackedStringArray("_errorPopup", "_errorLabel", "_confirmationPopup") instance=ExtResource("11_27f86")]
@@ -215,7 +205,6 @@ _confirmationPopup = NodePath("../../ConfirmPopup")
 initial_position = 2
 size = Vector2i(600, 300)
 always_on_top = true
-theme_override_styles/panel = SubResource("StyleBoxFlat_7ft08")
 
 [node name="ErrorLabel" type="Label" parent="ErrorPopup"]
 anchors_preset = -1
@@ -223,10 +212,10 @@ anchor_left = 0.00666667
 anchor_top = 0.0133333
 anchor_right = 0.993333
 anchor_bottom = 0.986667
-offset_left = -4.0
-offset_top = -3.99999
-offset_right = 4.00018
-offset_bottom = 3.99991
+offset_left = -1.0
+offset_top = -0.99999
+offset_right = 1.00018
+offset_bottom = 0.999908
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3
@@ -235,70 +224,6 @@ theme_override_font_sizes/font_size = 20
 text = "Error:"
 autowrap_mode = 3
 metadata/_edit_use_anchors_ = true
-
-[node name="ProgressWindow" type="Panel" parent="."]
-visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_jo4ax")
-
-[node name="Window" type="ColorRect" parent="ProgressWindow"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -505.0
-offset_top = -125.0
-offset_right = 505.0
-offset_bottom = 127.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.168627, 0.180392, 0.188235, 1)
-
-[node name="ProgressLabelBox" type="Label" parent="ProgressWindow/Window"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -246.5
-offset_top = -93.0
-offset_right = 246.5
-offset_bottom = -1.0
-grow_horizontal = 2
-grow_vertical = 2
-focus_mode = 2
-theme_override_font_sizes/font_size = 64
-text = "Download..."
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="ProgressProgress" type="ProgressBar" parent="ProgressWindow/Window"]
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -491.0
-offset_top = -101.0
-offset_right = 491.0
-offset_bottom = -50.0
-grow_horizontal = 2
-grow_vertical = 0
-size_flags_horizontal = 3
-size_flags_vertical = 3
-rounded = true
-
-[node name="ProgressProgressUpdater" type="Timer" parent="ProgressWindow/Window"]
-wait_time = 0.1
 
 [node name="ConfirmPopup" type="PopupMenu" parent="."]
 initial_position = 1
@@ -315,4 +240,5 @@ item_1/id = 1
 [connection signal="toggled" from="Header/Option/LightMode" to="." method="SetTheme"]
 [connection signal="toggled" from="Header/Option/MuteButton" to="." method="ToggledMusicButton"]
 
+[editable path="MainPage/Installer"]
 [editable path="MainPage/ModManager"]
