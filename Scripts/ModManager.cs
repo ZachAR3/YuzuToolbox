@@ -296,13 +296,15 @@ public partial class ModManager : Control
 			await Task.Run(async () =>
 			{
 				// Gets download path, and if using windows replaces /'s with \'s
-				string downloadPath = $@"{Globals.Instance.Settings.ModsLocation}/{gameId}/{modName}-Download";
-				downloadPath = _osUsed == "Windows" ? downloadPath.Replace("/", "\\").Replace(":", ".") : downloadPath;
-				
-				// Gets install path, and if using windows replaces /'s with \'s
-				string installPath = $@"{Globals.Instance.Settings.ModsLocation}/{gameId}/{modName}!{compatibleVersions.Last()}";
-				installPath = _osUsed == "Windows" ? installPath.Replace("/", "\\").Replace(":", ".") : installPath;
-				
+				string downloadPath = _osUsed == "Linux"
+					? $@"{Globals.Instance.Settings.ModsLocation}/{gameId}/{modName}-Download"
+					: $@"{Globals.Instance.Settings.ModsLocation}\{gameId}\{modName.Replace(":", ".")}-Download";
+
+					// Gets install path, and if using windows replaces /'s with \'s
+				string installPath = _osUsed == "Linux" 
+					? $@"{Globals.Instance.Settings.ModsLocation}/{gameId}/{modName}!{compatibleVersions.Last()}" 
+					: $@"{Globals.Instance.Settings.ModsLocation}\{gameId}\{modName.Replace(":", ".")}!{compatibleVersions.Last()}";
+
 				HttpClient httpClient = new HttpClient();
 				byte[] downloadData = await httpClient.GetAsync(modUrl).Result.Content.ReadAsByteArrayAsync();
 				await File.WriteAllBytesAsync(downloadPath, downloadData);
