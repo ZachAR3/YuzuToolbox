@@ -107,6 +107,7 @@ public partial class ModManager : Control
 			else
 			{
 				_tools.ErrorPopup("no installed games found", _errorLabel, _errorPopup);
+				_loadingPanel.Visible = false;
 			}
 		});
 	}
@@ -195,6 +196,7 @@ public partial class ModManager : Control
 		catch (Exception installedError)
 		{
 			_tools.ErrorPopup($@"cannot find installed mods error: {installedError}", _errorLabel, _errorPopup);
+			_loadingPanel.Visible = false;
 			throw;
 		}
 	}
@@ -322,6 +324,7 @@ public partial class ModManager : Control
 		catch (Exception installError)
 		{
 			_tools.ErrorPopup($@"failed to install mod:{installError}", _errorLabel, _errorPopup);
+			_loadingPanel.Visible = false;
 			throw;
 		}
 
@@ -353,6 +356,7 @@ public partial class ModManager : Control
 		catch (Exception updateError)
 		{
 			_tools.ErrorPopup($@"failed to update mod:{updateError}", _errorLabel, _errorPopup);
+			_loadingPanel.Visible = false;
 			throw;
 		}
 	}
@@ -402,6 +406,7 @@ public partial class ModManager : Control
 		catch (Exception removeError)
 		{
 			_tools.ErrorPopup("failed to remove mod:" + removeError, _errorLabel, _errorPopup);
+			_loadingPanel.Visible = false;
 			return false;
 		}
 	}
