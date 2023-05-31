@@ -43,7 +43,6 @@ public partial class Home : Control
 		Globals.Instance.SaveManager.Version = _saveManagerVersion;
 
 		// Mute by default the music
-		ToggledMusicButton(false);
 		SetTheme(Globals.Instance.Settings.LightModeEnabled);
 		
 		// Signals

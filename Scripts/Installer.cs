@@ -389,6 +389,7 @@ Categories=Game;Emulator;Qt;
 			Globals.Instance.Settings.ShadersLocation = shadersLocationInput;
 		}
 
+		_shadersLocationButton.Text = Globals.Instance.Settings.ShadersLocation;	
 		Globals.Instance.SaveManager.WriteSave(Globals.Instance.Settings);
 	}
 	
@@ -401,6 +402,8 @@ Categories=Game;Emulator;Qt;
 		{
 			Globals.Instance.Settings.SaveDirectory = saveDirectoryLocationInput;
 		}
+		
+		_installLocationButton.Text = Globals.Instance.Settings.SaveDirectory;
 		Globals.Instance.SaveManager.WriteSave(Globals.Instance.Settings);
 	}
 

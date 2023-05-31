@@ -213,7 +213,6 @@ public partial class ModManager : Control
 		
 		foreach (var mod in _yuzuModsList[gameId])
 		{
-			GD.Print("Add mod item");
 			if (mod.IsInstalled)
 			{
 				_modList.AddItem($@"  {mod.ModName} - Supports:{string.Join(", ", mod.CompatibleVersions)}  ", icon: _installedIcon);
