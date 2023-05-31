@@ -55,17 +55,24 @@ public partial class ModManager : Control
 	{
 		await Task.Run(async () =>
 		{
-			_titleRequester.Request(
-				"https://switchbrew.org/w/index.php?title=Title_list/Games&mobileaction=toggle_view_desktop");
-			await ToSignal(_titleRequester,
-				"request_completed"); // Waits for titles to be retrieved before checking installed titles against them.
-
 			if (!Directory.Exists(Globals.Instance.Settings.ModsLocation))
 			{
 				_tools.ErrorPopup($@"mods directory not found", _errorLabel, _errorPopup);
 				return;
 			}
+			
+			_titleRequester.Request(
+				"https://switchbrew.org/w/index.php?title=Title_list/Games&mobileaction=toggle_view_desktop");
+			await ToSignal(_titleRequester,
+				"request_completed"); // Waits for titles to be retrieved before checking installed titles against them.
 
+			// Checks if no titles were found, if they weren't gives error and cancels.
+			if (_titles.Count <= 0)
+			{
+				_tools.ErrorPopup("failed to retrieve titles list, check connection and try again later.", _errorLabel, _errorPopup);
+				return;
+			}
+			
 			foreach (var gameModFolder in Directory.GetDirectories(Globals.Instance.Settings.ModsLocation))
 			{
 				string gameId = gameModFolder.GetFile(); // Gets game id by grabbing the folders name
@@ -222,7 +229,13 @@ public partial class ModManager : Control
 			// Removes the <td> and </td> html from our script for cleaning along with the special TM character otherwise the mod sites won't recognize the title.
 			var gameCleaned = game.Replace("<td>", "").Replace("</td>", "").Replace("™", "");
 			// Splits at every new line
-			var gameSplit = gameCleaned.Split(System.Environment.NewLine);
+			var gameSplit = gameCleaned.Split("\n");
+
+			if (gameSplit.Length < 2)
+			{
+				_tools.ErrorPopup("unable to parse titles list, check connection and try again later.", _errorLabel, _errorPopup);
+				return;
+			}
 			// Adds the game to our title list with type Dictionary(string ID, string Title, string modID)
 			_titles[gameSplit[1]] = gameSplit[2];
 		}
