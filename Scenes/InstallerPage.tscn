@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://e5vtrghoacs2" path="res://ImageAssets/WarningSign.png" id="1_xly6n"]
 [ext_resource type="Image" uid="uid://dt3aq1jm2e2ds" path="res://ImageAssets/Icon.png" id="2_efmk0"]
 
-[node name="Installer" type="Control" node_paths=PackedStringArray("_versionButton", "_createShortcutButton", "_installLocationButton", "_downloadButton", "_clearShadersButton", "_shadersLocationButton", "_autoUnpackButton", "_customVersionCheckBox", "_customVersionSpinBox", "_latestReleaseRequester", "_downloadRequester", "_extractWarning", "_downloadWarning", "_clearShadersWarning")]
+[node name="Installer" type="Control" node_paths=PackedStringArray("_versionButton", "_createShortcutButton", "_installLocationButton", "_downloadButton", "_clearShadersButton", "_shadersLocationButton", "_autoUnpackButton", "_customVersionCheckBox", "_customVersionSpinBox", "_latestReleaseRequester", "_downloadRequester", "_extractWarning", "_downloadWarning", "_clearShadersWarning") groups=["Initiate"]]
 layout_mode = 3
 anchors_preset = 0
 script = ExtResource("1_3lw4p")

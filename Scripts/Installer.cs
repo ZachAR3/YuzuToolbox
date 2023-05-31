@@ -44,20 +44,14 @@ public partial class Installer : Control
 	[Export()] private int _previousVersionsToAdd = 10;
 
 	// Internal variables
-	private ResourceSaveManager _saveManager;
-	private SettingsResource _settings;
 	private String _osUsed = OS.GetName();
 	private string _yuzuExtensionString;
 	private Tools _tools = new Tools();
 
 
 	// Godot functions
-	public override void _Ready()
+	private void Initiate()
 	{
-		// Setup save manager and load settings
-		_saveManager = new ResourceSaveManager();
-		_settings = _saveManager.GetSettings();
-
 		if (_osUsed == "Linux")
 		{
 			_saveName += ".AppImage";
@@ -71,8 +65,8 @@ public partial class Installer : Control
 			_createShortcutButton.Disabled = true;
 		}
 
-		_shadersLocationButton.Text = _settings.ShadersLocation;
-		_installLocationButton.Text = _settings.SaveDirectory;
+		_shadersLocationButton.Text = Globals.Instance.Settings.ShadersLocation;
+		_installLocationButton.Text = Globals.Instance.Settings.SaveDirectory;
 		_downloadButton.Disabled = true;
 		_downloadWindow.Visible = false;
 		_customVersionSpinBox.Editable = false;
@@ -112,9 +106,9 @@ public partial class Installer : Control
 		DeleteOldVersion();
 
 		// Set old install (if it exists) to not be disabled anymore.
-		if (_settings.InstalledVersion != -1)
+		if (Globals.Instance.Settings.InstalledVersion != -1)
 		{
-			_versionButton.SetItemDisabled(_versionButton.GetItemIndex(_settings.InstalledVersion), false);
+			_versionButton.SetItemDisabled(_versionButton.GetItemIndex(Globals.Instance.Settings.InstalledVersion), false);
 		}
 
 		if (_customVersionCheckBox.ButtonPressed)
@@ -131,11 +125,11 @@ public partial class Installer : Control
 		_versionButton.Disabled = true;
 		_downloadButton.Disabled = true;
 		_installLocationButton.Disabled = true;
-		_settings.InstalledVersion = version;
+		Globals.Instance.Settings.InstalledVersion = version;
 		_downloadLabel.Text = "Downloading...";
 		_downloadWindow.Visible = true;
 		_downloadLabel.GrabFocus();
-		_downloadRequester.DownloadFile = $@"{_settings.SaveDirectory}/{_saveName}";
+		_downloadRequester.DownloadFile = $@"{Globals.Instance.Settings.SaveDirectory}/{_saveName}";
 		_downloadRequester.Request(
 			$@"{_pineappleDownloadBaseUrl}{version}/{_osUsed}-{_yuzuBaseString}{version}{_yuzuExtensionString}");
 		_downloadUpdateTimer.Start();
@@ -153,7 +147,7 @@ public partial class Installer : Control
 	{
 		String linuxShortcutName = "yuzu-ea.desktop";
 		String windowsShortcutName = "yuzu-ea.lnk";
-		String iconPath = $@"{_settings.SaveDirectory}/Icon.png";
+		String iconPath = $@"{Globals.Instance.Settings.SaveDirectory}/Icon.png";
 
 		if (_osUsed == "Linux")
 		{
@@ -181,7 +175,7 @@ Categories=Game;Emulator;Qt;
 
 				try
 				{
-					string tempShortcutPath = $@"{_settings.SaveDirectory}/{linuxShortcutName}";
+					string tempShortcutPath = $@"{Globals.Instance.Settings.SaveDirectory}/{linuxShortcutName}";
 					File.WriteAllText(tempShortcutPath, shortcutContent);
 					ProcessStartInfo startInfo = new ProcessStartInfo
 					{
@@ -196,7 +190,7 @@ Categories=Game;Emulator;Qt;
 				}
 				catch (Exception shortcutError)
 				{
-					shortcutPath = $@"{_settings.SaveDirectory}/{linuxShortcutName}";
+					shortcutPath = $@"{Globals.Instance.Settings.SaveDirectory}/{linuxShortcutName}";
 					_tools.ErrorPopup(
 						$@"Error creating shortcut, creating new at {shortcutPath}. Error:{shortcutError}", _errorLabel,
 						_errorPopup);
@@ -228,7 +222,7 @@ Categories=Game;Emulator;Qt;
 			}
 			catch (Exception shortcutError)
 			{
-				yuzuShortcutPath = $@"{_settings.SaveDirectory}/{windowsShortcutName}";
+				yuzuShortcutPath = $@"{Globals.Instance.Settings.SaveDirectory}/{windowsShortcutName}";
 				_tools.ErrorPopup(
 					$@"cannot create shortcut, ensure app is running as admin. Placing instead at {yuzuShortcutPath}. Exception:{shortcutError}",
 					_errorLabel, _errorPopup);
@@ -255,7 +249,7 @@ Categories=Game;Emulator;Qt;
 			}
 
 			//Checks if there is already a version installed, and if so adds it.
-			if (_settings.InstalledVersion != -1)
+			if (Globals.Instance.Settings.InstalledVersion != -1)
 			{
 				AddInstalledVersion();
 			}
@@ -272,7 +266,7 @@ Categories=Game;Emulator;Qt;
 
 	private void AddInstalledVersion()
 	{
-		var installedVersion = _settings.InstalledVersion;
+		var installedVersion = Globals.Instance.Settings.InstalledVersion;
 		var selectedIndex = _versionButton.GetItemIndex(installedVersion);
 		_customVersionSpinBox.Value = installedVersion;
 
@@ -307,7 +301,7 @@ Categories=Game;Emulator;Qt;
 
 	private void UnpackAndSetPermissions()
 	{
-		string yuzuPath = $@"{_settings.SaveDirectory}/{_saveName}";
+		string yuzuPath = $@"{Globals.Instance.Settings.SaveDirectory}/{_saveName}";
 		if (_osUsed == "Linux")
 		{
 			var yuzuFile = new Mono.Unix.UnixFileInfo(yuzuPath)
@@ -319,11 +313,11 @@ Categories=Game;Emulator;Qt;
 		{
 			if (_autoUnpackButton.ButtonPressed)
 			{
-				System.IO.Compression.ZipFile.ExtractToDirectory(yuzuPath, _settings.SaveDirectory);
-				String yuzuWindowsDirectory = $@"{_settings.SaveDirectory}/{_windowsFolderName}";
+				System.IO.Compression.ZipFile.ExtractToDirectory(yuzuPath, Globals.Instance.Settings.SaveDirectory);
+				String yuzuWindowsDirectory = $@"{Globals.Instance.Settings.SaveDirectory}/{_windowsFolderName}";
 				if (Directory.Exists(yuzuWindowsDirectory))
 				{
-					Tools.MoveFilesAndDirs(yuzuWindowsDirectory, _settings.SaveDirectory);
+					Tools.MoveFilesAndDirs(yuzuWindowsDirectory, Globals.Instance.Settings.SaveDirectory);
 				}
 			}
 		}
@@ -332,15 +326,15 @@ Categories=Game;Emulator;Qt;
 
 	private String GetExistingVersion()
 	{
-		if (DirAccess.DirExistsAbsolute(_settings.SaveDirectory))
+		if (DirAccess.DirExistsAbsolute(Globals.Instance.Settings.SaveDirectory))
 		{
-			var previousSave = DirAccess.Open(_settings.SaveDirectory);
+			var previousSave = DirAccess.Open(Globals.Instance.Settings.SaveDirectory);
 
 			foreach (var file in previousSave.GetFiles())
 			{
 				if (file.GetExtension() == "AppImage" || file.GetBaseName() == "yuzu")
 				{
-					return $@"{_settings.SaveDirectory}/{file}";
+					return $@"{Globals.Instance.Settings.SaveDirectory}/{file}";
 				}
 			}
 		}
@@ -365,7 +359,7 @@ Categories=Game;Emulator;Qt;
 		{
 			if (_autoUnpackButton.ButtonPressed)
 			{
-				Tools.DeleteDirectoryContents(_settings.SaveDirectory);
+				Tools.DeleteDirectoryContents(Globals.Instance.Settings.SaveDirectory);
 			}
 			else
 			{
@@ -378,7 +372,7 @@ Categories=Game;Emulator;Qt;
 
 		if (_clearShadersButton.ButtonPressed)
 		{
-			_tools.ClearShaders(_settings.ShadersLocation);
+			_tools.ClearShaders(Globals.Instance.Settings.ShadersLocation);
 			;
 		}
 	}
@@ -389,9 +383,9 @@ Categories=Game;Emulator;Qt;
 	{
 		await Task.Run(() =>
 		{
-			_tools.OpenFileChooser(ref _settings.ShadersLocation, _settings.ShadersLocation, _errorLabel, _errorPopup);
-			_shadersLocationButton.Text = _settings.ShadersLocation;
-			_saveManager.WriteSave(_settings);
+			_tools.OpenFileChooser(ref Globals.Instance.Settings.ShadersLocation, Globals.Instance.Settings.ShadersLocation, _errorLabel, _errorPopup);
+			_shadersLocationButton.Text = Globals.Instance.Settings.ShadersLocation;
+			Globals.Instance.SaveManager.WriteSave(Globals.Instance.Settings);
 		});
 	}
 	
@@ -400,9 +394,9 @@ Categories=Game;Emulator;Qt;
 	{
 		await Task.Run(() =>
 		{
-			_tools.OpenFileChooser(ref _settings.SaveDirectory, _settings.SaveDirectory, _errorLabel, _errorPopup);
-			_installLocationButton.Text = _settings.SaveDirectory;
-			_saveManager.WriteSave(_settings);
+			_tools.OpenFileChooser(ref Globals.Instance.Settings.SaveDirectory, Globals.Instance.Settings.SaveDirectory, _errorLabel, _errorPopup);
+			_installLocationButton.Text = Globals.Instance.Settings.SaveDirectory;
+			Globals.Instance.SaveManager.WriteSave(Globals.Instance.Settings);
 		});
 	}
 
@@ -432,8 +426,8 @@ Categories=Game;Emulator;Qt;
 		_versionButton.Disabled = false;
 		if (result == (int)HttpRequest.Result.Success)
 		{
-			_saveManager._settings = _settings;
-			_saveManager.WriteSave();
+			// Used to save version installed after download.
+			Globals.Instance.SaveManager.WriteSave(Globals.Instance.Settings);
 			_downloadProgressBar.Value = 100;
 			_downloadLabel.Text = "Successfully Downloaded!";
 

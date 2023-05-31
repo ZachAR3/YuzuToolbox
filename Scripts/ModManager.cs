@@ -1,13 +1,11 @@
 using Godot;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Godot.Collections;
 using HtmlAgilityPack;
-using WindowsShortcutFactory;
 using HttpClient = System.Net.Http.HttpClient;
 
 public partial class ModManager : Control
@@ -26,10 +24,8 @@ public partial class ModManager : Control
 
 	private const string Quote = "\"";
 	private string _currentGameId;
-	private SettingsResource _settings;
-	private ResourceSaveManager _saveManager = new ResourceSaveManager();
-	//private string _modsPath;
 	private Tools _tools = new Tools();
+	private string osUsed = OS.GetName();
 	
 	// Game id, game name
 	private Godot.Collections.Dictionary<string, string> _titles = new Godot.Collections.Dictionary<string, string>();
@@ -38,26 +34,16 @@ public partial class ModManager : Control
 	private Godot.Collections.Dictionary<string, Array<YuzuMod>> _yuzuModsList = new Godot.Collections.Dictionary<string, Array<YuzuMod>>();
 
 	// Godot Functions
-	public override void _Ready()
+	private void Initiate()
 	{
-		_settings = _saveManager.GetSettings();
 		_titleRequester.Connect("request_completed", new Callable(this, nameof(GetTitles)));
 
-		// Fix so doesn't overwrite previous saved locations TODO
-		if (OS.GetName() == "Linux")
+		if (Globals.Instance.Settings.ModsLocation == null)
 		{
-			_settings.AppDataPath = $@"{System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData)}/yuzu/";
+			Globals.Instance.Settings.ModsLocation = $@"{Globals.Instance.Settings.AppDataPath}load";
+			Globals.Instance.SaveManager.WriteSave(Globals.Instance.Settings);
 		}
-		else if (OS.GetName() == "Windows")
-		{
-			_settings.AppDataPath = $@"{System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData)}\yuzu\";
-		}
-
-		if (_settings.ModsLocation == null)
-		{
-			_settings.ModsLocation = $@"{_settings.AppDataPath}load";
-		}
-		_modLocationButton.Text = _settings.ModsLocation.PadLeft(_settings.ModsLocation.Length + 4, ' ');
+		_modLocationButton.Text = Globals.Instance.Settings.ModsLocation.PadLeft(Globals.Instance.Settings.ModsLocation.Length + 4, ' ');
 
 		GetGamesAndMods();
 		AddMods(_currentGameId);
@@ -74,13 +60,13 @@ public partial class ModManager : Control
 			await ToSignal(_titleRequester,
 				"request_completed"); // Waits for titles to be retrieved before checking installed titles against them.
 
-			if (!Directory.Exists(_settings.ModsLocation))
+			if (!Directory.Exists(Globals.Instance.Settings.ModsLocation))
 			{
 				_tools.ErrorPopup($@"mods directory not found", _errorLabel, _errorPopup);
 				return;
 			}
 
-			foreach (var gameModFolder in Directory.GetDirectories(_settings.ModsLocation))
+			foreach (var gameModFolder in Directory.GetDirectories(Globals.Instance.Settings.ModsLocation))
 			{
 				string gameId = gameModFolder.GetFile(); // Gets game id by grabbing the folders name
 				if (_titles.TryGetValue(gameId, out var gameName))
@@ -173,7 +159,7 @@ public partial class ModManager : Control
 	{
 		try
 		{
-			foreach (var modDirectory in Directory.GetDirectories($@"{_settings.ModsLocation}/{gameId}"))
+			foreach (var modDirectory in Directory.GetDirectories($@"{Globals.Instance.Settings.ModsLocation}/{gameId}"))
 			{
 				string[] modInfo = modDirectory.GetFile().Split("|");
 				string modName = modInfo[0];
@@ -289,12 +275,16 @@ public partial class ModManager : Control
 		{
 			await Task.Run(async () =>
 			{
-				// Downloads mod zip
-				string downloadPath = $@"{_settings.ModsLocation}/{gameId}/{modName}-Download";
-				string installPath = $@"{_settings.ModsLocation}/{gameId}/{modName}|{compatibleVersions.Last()}";
+				// Gets download path, and if using windows replaces /'s with \'s
+				string downloadPath = $@"{Globals.Instance.Settings.ModsLocation}/{gameId}/{modName}-Download";
+				downloadPath = osUsed == "Windows" ? downloadPath.Replace("/", "\\") : downloadPath;
+				
+				// Gets install path, and if using windows replaces /'s with \'s
+				string installPath = $@"{Globals.Instance.Settings.ModsLocation}/{gameId}/{modName}|{compatibleVersions.Last()}";
+				installPath = osUsed == "Windows" ? installPath.Replace("/", "\\") : installPath;
+				
 				HttpClient httpClient = new HttpClient();
 				byte[] downloadData = await httpClient.GetAsync(modUrl).Result.Content.ReadAsByteArrayAsync();
-				// Should really make it so / is different for windows and linux TODO
 				await File.WriteAllBytesAsync(downloadPath, downloadData);
 				System.IO.Compression.ZipFile.ExtractToDirectory(downloadPath, installPath + "-temp");
 
@@ -349,7 +339,7 @@ public partial class ModManager : Control
 	private async Task<bool> RemoveMod(string gameId, string modName, string currentVersion, Array<string> compatibleVersions, bool noConfirmation = false)
 	{
 		string modNameEnding = currentVersion == "N/A" ? "" : $"|{currentVersion}";
-		string removePath = $@"{_settings.ModsLocation}/{gameId}/{modName}{modNameEnding}";
+		string removePath = $@"{Globals.Instance.Settings.ModsLocation}/{gameId}/{modName}{modNameEnding}";
 		try
 		{
 			if (!noConfirmation)
@@ -475,10 +465,10 @@ public partial class ModManager : Control
 	{
 		await Task.Run(() =>
 		{
-			_tools.OpenFileChooser(ref _settings.ModsLocation, _settings.ModsLocation, _errorLabel, _errorPopup);
-			_modLocationButton.Text = _settings.ModsLocation.PadLeft(_settings.ModsLocation.Length + 4, ' ');
-			;
-			_saveManager.WriteSave(_settings);
+			_tools.OpenFileChooser(ref Globals.Instance.Settings.ModsLocation, Globals.Instance.Settings.ModsLocation, _errorLabel, _errorPopup);
+			_modLocationButton.Text = Globals.Instance.Settings.ModsLocation.PadLeft(Globals.Instance.Settings.ModsLocation.Length + 4, ' ');
+			
+			Globals.Instance.SaveManager.WriteSave(Globals.Instance.Settings);
 		});
 	}
 

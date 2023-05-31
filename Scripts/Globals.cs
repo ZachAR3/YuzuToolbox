@@ -19,8 +19,32 @@ public partial class Globals : Node
 	{
 		Settings = SaveManager.GetSettings();
 		_instance = this;
-		GetTree().CallDeferred("call_group", "Page", "Initiate");
-		//GetTree().CallGroup("Page", "Initiate");
+		
+		// Sets app data path default for first startup
+		if (Settings.AppDataPath == null)
+		{
+			if (OS.GetName() == "Linux")
+			{
+				Settings.AppDataPath =
+					$@"{System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData)}/yuzu/";
+			}
+			else if (OS.GetName() == "Windows")
+			{
+				Settings.AppDataPath =
+					$@"{System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData)}\yuzu\";
+			}
+			SaveManager.WriteSave(Settings);
+		}
+		
+		// Sets shaders location default for first startup
+		if (Settings.ShadersLocation == null)
+		{
+			GD.Print("Shader location = " + Settings.ShadersLocation);
+			Settings.ShadersLocation = $@"{Settings.AppDataPath}shader";
+			SaveManager.WriteSave(Settings);
+		}
+
+		GetTree().CallDeferred("call_group", "Initiate", "Initiate");
 	}
 
 }

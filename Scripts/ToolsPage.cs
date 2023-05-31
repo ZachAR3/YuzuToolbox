@@ -16,9 +16,7 @@ public partial class ToolsPage : Control
 	[Export()] private Button _restoreSavesButton;
 	[Export()] private Button _fromSaveDirectoryButton;
 	[Export()] private Button _toSaveDirectoryButton;
-
-	private ResourceSaveManager _saveManager = new ResourceSaveManager();
-	private SettingsResource _settings;
+	
 	private Tools _tools = new Tools();
 	private string _osUsed = OS.GetName();
 	
@@ -26,34 +24,16 @@ public partial class ToolsPage : Control
 	// Godot Functions
 	public override void _Ready()
 	{
-		_settings = _saveManager.GetSettings();
-		if (_settings.AppDataPath == null)
+		if (Globals.Instance.Settings.FromSaveDirectory == null)
 		{
-			if (_osUsed == "Linux")
-			{
-				_settings.AppDataPath = $@"{System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData)}/yuzu/";
-			}
-			else if (_osUsed == "Windows")
-			{
-				_settings.AppDataPath = $@"{System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData)}\yuzu\";
-			}
-		}
-		if (_settings.ShadersLocation == "")
-		{
-			_settings.ShadersLocation = $@"{_settings.AppDataPath}shader";
-			_saveManager.WriteSave(_settings);
-		}
-
-		if (_settings.FromSaveDirectory == "")
-		{
-			_settings.FromSaveDirectory = _osUsed == "Linux"
-				? $@"{_settings.AppDataPath}nand/user/save"
-				: $@"{_settings.AppDataPath}nand\user\save";
-			_saveManager.WriteSave(_settings);
+			Globals.Instance.Settings.FromSaveDirectory = _osUsed == "Linux"
+				? $@"{Globals.Instance.Settings.AppDataPath}nand/user/save"
+				: $@"{Globals.Instance.Settings.AppDataPath}nand\user\save";
+			Globals.Instance.SaveManager.WriteSave(Globals.Instance.Settings);
 		}
 		
-		_fromSaveDirectoryButton.Text = _settings.FromSaveDirectory;
-		_toSaveDirectoryButton.Text = _settings.ToSaveDirectory;
+		_fromSaveDirectoryButton.Text = Globals.Instance.Settings.FromSaveDirectory;
+		_toSaveDirectoryButton.Text = Globals.Instance.Settings.ToSaveDirectory;
 	}
 	
 	
@@ -67,7 +47,7 @@ public partial class ToolsPage : Control
 		}
 		
 		// Clears the install folder, if failed notifies user
-		if (!_tools.ClearInstallationFolder(_settings.SaveDirectory))
+		if (!_tools.ClearInstallationFolder(Globals.Instance.Settings.SaveDirectory))
 		{
 			_tools.ErrorPopup("failed to clear installation folder", _errorLabel, _errorPopup);
 			_clearInstallFolderButton.Text = "Clear failed!";
@@ -89,7 +69,7 @@ public partial class ToolsPage : Control
 		}
 		
 		// Clears the shaders, if returned an error notifies user.
-		if (!_tools.ClearShaders(_settings.ShadersLocation))
+		if (!_tools.ClearShaders(Globals.Instance.Settings.ShadersLocation))
 		{
 			_tools.ErrorPopup("failed to clear shaders", _errorLabel, _errorPopup);
 			_clearShadersToolButton.Text = "Clear failed!";
@@ -105,7 +85,7 @@ public partial class ToolsPage : Control
 	{
 		try
 		{
-			_tools.DuplicateDirectoryContents(_settings.FromSaveDirectory, _settings.ToSaveDirectory, true);
+			_tools.DuplicateDirectoryContents(Globals.Instance.Settings.FromSaveDirectory, Globals.Instance.Settings.ToSaveDirectory, true);
 			_backupSavesButton.Text = "Backup successful!";
 		}
 		catch (Exception backupError)
@@ -121,7 +101,7 @@ public partial class ToolsPage : Control
 	{
 		try
 		{
-			_tools.DuplicateDirectoryContents(_settings.ToSaveDirectory, _settings.FromSaveDirectory, true);
+			_tools.DuplicateDirectoryContents(Globals.Instance.Settings.ToSaveDirectory, Globals.Instance.Settings.FromSaveDirectory, true);
 			_restoreSavesButton.Text = "Saves restored successfully!";
 		}
 		catch (Exception restoreError)
@@ -136,10 +116,10 @@ public partial class ToolsPage : Control
 	{
 		await Task.Run(() =>
 		{
-			_tools.OpenFileChooser(ref _settings.FromSaveDirectory, _settings.FromSaveDirectory, _errorLabel,
+			_tools.OpenFileChooser(ref Globals.Instance.Settings.FromSaveDirectory, Globals.Instance.Settings.FromSaveDirectory, _errorLabel,
 				_errorPopup);
-			_fromSaveDirectoryButton.Text = _settings.FromSaveDirectory;
-			_saveManager.WriteSave(_settings);
+			_fromSaveDirectoryButton.Text = Globals.Instance.Settings.FromSaveDirectory;
+			Globals.Instance.SaveManager.WriteSave(Globals.Instance.Settings);
 		});
 	}
 	
@@ -147,9 +127,9 @@ public partial class ToolsPage : Control
 	{
 		await Task.Run(() =>
 		{
-			_tools.OpenFileChooser(ref _settings.ToSaveDirectory, _settings.ToSaveDirectory, _errorLabel, _errorPopup);
-			_toSaveDirectoryButton.Text = _settings.ToSaveDirectory;
-			_saveManager.WriteSave(_settings);
+			_tools.OpenFileChooser(ref Globals.Instance.Settings.ToSaveDirectory, Globals.Instance.Settings.ToSaveDirectory, _errorLabel, _errorPopup);
+			_toSaveDirectoryButton.Text = Globals.Instance.Settings.ToSaveDirectory;
+			Globals.Instance.SaveManager.WriteSave(Globals.Instance.Settings);
 		});
 	}
 

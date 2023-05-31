@@ -30,29 +30,24 @@ public partial class Home : Control
 
 
 	// Internal variables
-	private ResourceSaveManager _saveManager;
-	private SettingsResource _settings;
 	private Theme _currentTheme;
 
 
 	// Godot functions
-	public override void _Ready()
+	private void Initiate()
 	{
 		// Sets minimum window size to prevent text clipping and UI breaking at smaller scales.
 		DisplayServer.WindowSetMinSize(new Vector2I(1024, 576));
 		
-		// Setup save manager and load settings
-		_saveManager = new ResourceSaveManager();
-		_saveManager.Version = _saveManagerVersion;
-		_settings = _saveManager.GetSettings();
+		// Set save manager version
+		Globals.Instance.SaveManager.Version = _saveManagerVersion;
 
 		// Mute by default the music
 		ToggledMusicButton(false);
-		SetTheme(_settings.LightModeEnabled);
+		SetTheme(Globals.Instance.Settings.LightModeEnabled);
 		
 		// Signals
 		Resized += WindowResized;
-		_enableLightTheme.Toggled += SetTheme;
 	}
 
 
@@ -65,9 +60,8 @@ public partial class Home : Control
 		_header.Color = enableLight ? new Godot.Color(0.74117648601532f, 0.76470589637756f, 0.78039216995239f) : new Godot.Color(0.16862745583057f, 0.1803921610117f, 0.18823529779911f);
 		_downloadWindowApp.Color = enableLight ? new Godot.Color(0.74117648601532f, 0.76470589637756f, 0.78039216995239f) : new Godot.Color(0.16862745583057f, 0.1803921610117f, 0.18823529779911f);
 		_enableLightTheme.ButtonPressed = enableLight;
-		_settings.LightModeEnabled = enableLight;
-		_saveManager._settings = _settings;
-		_saveManager.WriteSave();
+		Globals.Instance.Settings.LightModeEnabled = enableLight;
+		Globals.Instance.SaveManager.WriteSave(Globals.Instance.Settings);
 		Theme = _currentTheme;
 	}
 

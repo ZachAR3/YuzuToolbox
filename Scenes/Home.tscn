@@ -42,7 +42,7 @@ bg_color = Color(0.184314, 0.196078, 0.203922, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jo4ax"]
 bg_color = Color(0.168627, 0.180392, 0.188235, 0.529412)
 
-[node name="Home" type="Control" node_paths=PackedStringArray("_darkBg", "_lightBg", "_downloadWindowApp", "_backgroundAudio", "_muteButton", "_enableLightTheme", "_header", "_headerLabel", "_latestVersionLabel", "_modList")]
+[node name="Home" type="Control" node_paths=PackedStringArray("_darkBg", "_lightBg", "_downloadWindowApp", "_backgroundAudio", "_muteButton", "_enableLightTheme", "_header", "_headerLabel", "_latestVersionLabel", "_modList") groups=["Initiate"]]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -223,8 +223,10 @@ anchor_left = 0.00666667
 anchor_top = 0.0133333
 anchor_right = 0.993333
 anchor_bottom = 0.986667
-offset_right = 600.0
-offset_bottom = 300.0
+offset_left = -4.0
+offset_top = -3.99999
+offset_right = 4.00018
+offset_bottom = 3.99991
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3
@@ -310,6 +312,7 @@ item_0/id = 0
 item_1/text = "Cancel"
 item_1/id = 1
 
+[connection signal="toggled" from="Header/Option/LightMode" to="." method="SetTheme"]
 [connection signal="toggled" from="Header/Option/MuteButton" to="." method="ToggledMusicButton"]
 
 [editable path="MainPage/ModManager"]
