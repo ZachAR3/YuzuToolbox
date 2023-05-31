@@ -27,6 +27,8 @@ public partial class Home : Control
 
 	[ExportGroup("ModManager")]
 	[Export()] private ItemList _modList;
+	[Export()] private AnimatedSprite2D _modMangerLoadingSprite;
+	[Export()] private Label _modManagerLoadingLabel;
 
 
 	// Internal variables
@@ -69,6 +71,8 @@ public partial class Home : Control
 	{
 		float scaleRatio = (((float)GetWindow().Size.X / 1920) + ((float)GetWindow().Size.Y / 1080)) / 2;
 		_modList.IconScale = scaleRatio;
+		_modMangerLoadingSprite.Scale = new Vector2(scaleRatio, scaleRatio);
+		_modManagerLoadingLabel.AddThemeFontSizeOverride("font_size", (int)(scaleRatio * 64));
 		_headerLabel.AddThemeFontSizeOverride("font_size", (int)(scaleRatio * 76));
 		_latestVersionLabel.AddThemeFontSizeOverride("font_size", (int)(scaleRatio * 32));
 		_currentTheme.DefaultFontSize = Mathf.Clamp((int)(scaleRatio * 35), 20, 50);

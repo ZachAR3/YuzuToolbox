@@ -273,7 +273,7 @@ grow_vertical = 2
 process_mode = 3
 sprite_frames = SubResource("SpriteFrames_2s7oa")
 autoplay = "default"
-frame_progress = 0.432685
+frame_progress = 0.838722
 
 [node name="LoadingLabelBox" type="Label" parent="LoadingWindow/LoadingBarControl"]
 layout_mode = 1

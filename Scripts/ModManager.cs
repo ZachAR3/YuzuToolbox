@@ -22,8 +22,6 @@ public partial class ModManager : Control
 	[Export()] private Texture2D _installedIcon;
 	[Export()] private Button _modLocationButton;
 	[Export()] private Panel _loadingPanel;
-	[Export()] private Label _loadingLabel;
-	[Export()] private AnimatedSprite2D _loadingSprite;	
 
 	private const string Quote = "\"";
 	private string _currentGameId;
@@ -222,6 +220,8 @@ public partial class ModManager : Control
 				_modList.AddItem($@"  {mod.ModName} - Supports:{string.Join(", ", mod.CompatibleVersions)}  ");
 			}
 		}
+		
+		_loadingPanel.Visible = false;
 	}
 
 
