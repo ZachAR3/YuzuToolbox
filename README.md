@@ -1,5 +1,11 @@
 # PineappleEA-GUI
-A simple tool to download and update early access builds of yuzu from the [PineappleEA](https://github.com/pineappleEA/pineapple-src "PineappleEA") Github repo. This tool is currently quite basic, but does support updating with overwrites of previous versions, saved location handling and lets you install backwards of up to 10 versions.
+A simple tool to download and update early access builds of yuzu from the [PineappleEA](https://github.com/pineappleEA/pineapple-src "PineappleEA") Github repo. This tool is currently supports 
+* Cross platform (Windows and Linux)
+* updating with overwrites of previous versions
+* Simple management tools such as clearing shader caches / install directory
+* Shortcut creation and automatic unpacking
+* Basic backup tool (allows save directory to be duplicated into another directory and then restored when desired)
+* Mod management features (downloading / installing from Yuzu mods wiki + ability to uninstall and detect manually installed mods)
 Note, Requires GTK runtime if you don't have it already:
 Windows: https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer)
 Linux: Distro-dependent but should be included in your distros mono package. Or you can download it by itself e.g libgtk-3-0 on debian or gtk3 for Arch.
