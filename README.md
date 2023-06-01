@@ -6,9 +6,11 @@ A simple tool to download and update early access builds of yuzu from the [Pinea
 * Shortcut creation and automatic unpacking
 * Basic backup tool (allows save directory to be duplicated into another directory and then restored when desired)
 * Mod management features (downloading / installing from Yuzu mods wiki + ability to uninstall and detect manually installed mods)
-Note, Requires GTK runtime if you don't have it already:
-Windows: https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer)
-Linux: Distro-dependent but should be included in your distros mono package. Or you can download it by itself e.g libgtk-3-0 on debian or gtk3 for Arch.
+
+# Dependencies
+GTK runtime:
+* Windows: https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer)
+* Linux: Distro-dependent but should be included in your distros mono package. Or you can download it by itself e.g libgtk-3-0 on debian or gtk3 for Arch.
 
 
 ![](https://github.com/ZachAR3/PineappleEA-GUI/blob/main/DemoImages/DarkInstaller.png?raw=true)![](https://github.com/ZachAR3/PineappleEA-GUI/blob/main/DemoImages/DarkTools.png?raw=true)![](https://github.com/ZachAR3/PineappleEA-GUI/blob/main/DemoImages/DarkModManager.png?raw=true)
