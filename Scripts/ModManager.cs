@@ -27,6 +27,12 @@ public partial class ModManager : Control
 	private string _currentGameId;
 	private Tools _tools = new Tools();
 	private string _osUsed = OS.GetName();
+
+	enum Sources
+	{
+		Official,
+		Banana
+	}
 	
 	// Game id, game name
 	private Godot.Collections.Dictionary<string, string> _titles = new Godot.Collections.Dictionary<string, string>();
@@ -45,6 +51,8 @@ public partial class ModManager : Control
 			Globals.Instance.SaveManager.WriteSave(Globals.Instance.Settings);
 		}
 		_modLocationButton.Text = Globals.Instance.Settings.ModsLocation.PadLeft(Globals.Instance.Settings.ModsLocation.Length + 4, ' ');
+		
+		// TODO add any other custom sources to the list
 		
 		GetGamesAndMods();
 	}
@@ -87,7 +95,7 @@ public partial class ModManager : Control
 						_yuzuModsList[gameId] = new Array<YuzuMod>();
 					}
 
-					await Task.Run(() => GetAvailableMods(gameId, false));
+					await Task.Run(() => GetAvailableMods(gameId));
 					GetInstalledMods(gameId);
 					_gamePickerButton.AddItem($@"    {gameName}");
 				}
@@ -113,53 +121,63 @@ public partial class ModManager : Control
 	}
 
 	
-	private async Task GetAvailableMods(string gameId, bool useBananaMods)
+	private async Task GetAvailableMods(string gameId, int source = (int)Sources.Official)
 	{
-		var htmlWeb = new HtmlWeb();
 		if (gameId == null || !_installedGames.ContainsKey(gameId))
 		{
-			_tools.ErrorPopup("no game ID given, or game ID invalid, cancelling", _errorLabel, _errorPopup);
+			_tools.ErrorPopup("no game ID given or invalid. Cancelling...", _errorLabel, _errorPopup);
 			_loadingPanel.Visible = false;
 			return;
-		}
-
-		// Checks if there is a mod list for the given game, if not creates one
-		if (!_yuzuModsList.ContainsKey(gameId))
-		{
-			_yuzuModsList[gameId] = new Array<YuzuMod>();
 		}
 		
+		var htmlWeb = new HtmlWeb();
 
-		var modsSourcePage = htmlWeb.Load("https://github.com/yuzu-emu/yuzu/wiki/Switch-Mods");
-		// List of elements, which MOSTLY contain mods (not all)
-		var mods = modsSourcePage.DocumentNode.SelectNodes(
-			$@"//h3[contains(., {Quote}{_installedGames[gameId].GameName}{Quote})]/following::table[1]//td//a");
-		if (mods == null)
+		// Grabs the mods from the specified source.
+		switch (source)
 		{
-			_tools.ErrorPopup($@"failed to retrieve mod list for ID:{gameId} | Title:{_titles[gameId]}. The game may not have available mods.", _errorLabel, _errorPopup);
-			_loadingPanel.Visible = false;
-			return;
-		}
-
-		int titleIndex = 1;
-		foreach (var mod in mods)
-		{
-			string downloadUrl = mod.GetAttributeValue("href", null).Trim();
-			string modName = mod.InnerText;
-
-			if (downloadUrl.EndsWith(".rar") || downloadUrl.EndsWith(".zip") || downloadUrl.EndsWith(".7z"))
-			{
-				var modVersions = modsSourcePage.DocumentNode.SelectNodes(
-					$@"//h3[contains(., {Quote}{_installedGames[gameId].GameName}{Quote})]/following::table[1]//tr[{titleIndex}]/td//code");
-				Array<string> versions = new Array<string>();
-				foreach (var version in modVersions)
+			case (int)Sources.Official:
+				_yuzuModsList[gameId] = new Array<YuzuMod>();
+				
+				var modsSourcePage = htmlWeb.Load("https://github.com/yuzu-emu/yuzu/wiki/Switch-Mods");
+				// List of elements, which MOSTLY contain mods (not all)
+				var mods = modsSourcePage.DocumentNode.SelectNodes(
+					$@"//h3[contains(., {Quote}{_installedGames[gameId].GameName}{Quote})]/following::table[1]//td//a");
+				if (mods == null)
 				{
-					versions.Add(version.InnerText);
+					_tools.ErrorPopup($@"Failed to retrieve mod list for ID:{gameId} | Title:{_titles[gameId]}. The game may not have available mods.", _errorLabel, _errorPopup);
+					_loadingPanel.Visible = false;
+					return;
 				}
-				titleIndex++;
-				_yuzuModsList[gameId].Add(new YuzuMod(modName, downloadUrl, versions, versions.Last(), false));
-			}
+
+				// Starts at an offset to account for the first example item in the site list
+				int titleIndex = 1;
+				// Loops through each element in the list of mostly mods
+				foreach (var mod in mods)
+				{
+					string downloadUrl = mod.GetAttributeValue("href", null).Trim();
+					string modName = mod.InnerText;
+
+					// Checks if the item is a mod by ensuring it ends with a usable extension
+					if (downloadUrl.EndsWith(".rar") || downloadUrl.EndsWith(".zip") || downloadUrl.EndsWith(".7z"))
+					{
+						var modVersions = modsSourcePage.DocumentNode.SelectNodes(
+							$@"//h3[contains(., {Quote}{_installedGames[gameId].GameName}{Quote})]/following::table[1]//tr[{titleIndex}]/td//code");
+						Array<string> versions = new Array<string>();
+						foreach (var version in modVersions)
+						{
+							versions.Add(version.InnerText);
+						}
+						titleIndex++;
+						_yuzuModsList[gameId].Add(new YuzuMod(modName, downloadUrl, versions, versions.Last(), false));
+					}
+				}
+
+				break;
+			
+			case (int)Sources.Banana:
+				break;
 		}
+
 	}
 
 
