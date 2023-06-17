@@ -18,6 +18,7 @@ public partial class ModManager : Control
 	[ExportGroup("ModManager")] 
 	[Export()] private ItemList _modList;
 	[Export()] private OptionButton _gamePickerButton;
+	[Export()] private OptionButton _sourcePickerButton;
 	[Export()] private HttpRequest _titleRequester;
 	[Export()] private Texture2D _installedIcon;
 	[Export()] private Button _modLocationButton;
@@ -33,12 +34,13 @@ public partial class ModManager : Control
 		Official,
 		Banana
 	}
+	private Dictionary<string, Array<Mod>> _selectedSourceMods = new Dictionary<string, Array<Mod>>();
 	
 	// Game id, game name
 	private Godot.Collections.Dictionary<string, string> _titles = new Godot.Collections.Dictionary<string, string>();
 	// Game id, mod names array
-	private Godot.Collections.Dictionary<string, Game> _installedGames = new Godot.Collections.Dictionary<string, Game>();
-	private Godot.Collections.Dictionary<string, Array<YuzuMod>> _yuzuModsList = new Godot.Collections.Dictionary<string, Array<YuzuMod>>();
+	private Dictionary<string, Game> _installedGames = new Godot.Collections.Dictionary<string, Game>();
+	private Dictionary<string, Array<Mod>> _officialModList = new Godot.Collections.Dictionary<string, Array<Mod>>();
 
 	// Godot Functions
 	private void Initiate()
@@ -90,9 +92,9 @@ public partial class ModManager : Control
 				if (_titles.TryGetValue(gameId, out var gameName))
 				{
 					_installedGames[gameId] = new Game(gameName);
-					if (!_yuzuModsList.ContainsKey(gameId))
+					if (!_officialModList.ContainsKey(gameId))
 					{
-						_yuzuModsList[gameId] = new Array<YuzuMod>();
+						_officialModList[gameId] = new Array<Mod>();
 					}
 
 					await Task.Run(() => GetAvailableMods(gameId));
@@ -129,47 +131,21 @@ public partial class ModManager : Control
 			_loadingPanel.Visible = false;
 			return;
 		}
-		
-		var htmlWeb = new HtmlWeb();
 
 		// Grabs the mods from the specified source.
 		switch (source)
 		{
 			case (int)Sources.Official:
-				_yuzuModsList[gameId] = new Array<YuzuMod>();
-				
-				var modsSourcePage = htmlWeb.Load("https://github.com/yuzu-emu/yuzu/wiki/Switch-Mods");
-				// List of elements, which MOSTLY contain mods (not all)
-				var mods = modsSourcePage.DocumentNode.SelectNodes(
-					$@"//h3[contains(., {Quote}{_installedGames[gameId].GameName}{Quote})]/following::table[1]//td//a");
-				if (mods == null)
+				OfficialManager _officialManager = new OfficialManager();
+				try
+				{
+					_officialModList = await _officialManager.GetAvailableMods(_officialModList, _installedGames, gameId, (int)Sources.Official);
+				}
+				catch (ArgumentException argumentException)
 				{
 					_tools.ErrorPopup($@"Failed to retrieve mod list for ID:{gameId} | Title:{_titles[gameId]}. The game may not have available mods.", _errorLabel, _errorPopup);
 					_loadingPanel.Visible = false;
-					return;
-				}
-
-				// Starts at an offset to account for the first example item in the site list
-				int titleIndex = 1;
-				// Loops through each element in the list of mostly mods
-				foreach (var mod in mods)
-				{
-					string downloadUrl = mod.GetAttributeValue("href", null).Trim();
-					string modName = mod.InnerText;
-
-					// Checks if the item is a mod by ensuring it ends with a usable extension
-					if (downloadUrl.EndsWith(".rar") || downloadUrl.EndsWith(".zip") || downloadUrl.EndsWith(".7z"))
-					{
-						var modVersions = modsSourcePage.DocumentNode.SelectNodes(
-							$@"//h3[contains(., {Quote}{_installedGames[gameId].GameName}{Quote})]/following::table[1]//tr[{titleIndex}]/td//code");
-						Array<string> versions = new Array<string>();
-						foreach (var version in modVersions)
-						{
-							versions.Add(version.InnerText);
-						}
-						titleIndex++;
-						_yuzuModsList[gameId].Add(new YuzuMod(modName, downloadUrl, versions, versions.Last(), false));
-					}
+					return; // TODO
 				}
 
 				break;
@@ -190,14 +166,30 @@ public partial class ModManager : Control
 				string[] modInfo = modDirectory.GetFile().Split("!");
 				string modName = modInfo[0];
 				string modVersion = modInfo.Length > 1 ? modInfo[1] : "N/A";
+				int modSource = modInfo.Length > 2 ? modInfo[2].ToInt() : -1;
 				bool available = false;
-				foreach (var availableMod in _yuzuModsList[gameId])
+
+				Dictionary<string, Array<Mod>> modSourceList = new Dictionary<string, Array<Mod>>();
+				switch (modSource)
+				{
+					case (int)Sources.Official:
+						modSourceList = _officialModList;
+						break;
+					case (int)Sources.Banana:
+						// Add code for banana list
+						break;
+					// Returns if nothing is found.
+					default:
+						return;
+				}
+				foreach (var availableMod in modSourceList[gameId])
 				{
 					// Extra replacements are used since Windows can't handle ":" we need to convert it back and forth in names to periods.
 					if (availableMod.ModName.Contains(modName) || availableMod.ModName.Contains(modName.Replace(".", ":")))
 					{
 						availableMod.IsInstalled = true;
 						availableMod.CurrentVersion = modVersion;
+						availableMod.Source = modSource;
 						available = true;
 						break;
 					}
@@ -205,9 +197,11 @@ public partial class ModManager : Control
 
 				if (!available)
 				{
+					// Sets the version as NA since it can't be found online.
 					var versions = new Array<string>();
 					versions.Add("N/A");
-					_yuzuModsList[gameId].Add(new YuzuMod(modName, null, versions, modVersion, true));
+					
+					modSourceList[gameId].Add(new Mod(modName, null, versions, modVersion, true, modSource));
 				}
 			}
 		}
@@ -223,14 +217,14 @@ public partial class ModManager : Control
 	// Adds available and local mods to mod list
 	private void AddMods(string gameId)
 	{
-		if (!_yuzuModsList.ContainsKey(gameId))
+		if (!_officialModList.ContainsKey(gameId))
 		{
 			GD.Print("Cannot find games for:" + gameId);
 			_loadingPanel.Visible = false;
 			return;
 		}
 		
-		foreach (var mod in _yuzuModsList[gameId])
+		foreach (var mod in _officialModList[gameId])
 		{
 			if (mod.IsInstalled)
 			{
@@ -281,7 +275,7 @@ public partial class ModManager : Control
 		
 		foreach (var installedGame in _installedGames)
 		{
-			foreach (var mod in _yuzuModsList[installedGame.Key])
+			foreach (var mod in _officialModList[installedGame.Key])
 			{
 				if (mod.IsInstalled && mod.ModUrl != null)
 				{
@@ -289,7 +283,7 @@ public partial class ModManager : Control
 					{
 						_loadingPanel.Visible = true;
 						var modUpdated = await UpdateMod(installedGame.Key, mod.ModName, mod.ModUrl,
-							mod.CompatibleVersions, mod.CurrentVersion, true);
+							mod.CompatibleVersions, mod.CurrentVersion, mod.Source, true);
 						if (modUpdated != true)
 						{
 							_loadingPanel.Visible = false;
@@ -350,7 +344,7 @@ public partial class ModManager : Control
 	}
 
 
-	private async Task<bool> UpdateMod(string gameId, string modName, string modUrl, Array<string> compatibleVersions, string currentVersion, bool noConfirmation = false)
+	private async Task<bool> UpdateMod(string gameId, string modName, string modUrl, Array<string> compatibleVersions, string currentVersion, int source, bool noConfirmation = false)
 	{
 		if (!noConfirmation)
 		{
@@ -363,7 +357,7 @@ public partial class ModManager : Control
 
 		try
 		{
-			var removedMod = RemoveMod(gameId, modName, currentVersion, compatibleVersions, true).Result;
+			var removedMod = RemoveMod(gameId, modName, currentVersion, compatibleVersions, source, true).Result;
 			if (removedMod != true)
 			{
 				return false;
@@ -380,7 +374,7 @@ public partial class ModManager : Control
 	}
 
 
-	private async Task<bool> RemoveMod(string gameId, string modName, string currentVersion, Array<string> compatibleVersions, bool noConfirmation = false)
+	private async Task<bool> RemoveMod(string gameId, string modName, string currentVersion, Array<string> compatibleVersions, int modSource, bool noConfirmation = false)
 	{
 		string modNameEnding = currentVersion == "N/A" ? "" : $"!{currentVersion}";
 		string removePath = _osUsed == "Linux" 
@@ -397,9 +391,19 @@ public partial class ModManager : Control
 				}
 			}
 
+			Dictionary<string, Array<Mod>> modSourceList = new Dictionary<string, Array<Mod>>();
+			switch (modSource)
+			{
+				case (int)Sources.Official:
+					modSourceList = _officialModList;
+					break;
+				case (int)Sources.Banana:
+					// Add code for banana list
+					break;
+			}
 			// Checks if the game is available for download, if not sets the bool to remove the game from the list
-			YuzuMod modToRemove = null;
-			foreach (var availableMod in _yuzuModsList[gameId])
+			Mod modToRemove = null;
+			foreach (var availableMod in modSourceList[gameId])
 			{
 				if (availableMod.ModName == modName && availableMod.ModUrl != null)
 				{
@@ -412,7 +416,7 @@ public partial class ModManager : Control
 			// If the mod was locally installed, removes it from the list of available mods.
 			if (modToRemove != null)
 			{
-				_yuzuModsList[gameId].Remove(modToRemove);
+				modSourceList[gameId].Remove(modToRemove);
 			}
 
 			// Deletes directory contents, then the directory itself.
@@ -456,25 +460,26 @@ public partial class ModManager : Control
 	// Signal functions
 	private async void ModClicked(int modIndex)
 	{
-		// Finds mod with the same name as the one clicked and installs it
-		if (_yuzuModsList.TryGetValue(_currentGameId, out var value))
+		if (!_selectedSourceMods.ContainsKey(_currentGameId))
 		{
-			foreach (var mod in value)
-			{
-				if (_modList.GetItemText(modIndex).Split("-")[0].Trim() == (mod.ModName))
-				{
-					if (mod.IsInstalled)
-					{
-						mod.IsInstalled = !await RemoveMod(_currentGameId, mod.ModName, mod.CurrentVersion, mod.CompatibleVersions);
-					}
-					else
-					{
-						mod.IsInstalled = await InstallMod(_currentGameId, mod.ModName, mod.ModUrl, mod.CompatibleVersions);
-					}
+			return;
+		}
 
-					// Used to update UI with installed icon
-					SelectGame(_gamePickerButton.Selected);
+		foreach (var mod in _selectedSourceMods[_currentGameId])
+		{
+			if (_modList.GetItemText(modIndex).Split("-")[0].Trim() == (mod.ModName))
+			{
+				if (mod.IsInstalled)
+				{
+					mod.IsInstalled = !await RemoveMod(_currentGameId, mod.ModName, mod.CurrentVersion, mod.CompatibleVersions, mod.Source);
 				}
+				else
+				{
+					mod.IsInstalled = await InstallMod(_currentGameId, mod.ModName, mod.ModUrl, mod.CompatibleVersions);
+				}
+
+				// Used to update UI with installed icon
+				SelectGame(_gamePickerButton.Selected);
 			}
 		}
 	}
@@ -482,7 +487,7 @@ public partial class ModManager : Control
 	
 	private async void UpdateSelectedPressed()
 	{
-		foreach (var mod in _yuzuModsList[_currentGameId])
+		foreach (var mod in _officialModList[_currentGameId])
 		{
 			var selectedMods = _modList.GetSelectedItems();
 			if (selectedMods.Length <= 0)
@@ -497,7 +502,7 @@ public partial class ModManager : Control
 				if (mod.IsInstalled && mod.ModUrl != null)
 				{
 					await UpdateMod(_currentGameId, mod.ModName, mod.ModUrl, mod.CompatibleVersions,
-						mod.CurrentVersion);
+						mod.CurrentVersion, mod.Source);
 				}
 
 				// Used to update UI with installed icon
@@ -528,7 +533,7 @@ public partial class ModManager : Control
 		// Clean up
 		_modList.Clear();
 		_gamePickerButton.Clear();
-		_yuzuModsList.Clear();
+		_officialModList.Clear();
 		_installedGames.Clear();
 		_titles.Clear();
 
