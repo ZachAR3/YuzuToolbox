@@ -146,7 +146,7 @@ animations = [{
 "speed": 30.0
 }]
 
-[node name="ModManager" type="Control" node_paths=PackedStringArray("_modList", "_gamePickerButton", "_titleRequester", "_modLocationButton", "_loadingPanel") groups=["Initiate"]]
+[node name="ModManager" type="Control" node_paths=PackedStringArray("_modList", "_gamePickerButton", "_sourcePickerButton", "_titleRequester", "_modLocationButton", "_loadingPanel") groups=["Initiate"]]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -156,6 +156,7 @@ grow_vertical = 2
 script = ExtResource("1_g8nhx")
 _modList = NodePath("ModsList")
 _gamePickerButton = NodePath("Header/GameSelection")
+_sourcePickerButton = NodePath("Header/SourceSelection")
 _titleRequester = NodePath("TitleRequester")
 _installedIcon = ExtResource("2_2ngo2")
 _modLocationButton = NodePath("Header/ModLocationButton")
@@ -211,9 +212,9 @@ metadata/_edit_use_anchors_ = true
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.0130208
-anchor_top = 0.00833333
+anchor_top = 0.000925926
 anchor_right = 0.991667
-anchor_bottom = 0.126852
+anchor_bottom = 0.110185
 grow_horizontal = 2
 columns = 2
 metadata/_edit_use_anchors_ = true
@@ -308,4 +309,5 @@ metadata/_edit_use_anchors_ = true
 [connection signal="pressed" from="SideBar/UpdateAll" to="." method="UpdateAll"]
 [connection signal="pressed" from="SideBar/UpdateSelected" to="." method="UpdateSelectedPressed"]
 [connection signal="item_selected" from="Header/GameSelection" to="." method="SelectGame"]
+[connection signal="item_selected" from="Header/SourceSelection" to="." method="SelectSource"]
 [connection signal="pressed" from="Header/ModLocationButton" to="." method="ModLocationPressed"]

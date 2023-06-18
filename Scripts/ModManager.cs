@@ -16,6 +16,7 @@ public partial class ModManager : Control
 	[Export()] private PopupMenu _confirmationPopup;
 
 	[ExportGroup("ModManager")] 
+	[Export()] private int _selectionPaddingLeft = 4;
 	[Export()] private ItemList _modList;
 	[Export()] private OptionButton _gamePickerButton;
 	[Export()] private OptionButton _sourcePickerButton;
@@ -34,34 +35,41 @@ public partial class ModManager : Control
 		Official,
 		Banana
 	}
+	
+	private Array<string> _sourceNames = new Array<string>();
+
 	private Dictionary<string, Array<Mod>> _selectedSourceMods = new Dictionary<string, Array<Mod>>();
+	private int _selectedSource = (int)Sources.Official;
 	
 	// Game id, game name
 	private Godot.Collections.Dictionary<string, string> _titles = new Godot.Collections.Dictionary<string, string>();
 	// Game id, mod names array
 	private Dictionary<string, Game> _installedGames = new Godot.Collections.Dictionary<string, Game>();
-	private Dictionary<string, Array<Mod>> _officialModList = new Godot.Collections.Dictionary<string, Array<Mod>>();
+	private Dictionary<string, Array<Mod>> _installedMods = new Godot.Collections.Dictionary<string, Array<Mod>>();
+	//private Dictionary<string, Array<Mod>> _officialModList = new Godot.Collections.Dictionary<string, Array<Mod>>();
 
 	// Godot Functions
 	private void Initiate()
 	{	
 		_titleRequester.Connect("request_completed", new Callable(this, nameof(GetTitles)));
 
+		_sourceNames.Insert((int)Sources.Official, "Official");
+		_sourceNames.Insert((int)Sources.Banana, "Banana");
+
 		if (Globals.Instance.Settings.ModsLocation == null)
 		{
 			Globals.Instance.Settings.ModsLocation = $@"{Globals.Instance.Settings.AppDataPath}load";
 			Globals.Instance.SaveManager.WriteSave(Globals.Instance.Settings);
 		}
-		_modLocationButton.Text = Globals.Instance.Settings.ModsLocation.PadLeft(Globals.Instance.Settings.ModsLocation.Length + 4, ' ');
+		_modLocationButton.Text = Globals.Instance.Settings.ModsLocation.PadLeft(Globals.Instance.Settings.ModsLocation.Length + _selectionPaddingLeft, ' ');
 		
-		// TODO add any other custom sources to the list
-		
+		AddSources();
 		GetGamesAndMods();
 	}
 
 
 	// Custom functions
-	private async void GetGamesAndMods()
+	private async void GetGamesAndMods(int source = (int)Sources.Official)
 	{
 		await Task.Run(async () =>
 		{
@@ -92,12 +100,13 @@ public partial class ModManager : Control
 				if (_titles.TryGetValue(gameId, out var gameName))
 				{
 					_installedGames[gameId] = new Game(gameName);
-					if (!_officialModList.ContainsKey(gameId))
-					{
-						_officialModList[gameId] = new Array<Mod>();
-					}
+					// MODDO
+					// if (!_officialModList.ContainsKey(gameId))
+					// {
+					// 	_officialModList[gameId] = new Array<Mod>();
+					// }
 
-					await Task.Run(() => GetAvailableMods(gameId));
+					await Task.Run(() => GetAvailableMods(gameId, source));
 					GetInstalledMods(gameId);
 					_gamePickerButton.AddItem($@"    {gameName}");
 				}
@@ -123,7 +132,7 @@ public partial class ModManager : Control
 	}
 
 	
-	private async Task GetAvailableMods(string gameId, int source = (int)Sources.Official)
+	private async Task GetAvailableMods(string gameId, int source)
 	{
 		if (gameId == null || !_installedGames.ContainsKey(gameId))
 		{
@@ -139,7 +148,7 @@ public partial class ModManager : Control
 				OfficialManager _officialManager = new OfficialManager();
 				try
 				{
-					_officialModList = await _officialManager.GetAvailableMods(_officialModList, _installedGames, gameId, (int)Sources.Official);
+					_selectedSourceMods = await _officialManager.GetAvailableMods(_selectedSourceMods, _installedGames, gameId, (int)Sources.Official);
 				}
 				catch (ArgumentException argumentException)
 				{
@@ -168,41 +177,29 @@ public partial class ModManager : Control
 				string modVersion = modInfo.Length > 1 ? modInfo[1] : "N/A";
 				int modSource = modInfo.Length > 2 ? modInfo[2].ToInt() : -1;
 				bool available = false;
+				
+				// TODO Rework to use a seperate function to query the mod from the desired source and ensure it can be found first
+				// foreach (var availableMod in modSourceList[gameId])
+				// {
+				// 	// Extra replacements are used since Windows can't handle ":" we need to convert it back and forth in names to periods.
+				// 	if (availableMod.ModName.Contains(modName) || availableMod.ModName.Contains(modName.Replace(".", ":")))
+				// 	{
+				// 		availableMod.IsInstalled = true;
+				// 		availableMod.CurrentVersion = modVersion;
+				// 		availableMod.Source = modSource;
+				// 		available = true;
+				// 		break;
+				// 	}
+				// }
 
-				Dictionary<string, Array<Mod>> modSourceList = new Dictionary<string, Array<Mod>>();
-				switch (modSource)
-				{
-					case (int)Sources.Official:
-						modSourceList = _officialModList;
-						break;
-					case (int)Sources.Banana:
-						// Add code for banana list
-						break;
-					// Returns if nothing is found.
-					default:
-						return;
-				}
-				foreach (var availableMod in modSourceList[gameId])
-				{
-					// Extra replacements are used since Windows can't handle ":" we need to convert it back and forth in names to periods.
-					if (availableMod.ModName.Contains(modName) || availableMod.ModName.Contains(modName.Replace(".", ":")))
-					{
-						availableMod.IsInstalled = true;
-						availableMod.CurrentVersion = modVersion;
-						availableMod.Source = modSource;
-						available = true;
-						break;
-					}
-				}
-
-				if (!available)
-				{
-					// Sets the version as NA since it can't be found online.
-					var versions = new Array<string>();
-					versions.Add("N/A");
-					
-					modSourceList[gameId].Add(new Mod(modName, null, versions, modVersion, true, modSource));
-				}
+				// if (!available)
+				// {
+				// 	// Sets the version as NA since it can't be found online.
+				// 	var versions = new Array<string>();
+				// 	versions.Add("N/A");
+				// 	
+				// 	modSourceList[gameId].Add(new Mod(modName, null, versions, modVersion, true, modSource));
+				// }
 			}
 		}
 		catch (Exception installedError)
@@ -217,14 +214,16 @@ public partial class ModManager : Control
 	// Adds available and local mods to mod list
 	private void AddMods(string gameId)
 	{
-		if (!_officialModList.ContainsKey(gameId))
+		// MODDO
+		if (!_selectedSourceMods.ContainsKey(gameId))
 		{
 			GD.Print("Cannot find games for:" + gameId);
 			_loadingPanel.Visible = false;
 			return;
 		}
 		
-		foreach (var mod in _officialModList[gameId])
+		// MODDO
+		foreach (var mod in _selectedSourceMods[gameId])
 		{
 			if (mod.IsInstalled)
 			{
@@ -275,30 +274,31 @@ public partial class ModManager : Control
 		
 		foreach (var installedGame in _installedGames)
 		{
-			foreach (var mod in _officialModList[installedGame.Key])
-			{
-				if (mod.IsInstalled && mod.ModUrl != null)
-				{
-					await Task.Run(async () =>
-					{
-						_loadingPanel.Visible = true;
-						var modUpdated = await UpdateMod(installedGame.Key, mod.ModName, mod.ModUrl,
-							mod.CompatibleVersions, mod.CurrentVersion, mod.Source, true);
-						if (modUpdated != true)
-						{
-							_loadingPanel.Visible = false;
-							return;
-						}
-
-						_modList.AddItem($@"  {mod.ModName} - Supports:{mod.CompatibleVersions}  ",
-							icon: _installedIcon);
-						// Used to update UI with installed icon
-						SelectGame(_gamePickerButton.Selected);
-						
-						_loadingPanel.Visible = false;
-					});
-				}
-			}
+			// TODO needs to be reworked with new sourcing construction
+			// foreach (var mod in _officialModList[installedGame.Key])
+			// {
+			// 	if (mod.IsInstalled && mod.ModUrl != null)
+			// 	{
+			// 		await Task.Run(async () =>
+			// 		{
+			// 			_loadingPanel.Visible = true;
+			// 			var modUpdated = await UpdateMod(installedGame.Key, mod.ModName, mod.ModUrl,
+			// 				mod.CompatibleVersions, mod.CurrentVersion, mod.Source, true);
+			// 			if (modUpdated != true)
+			// 			{
+			// 				_loadingPanel.Visible = false;
+			// 				return;
+			// 			}
+			//
+			// 			_modList.AddItem($@"  {mod.ModName} - Supports:{mod.CompatibleVersions}  ",
+			// 				icon: _installedIcon);
+			// 			// Used to update UI with installed icon
+			// 			SelectGame(_gamePickerButton.Selected);
+			// 			
+			// 			_loadingPanel.Visible = false;
+			// 		});
+			// 	}
+			// }
 		}
 	}
 	
@@ -357,7 +357,7 @@ public partial class ModManager : Control
 
 		try
 		{
-			var removedMod = RemoveMod(gameId, modName, currentVersion, compatibleVersions, source, true).Result;
+			var removedMod = RemoveMod(gameId, modName, compatibleVersions, source, true).Result;
 			if (removedMod != true)
 			{
 				return false;
@@ -374,9 +374,9 @@ public partial class ModManager : Control
 	}
 
 
-	private async Task<bool> RemoveMod(string gameId, string modName, string currentVersion, Array<string> compatibleVersions, int modSource, bool noConfirmation = false)
+	private async Task<bool> RemoveMod(string gameId, string modName, Array<string> compatibleVersions, int modSource, bool noConfirmation = false)
 	{
-		string modNameEnding = currentVersion == "N/A" ? "" : $"!{currentVersion}";
+		//string modNameEnding = currentVersion == "N/A" ? "" : $"!{currentVersion}";
 		string removePath = _osUsed == "Linux" 
 			? $@"{Globals.Instance.Settings.ModsLocation}/{gameId}/{modName}!{compatibleVersions.Last()}" 
 			: $@"{Globals.Instance.Settings.ModsLocation}\{gameId}\{modName.Replace(":", ".")}!{compatibleVersions.Last()}";;
@@ -391,39 +391,32 @@ public partial class ModManager : Control
 				}
 			}
 
-			Dictionary<string, Array<Mod>> modSourceList = new Dictionary<string, Array<Mod>>();
-			switch (modSource)
-			{
-				case (int)Sources.Official:
-					modSourceList = _officialModList;
-					break;
-				case (int)Sources.Banana:
-					// Add code for banana list
-					break;
-			}
-			// Checks if the game is available for download, if not sets the bool to remove the game from the list
-			Mod modToRemove = null;
-			foreach (var availableMod in modSourceList[gameId])
-			{
-				if (availableMod.ModName == modName && availableMod.ModUrl != null)
-				{
-					modToRemove = null;
-					break;
-				}
-				modToRemove = availableMod;
-			}
-			
-			// If the mod was locally installed, removes it from the list of available mods.
-			if (modToRemove != null)
-			{
-				modSourceList[gameId].Remove(modToRemove);
-			}
-
-			// Deletes directory contents, then the directory itself.
-			Tools.DeleteDirectoryContents(removePath);
-			Directory.Delete(removePath, true);
-			
 			return true;
+
+			// TODO needs to be reworked to work with multiple sources and more importantly the installed mod list
+			// // Checks if the game is available for download, if not sets the bool to remove the game from the list
+			// Mod modToRemove = null;
+			// foreach (var availableMod in modSourceList[gameId])
+			// {
+			// 	if (availableMod.ModName == modName && availableMod.ModUrl != null)
+			// 	{
+			// 		modToRemove = null;
+			// 		break;
+			// 	}
+			// 	modToRemove = availableMod;
+			// }
+			//
+			// // If the mod was locally installed, removes it from the list of available mods.
+			// if (modToRemove != null)
+			// {
+			// 	modSourceList[gameId].Remove(modToRemove);
+			// }
+			//
+			// // Deletes directory contents, then the directory itself.
+			// Tools.DeleteDirectoryContents(removePath);
+			// Directory.Delete(removePath, true);
+			//
+			// return true;
 		}
 		catch (Exception removeError)
 		{
@@ -444,7 +437,7 @@ public partial class ModManager : Control
 	}
 	
 	
-	static string GetGameIdFromValue(string value, Godot.Collections.Dictionary<string, Game> installedGames)
+	static string GetGameIdFromValue(string value, Dictionary<string, Game> installedGames)
 	{
 		foreach (string gameId in installedGames.Keys)
 		{
@@ -454,6 +447,29 @@ public partial class ModManager : Control
 			}
 		}
 		return null;
+	}
+
+
+	private void Refresh(int source = (int)Sources.Official)
+	{
+		// Clean up
+		_modList.Clear();
+		_gamePickerButton.Clear();
+		_selectedSourceMods.Clear();
+		_installedGames.Clear();
+		_titles.Clear();
+
+		// Re-grabs and adds the mods
+		GetGamesAndMods(source);
+	}
+
+
+	private void AddSources()
+	{
+		foreach (string source in _sourceNames)
+		{
+			_sourcePickerButton.AddItem(source.PadLeft(source.Length + _selectionPaddingLeft));
+		}
 	}
 	
 	
@@ -471,7 +487,7 @@ public partial class ModManager : Control
 			{
 				if (mod.IsInstalled)
 				{
-					mod.IsInstalled = !await RemoveMod(_currentGameId, mod.ModName, mod.CurrentVersion, mod.CompatibleVersions, mod.Source);
+					mod.IsInstalled = !await RemoveMod(_currentGameId, mod.ModName, mod.CompatibleVersions, mod.Source);
 				}
 				else
 				{
@@ -483,33 +499,49 @@ public partial class ModManager : Control
 			}
 		}
 	}
+
+
+	// Refreshes the mods with the newly selected source
+	private void SelectSource(int sourceIndex)
+	{
+		_selectedSource = _sourceNames.IndexOf(_sourcePickerButton.GetItemText(sourceIndex).Trim());
+		if (_selectedSource == -1)
+		{
+			_tools.ErrorPopup("source not found, please file a bug report. Defaulting back to official", _errorLabel, _errorPopup);
+			_sourcePickerButton.Select(0);
+			return;
+		}
+		
+		Refresh(_selectedSource);
+	}
 	
 	
 	private async void UpdateSelectedPressed()
 	{
-		foreach (var mod in _officialModList[_currentGameId])
-		{
-			var selectedMods = _modList.GetSelectedItems();
-			if (selectedMods.Length <= 0)
-			{
-				return;
-			}
-			
-			_loadingPanel.Visible = true;
-			
-			if (_modList.GetItemText(selectedMods[0]).Split("-")[0].Trim() == (mod.ModName))
-			{
-				if (mod.IsInstalled && mod.ModUrl != null)
-				{
-					await UpdateMod(_currentGameId, mod.ModName, mod.ModUrl, mod.CompatibleVersions,
-						mod.CurrentVersion, mod.Source);
-				}
-
-				// Used to update UI with installed icon
-				SelectGame(_gamePickerButton.Selected);
-				_loadingPanel.Visible = false;
-			}
-		}
+		// TODO needs to be reworked with installed mods list and multiple source support
+		// foreach (var mod in _officialModList[_currentGameId])
+		// {
+		// 	var selectedMods = _modList.GetSelectedItems();
+		// 	if (selectedMods.Length <= 0)
+		// 	{
+		// 		return;
+		// 	}
+		// 	
+		// 	_loadingPanel.Visible = true;
+		// 	
+		// 	if (_modList.GetItemText(selectedMods[0]).Split("-")[0].Trim() == (mod.ModName))
+		// 	{
+		// 		if (mod.IsInstalled && mod.ModUrl != null)
+		// 		{
+		// 			await UpdateMod(_currentGameId, mod.ModName, mod.ModUrl, mod.CompatibleVersions,
+		// 				mod.CurrentVersion, mod.Source);
+		// 		}
+		//
+		// 		// Used to update UI with installed icon
+		// 		SelectGame(_gamePickerButton.Selected);
+		// 		_loadingPanel.Visible = false;
+		// 	}
+		// }
 	}
 	
 	
@@ -522,7 +554,7 @@ public partial class ModManager : Control
 			Globals.Instance.Settings.ModsLocation = modLocationInput;
 		}
 		
-		_modLocationButton.Text = Globals.Instance.Settings.ModsLocation.PadLeft(Globals.Instance.Settings.ModsLocation.Length + 4, ' ');
+		_modLocationButton.Text = Globals.Instance.Settings.ModsLocation.PadLeft(Globals.Instance.Settings.ModsLocation.Length + _selectionPaddingLeft, ' ');
 		
 		Globals.Instance.SaveManager.WriteSave(Globals.Instance.Settings);
 	}
@@ -530,14 +562,6 @@ public partial class ModManager : Control
 
 	private void RefreshPressed()
 	{
-		// Clean up
-		_modList.Clear();
-		_gamePickerButton.Clear();
-		_officialModList.Clear();
-		_installedGames.Clear();
-		_titles.Clear();
-
-		// Re-grabs and adds the mods
-		GetGamesAndMods();
+		Refresh(_selectedSource);
 	}
 }
