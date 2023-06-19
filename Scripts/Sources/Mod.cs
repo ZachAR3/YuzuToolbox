@@ -8,18 +8,14 @@ public partial class Mod : Node
     public string ModName;
     public string ModUrl;
     public Array<string> CompatibleVersions;
-    public bool IsInstalled;
-    public string CurrentVersion;
     public int Source;
     
     
-    public Mod(string modName, string modUrl, Array<string> compatibleVersions, string currentVersion, bool isInstalled, int source)
+    public Mod(string modName, string modUrl, Array<string> compatibleVersions, int source)
     {
         ModName = modName;
         ModUrl = modUrl;
         CompatibleVersions = compatibleVersions;
-        CurrentVersion = currentVersion;
-        IsInstalled = isInstalled;
         Source = source;
     }
 }
