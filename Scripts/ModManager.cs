@@ -177,6 +177,7 @@ public partial class ModManager : Control
 				string[] modInfo = modDirectory.GetFile().Split("!");
 				string modName = modInfo[0];
 				string modVersion = modInfo.Length > 1 ? modInfo[1] : "N/A";
+				var compatibleVersions = new Array<string> { modVersion };
 				int modSource = modInfo.Length > 2 ? _sourceNames.IndexOf(modInfo[2]) : -1;
 
 				Mod availableMod = IsModAvailable(gameId, modName, modSource);
@@ -184,8 +185,7 @@ public partial class ModManager : Control
 				// If the mod isn't found in any online sources sets it to be just be a local mod with no source or url.
 				if (availableMod == null)
 				{
-					var versions = new Array<string> { modVersion };
-					_installedMods[gameId].Add(new Mod(modName, null, versions, -1, modDirectory));
+					_installedMods[gameId].Add(new Mod(modName, null, compatibleVersions, -1, modDirectory));
 					return;
 				}
 
@@ -296,33 +296,57 @@ public partial class ModManager : Control
 		
 		foreach (var installedGame in _installedGames)
 		{
-			// TODO needs to be reworked with new sourcing construction
-			// foreach (var mod in _officialModList[installedGame.Key])
-			// {
-			// 	if (mod.IsInstalled && mod.ModUrl != null)
-			// 	{
-			// 		await Task.Run(async () =>
-			// 		{
-			// 			_loadingPanel.Visible = true;
-			// 			var modUpdated = await UpdateMod(installedGame.Key, mod.ModName, mod.ModUrl,
-			// 				mod.CompatibleVersions, mod.CurrentVersion, mod.Source, true);
-			// 			if (modUpdated != true)
-			// 			{
-			// 				_loadingPanel.Visible = false;
-			// 				return;
-			// 			}
-			//
-			// 			_modList.AddItem($@"  {mod.ModName} - Supports:{mod.CompatibleVersions}  ",
-			// 				icon: _installedIcon);
-			// 			// Used to update UI with installed icon
-			// 			SelectGame(_gamePickerButton.Selected);
-			// 			
-			// 			_loadingPanel.Visible = false;
-			// 		});
-			// 	}
-			// }
+			// Mods list is temporarily duplicated to avoid issues with indexing when removing and re-adding the mods during update.
+			foreach (var mod in _installedMods[installedGame.Key].Duplicate())
+			{
+				if (mod.ModUrl != null)
+				{
+					_loadingPanel.Visible = true;
+					var modUpdated = await UpdateMod(installedGame.Key, mod, true);
+					if (modUpdated != true)
+					{
+						_tools.ErrorPopup($@"failed to update:{mod.ModName}", _errorLabel, _errorPopup);
+						_loadingPanel.Visible = false;
+						return;
+					}
+			
+					SelectGame(_gamePickerButton.Selected);
+					_loadingPanel.Visible = false;
+				}
+			}
 		}
 	}
+	
+	
+	private async Task<bool> UpdateMod(string gameId, Mod mod, bool noConfirmation = false)
+	{
+		if (!noConfirmation)
+		{
+			var confirm = await _tools.ConfirmationPopup(_confirmationPopup, $@"Update {mod.ModName}?");
+			if (confirm == false)
+			{
+				return false;
+			}
+		}
+
+		try
+		{
+			var removedMod = RemoveMod(gameId, mod, true).Result;
+			if (removedMod != true)
+			{
+				return false;
+			}
+			await InstallMod(gameId, mod);
+			return true;
+		}
+		catch (Exception updateError)
+		{
+			_tools.ErrorPopup($@"failed to update mod:{updateError}", _errorLabel, _errorPopup);
+			_loadingPanel.Visible = false;
+			throw;
+		}
+	}
+
 	
 
 	private async Task<bool> InstallMod(string gameId, Mod mod)
@@ -373,37 +397,7 @@ public partial class ModManager : Control
 
 		return true;
 	}
-
-
-	private async Task<bool> UpdateMod(string gameId, Mod mod, bool noConfirmation = false)
-	{
-		if (!noConfirmation)
-		{
-			var confirm = await _tools.ConfirmationPopup(_confirmationPopup, $@"Update {mod.ModName}?");
-			if (confirm == false)
-			{
-				return false;
-			}
-		}
-
-		try
-		{
-			var removedMod = RemoveMod(gameId, mod, true).Result;
-			if (removedMod != true)
-			{
-				return false;
-			}
-			await InstallMod(gameId, mod);
-			return true;
-		}
-		catch (Exception updateError)
-		{
-			_tools.ErrorPopup($@"failed to update mod:{updateError}", _errorLabel, _errorPopup);
-			_loadingPanel.Visible = false;
-			throw;
-		}
-	}
-
+	
 
 	private async Task<bool> RemoveMod(string gameId, Mod mod, bool noConfirmation = false)
 	{
