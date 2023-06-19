@@ -169,6 +169,9 @@ public partial class ModManager : Control
 	{
 		try
 		{
+			// Initializes installed mods for the given title.
+			_installedMods[gameId] = new Array<Mod>();
+			
 			foreach (var modDirectory in Directory.GetDirectories($@"{Globals.Instance.Settings.ModsLocation}/{gameId}"))
 			{
 				string[] modInfo = modDirectory.GetFile().Split("!");
@@ -177,16 +180,17 @@ public partial class ModManager : Control
 				int modSource = modInfo.Length > 2 ? _sourceNames.IndexOf(modInfo[2]) : -1;
 
 				Mod availableMod = IsModAvailable(gameId, modName, modSource);
-				// Creates new array for the given game if it is currently null
-				_installedMods[gameId] = !_installedMods.ContainsKey(gameId) ? new Array<Mod>() : _installedMods[gameId];
 
 				// If the mod isn't found in any online sources sets it to be just be a local mod with no source or url.
 				if (availableMod == null)
 				{
 					var versions = new Array<string> { modVersion };
-					_installedMods[gameId].Add(new Mod(modName, null, versions, -1));
+					_installedMods[gameId].Add(new Mod(modName, null, versions, -1, modDirectory));
 					return;
 				}
+
+				// Sets the installed location
+				availableMod.InstalledPath = modDirectory;
 				
 				_installedMods[gameId].Add(availableMod);
 				_availableMods[gameId].Remove(availableMod);
@@ -204,17 +208,20 @@ public partial class ModManager : Control
 	// Checks if a mod is available for download, if so returns the mod
 	private Mod IsModAvailable(string gameId, string modName, int source = -1)
 	{
-		foreach (Mod availableMod in _availableMods[gameId])
+		if (_availableMods.TryGetValue(gameId, out var availableMods))
 		{
-			if (availableMod.ModName == modName || availableMod.ModName == modName.Replace(".", ":"))
+			foreach (Mod availableMod in availableMods)
 			{
-				if (source != -1 && source != availableMod.Source)
+				if (availableMod.ModName == modName || availableMod.ModName == modName.Replace(".", ":"))
 				{
-					continue;
+					if (source != -1 && source != availableMod.Source)
+					{
+						continue;
+					}
+
+					_availableMods[gameId].Remove(availableMod);
+					return availableMod;
 				}
-				
-				_availableMods[gameId].Remove(availableMod);
-				return availableMod;
 			}
 		}
 
@@ -233,14 +240,21 @@ public partial class ModManager : Control
 		}
 		
 		// Adds the available and installed mods
-		foreach (var mod in _installedMods[gameId])
+		if (_installedMods.TryGetValue(gameId, out var installedMods))
 		{
-			_modList.AddItem($@"  {mod.ModName} - Supports:{string.Join(", ", mod.CompatibleVersions)}  ", icon: _installedIcon);
+			foreach (var mod in installedMods)
+			{
+				_modList.AddItem($@"  {mod.ModName} - Supports:{string.Join(", ", mod.CompatibleVersions)}  ",
+					icon: _installedIcon);
+			}
 		}
-		
-		foreach (var mod in _selectedSourceMods[gameId])
+
+		if (_selectedSourceMods.TryGetValue(gameId, out var selectedSourceMods))
 		{
-			_modList.AddItem($@"  {mod.ModName} - Supports:{string.Join(", ", mod.CompatibleVersions)}  ");
+			foreach (var mod in selectedSourceMods)
+			{
+				_modList.AddItem($@"  {mod.ModName} - Supports:{string.Join(", ", mod.CompatibleVersions)}  ");
+			}
 		}
 
 		_loadingPanel.Visible = false;
@@ -339,8 +353,14 @@ public partial class ModManager : Control
 				// Cleanup
 				Directory.Delete(installPath + "-temp", true);
 				File.Delete(downloadPath);
-				
+
+				// Sets the installed path and initializes the installed mods list for the given game if needed
+				mod.InstalledPath = installPath;
+				_installedMods[_currentGameId] = !_installedMods.ContainsKey(_currentGameId)
+					? new Array<Mod>()
+					: _installedMods[_currentGameId];
 				_installedMods[_currentGameId].Add(mod);
+				
 				_availableMods[_currentGameId].Remove(mod);
 			});
 		}
@@ -387,10 +407,6 @@ public partial class ModManager : Control
 
 	private async Task<bool> RemoveMod(string gameId, Mod mod, bool noConfirmation = false)
 	{
-		//string modNameEnding = currentVersion == "N/A" ? "" : $"!{currentVersion}";
-		string removePath = _osUsed == "Linux" 
-			? $@"{Globals.Instance.Settings.ModsLocation}/{gameId}/{mod.ModName}!{mod.CompatibleVersions.Last()}" 
-			: $@"{Globals.Instance.Settings.ModsLocation}\{gameId}\{mod.ModName.Replace(":", ".")}!{mod.CompatibleVersions.Last()}";;
 		try
 		{
 			if (!noConfirmation)
@@ -402,32 +418,24 @@ public partial class ModManager : Control
 				}
 			}
 
-			return true;
+			if (mod.ModUrl != null)
+			{
+				_installedMods[gameId].Remove(mod);
 
-			// TODO needs to be reworked to work with multiple sources and more importantly the installed mod list
-			// // Checks if the game is available for download, if not sets the bool to remove the game from the list
-			// Mod modToRemove = null;
-			// foreach (var availableMod in modSourceList[gameId])
-			// {
-			// 	if (availableMod.ModName == modName && availableMod.ModUrl != null)
-			// 	{
-			// 		modToRemove = null;
-			// 		break;
-			// 	}
-			// 	modToRemove = availableMod;
-			// }
-			//
-			// // If the mod was locally installed, removes it from the list of available mods.
-			// if (modToRemove != null)
-			// {
-			// 	modSourceList[gameId].Remove(modToRemove);
-			// }
-			//
-			// // Deletes directory contents, then the directory itself.
-			// Tools.DeleteDirectoryContents(removePath);
-			// Directory.Delete(removePath, true);
-			//
-			// return true;
+				// If there is no mod list for the game id creates one
+				_availableMods[gameId] =
+					!_availableMods.ContainsKey(gameId) ? new Array<Mod>() : _availableMods[gameId];
+				_availableMods[gameId].Add(mod);
+				
+				// Deletes directory contents, then the directory itself.
+				Tools.DeleteDirectoryContents(mod.InstalledPath);
+				Directory.Delete(mod.InstalledPath, true);
+				
+				// Refreshes the mod list
+				SelectGame(_gamePickerButton.Selected);
+			}
+
+			return true;
 		}
 		catch (Exception removeError)
 		{
@@ -487,32 +495,32 @@ public partial class ModManager : Control
 	// Signal functions
 	private async void ModClicked(int modIndex)
 	{
-		if (!_selectedSourceMods.ContainsKey(_currentGameId))
-		{
-			return;
-		}
-
 		// If the mod is found in the installed mods list removes it
-		foreach (var mod in _installedMods[_currentGameId])
+		if (_installedMods.TryGetValue(_currentGameId, out var installedMods))
 		{
-			if (_modList.GetItemText(modIndex).Split("-")[0].Trim() == (mod.ModName))
+			foreach (var mod in installedMods)
 			{
-				await RemoveMod(_currentGameId, mod);
-				return;
+				if (_modList.GetItemText(modIndex).Split("-")[0].Trim() == (mod.ModName))
+				{
+					await RemoveMod(_currentGameId, mod);
+					return;
+				}
 			}
 		}
-		
-		// Installs the mod from the online source
-		foreach (var mod in _selectedSourceMods[_currentGameId])
-		{
-			if (_modList.GetItemText(modIndex).Split("-")[0].Trim() == (mod.ModName))
-			{
-				await InstallMod(_currentGameId, mod);
-			}
 
-				// Used to update UI with installed icon
+		// Installs the mod from the online source
+		if (_selectedSourceMods.TryGetValue(_currentGameId, out var selectedSourceMods))
+		{
+			foreach (var mod in selectedSourceMods)
+			{
+				if (_modList.GetItemText(modIndex).Split("-")[0].Trim() == (mod.ModName))
+				{
+					await InstallMod(_currentGameId, mod);
+					break;
+				}
+			}
+			// Used to update UI with installed icon	
 			SelectGame(_gamePickerButton.Selected);
-			return;
 		}
 	}
 
@@ -534,30 +542,28 @@ public partial class ModManager : Control
 	
 	private async void UpdateSelectedPressed()
 	{
-		// TODO needs to be reworked with installed mods list and multiple source support
-		// foreach (var mod in _officialModList[_currentGameId])
-		// {
-		// 	var selectedMods = _modList.GetSelectedItems();
-		// 	if (selectedMods.Length <= 0)
-		// 	{
-		// 		return;
-		// 	}
-		// 	
-		// 	_loadingPanel.Visible = true;
-		// 	
-		// 	if (_modList.GetItemText(selectedMods[0]).Split("-")[0].Trim() == (mod.ModName))
-		// 	{
-		// 		if (mod.IsInstalled && mod.ModUrl != null)
-		// 		{
-		// 			await UpdateMod(_currentGameId, mod.ModName, mod.ModUrl, mod.CompatibleVersions,
-		// 				mod.CurrentVersion, mod.Source);
-		// 		}
-		//
-		// 		// Used to update UI with installed icon
-		// 		SelectGame(_gamePickerButton.Selected);
-		// 		_loadingPanel.Visible = false;
-		// 	}
-		// }
+		foreach (Mod mod in _installedMods[_currentGameId])
+		{
+			var selectedMods = _modList.GetSelectedItems();
+			if (selectedMods.Length <= 0)
+			{
+				return;
+			}
+			
+			_loadingPanel.Visible = true;
+			
+			if (_modList.GetItemText(selectedMods[0]).Split("-")[0].Trim() == (mod.ModName))
+			{
+				if (mod.ModUrl != null)
+				{
+					await UpdateMod(_currentGameId, mod);
+				}
+		
+				// Used to update UI with installed icon
+				SelectGame(_gamePickerButton.Selected);
+				_loadingPanel.Visible = false;
+			}
+		}
 	}
 	
 	

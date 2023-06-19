@@ -42,7 +42,7 @@ public partial class OfficialManager : Node
                     versions.Add(version.InnerText);
                 }
                 titleIndex++;
-                officialModList[gameId].Add(new Mod(modName, downloadUrl, versions, sourceId));
+                officialModList[gameId].Add(new Mod(modName, downloadUrl, versions, sourceId, null));
             }
         }
 

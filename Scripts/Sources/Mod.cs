@@ -9,13 +9,15 @@ public partial class Mod : Node
     public string ModUrl;
     public Array<string> CompatibleVersions;
     public int Source;
+    public string InstalledPath;
     
     
-    public Mod(string modName, string modUrl, Array<string> compatibleVersions, int source)
+    public Mod(string modName, string modUrl, Array<string> compatibleVersions, int source, string installedPath)
     {
         ModName = modName;
         ModUrl = modUrl;
         CompatibleVersions = compatibleVersions;
         Source = source;
+        InstalledPath = installedPath;
     }
 }
