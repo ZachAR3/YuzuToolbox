@@ -5,9 +5,12 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
-using Godot.Collections;
+//using Godot.Collections;
+using Microsoft.VisualBasic;
 using SevenZip;
+using YuzuEAUpdateManager.Scripts.Sources;
 using Environment = System.Environment;
 using HttpClient = System.Net.Http.HttpClient;
 
@@ -19,6 +22,7 @@ public partial class ModManager : Control
 	[Export()] private PopupMenu _confirmationPopup;
 
 	[ExportGroup("ModManager")]
+	[Export()] private string _installedModsPath;
 	[Export()] private int _selectionPaddingLeft = 4;
 	[Export()] private ItemList _modList;
 	[Export()] private OptionButton _gamePickerButton;
@@ -41,23 +45,22 @@ public partial class ModManager : Control
 		All
 	}
 	
-	private Array<string> _sourceNames = new Array<string>();
-	private Godot.Collections.Dictionary<string, Array<Mod>> _selectedSourceMods = new Godot.Collections.Dictionary<string, Array<Mod>>();
+	private List<string> _sourceNames = new List<string>();
+	private Dictionary<string, List<Mod>> _selectedSourceMods = new Dictionary<string, List<Mod>>();
 	private int _selectedSource = (int)Sources.Official;
 	
 	// Game id, game name
-	private Godot.Collections.Dictionary<string, string> _titles = new Godot.Collections.Dictionary<string, string>();
-	// Game id, mod names array
-	private Godot.Collections.Dictionary<string, Game> _installedGames = new Godot.Collections.Dictionary<string, Game>();
-	private Godot.Collections.Dictionary<string, Array<Mod>> _availableMods = new Godot.Collections.Dictionary<string, Array<Mod>>();
-	private Godot.Collections.Dictionary<string, Array<Mod>> _installedMods = new Godot.Collections.Dictionary<string, Array<Mod>>();
+	private Dictionary<string, string> _titles = new Dictionary<string, string>();
+	// Game id, mod names List
+	private Dictionary<string, Game> _installedGames = new Dictionary<string, Game>();
+	private Dictionary<string, List<Mod>> _availableMods = new Dictionary<string, List<Mod>>();
+	private Dictionary<string, List<Mod>> _installedMods = new Dictionary<string, List<Mod>>();
 
 	// Godot Functions
 	private void Initiate()
 	{
 		// Sets the 7zip dll path
 		SevenZipBase.SetLibraryPath(ProjectSettings.GlobalizePath("res://7ZipDlls/7z.dll"));
-		//SevenZipBase.SetLibraryPath("C:\\Program Files\\7-Zip\\7z.dll");
 
 		_titleRequester.Connect("request_completed", new Callable(this, nameof(GetTitles)));
 
@@ -119,6 +122,7 @@ public partial class ModManager : Control
 				}
 
 			}
+
 
 			// Sets the first game as selected by default
 			if (_installedGames.Count > 0)
@@ -189,21 +193,28 @@ public partial class ModManager : Control
 		try
 		{
 			// Initializes installed mods for the given title.
-			_installedMods[gameId] = new Array<Mod>();
+			_installedMods[gameId] = new List<Mod>();
 			
 			foreach (var modDirectory in Directory.GetDirectories($@"{Globals.Instance.Settings.ModsLocation}/{gameId}"))
 			{
 				string[] modInfo = modDirectory.GetFile().Split("!");
 				string modName = modInfo[0];
 				string modVersion = modInfo.Length > 1 ? modInfo[1] : "NA";
-				var compatibleVersions = new Array<string> { modVersion };
+				var compatibleVersions = new List<string> { modVersion };
 				int modSource = modInfo.Length > 2 ? _sourceNames.IndexOf(modInfo[2]) : -1;
 				Mod availableMod = IsModAvailable(gameId, modName, modSource);
 
 				// If the mod isn't found in any online sources sets it to be just be a local mod with no source or url.
 				if (availableMod == null)
 				{
-					_installedMods[gameId].Add(new Mod(modName, null, compatibleVersions, -1, modDirectory));
+					_installedMods[gameId].Add(new Mod 
+					{
+						ModName = modName, 
+						ModUrl = null, 
+						CompatibleVersions = compatibleVersions, 
+						Source = -1, 
+						InstalledPath = modDirectory
+					});
 					continue;
 				}
 
@@ -281,8 +292,8 @@ public partial class ModManager : Control
 
 	private void GetTitles(long result, long responseCode, string[] headers, byte[] body)
 	{
-		string[] gamesArray = Encoding.UTF8.GetString(body).Split("<tr>"); // Splits the list into the begginings of each game
-		var gameList = gamesArray.ToList(); // Converted to list so first and second item (headers and example text at top) can be removed
+		string[] gamesList = Encoding.UTF8.GetString(body).Split("<tr>"); // Splits the list into the begginings of each game
+		var gameList = gamesList.ToList(); // Converted to list so first and second item (headers and example text at top) can be removed
 		gameList.RemoveRange(0, 2);
 
 		foreach (string game in gameList)
@@ -315,7 +326,8 @@ public partial class ModManager : Control
 		foreach (var installedGame in _installedGames)
 		{
 			// Mods list is temporarily duplicated to avoid issues with indexing when removing and re-adding the mods during update.
-			foreach (var mod in _installedMods[installedGame.Key].Duplicate())
+			// TODO may need fix for duplication
+			foreach (var mod in _installedMods[installedGame.Key])
 			{
 				if (mod.ModUrl != null)
 				{
@@ -411,7 +423,7 @@ public partial class ModManager : Control
 				// Sets the installed path and initializes the installed mods list for the given game if needed
 				mod.InstalledPath = installPath;
 				_installedMods[_currentGameId] = !_installedMods.ContainsKey(_currentGameId)
-					? new Array<Mod>()
+					? new List<Mod>()
 					: _installedMods[_currentGameId];
 				_installedMods[_currentGameId].Add(mod);
 				
@@ -450,7 +462,7 @@ public partial class ModManager : Control
 			{
 				// If there is no mod list for the game id creates one
 				_availableMods[gameId] =
-					!_availableMods.ContainsKey(gameId) ? new Array<Mod>() : _availableMods[gameId];
+					!_availableMods.ContainsKey(gameId) ? new List<Mod>() : _availableMods[gameId];
 				_availableMods[gameId].Add(mod);
 			}
 
@@ -474,7 +486,7 @@ public partial class ModManager : Control
 	
 	private void SelectGame(int gameIndex)
 	{
-		// Gets the keys we can equate as an array
+		// Gets the keys we can equate as an List
 		_currentGameId = GetGameIdFromValue(_gamePickerButton.GetItemText(gameIndex).Trim(), _installedGames);
 		// Clears old mods from our list
 		_modList.Clear();
@@ -482,7 +494,7 @@ public partial class ModManager : Control
 	}
 	
 	
-	static string GetGameIdFromValue(string value, Godot.Collections.Dictionary<string, Game> installedGames)
+	static string GetGameIdFromValue(string value, Dictionary<string, Game> installedGames)
 	{
 		foreach (string gameId in installedGames.Keys)
 		{

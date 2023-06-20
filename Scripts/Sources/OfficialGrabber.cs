@@ -1,19 +1,17 @@
-using Godot;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Godot.Collections;
 using HtmlAgilityPack;
 
-public partial class OfficialGrabber : Node
+public class OfficialGrabber
 {
     private const string Quote = "\"";
     
     
-    public async Task<Dictionary<string, Array<Mod>>> GetAvailableMods(Dictionary<string, Array<Mod>> modList, 
-        Dictionary<string, Game> installedGames, string gameId, int sourceId)
+    public async Task<Dictionary<string, List<Mod>>> GetAvailableMods(Dictionary<string, List<Mod>> modList, Dictionary<string, Game> installedGames, string gameId, int sourceId)
     {
-        modList[gameId] = new Array<Mod>();
+        modList[gameId] = new List<Mod>();
 
         var htmlWeb = new HtmlWeb();
         var modsSourcePage = htmlWeb.Load("https://github.com/yuzu-emu/yuzu/wiki/Switch-Mods");
@@ -37,13 +35,20 @@ public partial class OfficialGrabber : Node
             {
                 var modVersions = modsSourcePage.DocumentNode.SelectNodes(
                     $@"//h3[contains(., {Quote}{installedGames[gameId].GameName}{Quote})]/following::table[1]//tr[{titleIndex}]/td//code");
-                Array<string> versions = new Array<string>();
+                List<string> versions = new List<string>();
                 foreach (var version in modVersions)
                 {
                     versions.Add(version.InnerText);
                 }
                 titleIndex++;
-                modList[gameId].Add(new Mod(modName, downloadUrl, versions, sourceId, null));
+                modList[gameId].Add(new Mod 
+                {
+                    ModName = modName, 
+                    ModUrl = downloadUrl, 
+                    CompatibleVersions = versions, 
+                    Source = sourceId, 
+                    InstalledPath = null
+                });
             }
         }
 

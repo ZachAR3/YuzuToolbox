@@ -1,23 +1,22 @@
-using Godot;
 using System;
-using Godot.Collections;
+using System.Collections.Generic;
 
-public partial class Mod : Node
+public class Mod
 {
     // Mod name, List<mod url, mod version
-    public string ModName;
-    public string ModUrl;
-    public Array<string> CompatibleVersions;
-    public int Source;
-    public string InstalledPath;
+    public string ModName { get; set; }
+    public string ModUrl { get; set; }
+    public List<string> CompatibleVersions { get; set; }
+    public int Source { get; set; }
+    public string InstalledPath { get; set; }
     
     
-    public Mod(string modName, string modUrl, Array<string> compatibleVersions, int source, string installedPath)
-    {
-        ModName = modName;
-        ModUrl = modUrl;
-        CompatibleVersions = compatibleVersions;
-        Source = source;
-        InstalledPath = installedPath;
-    }
+    // public Mod(string modName, string modUrl, List<string> compatibleVersions, int source, string installedPath)
+    // {
+    //     ModName = modName;
+    //     ModUrl = modUrl;
+    //     CompatibleVersions = compatibleVersions;
+    //     Source = source;
+    //     InstalledPath = installedPath;
+    // }
 }

@@ -1,25 +1,22 @@
-using Godot;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using Godot.Collections;
 using Newtonsoft.Json.Linq;
 using Array = Godot.Collections.Array;
 using HttpClient = System.Net.Http.HttpClient;
 
-public partial class BananaGrabber : Node
+public class BananaGrabber
 {
 	private readonly HttpClient _httpClient = new HttpClient();
 	
 	
-	public async Task<Dictionary<string, Array<Mod>>> GetAvailableMods(Dictionary<string, Array<Mod>> modList,
-		Dictionary<string, Game> installedGames, string gameId, int sourceId)
+	public async Task<Dictionary<string, List<Mod>>> GetAvailableMods(Dictionary<string, List<Mod>> modList, Dictionary<string, Game> installedGames, string gameId, int sourceId)
 	{
-		modList[gameId] = new Array<Mod>();
+		modList[gameId] = new List<Mod>();
 		
 		int bananaGameId = GetGameModId(installedGames[gameId].GameName);
 		if (bananaGameId == -1)
 		{
-			GD.Print("Cannot find game id for selected game on banana mods");
 			return null;
 		}
 		
@@ -36,12 +33,20 @@ public partial class BananaGrabber : Node
 			string modPage = _httpClient.GetAsync($@"https://gamebanana.com/apiv11/Mod/{mod["_idRow"]}/Files").Result.Content.ReadAsStringAsync().Result;
 			var modPageContent = JToken.Parse(modPage);
 			string downloadUrl = modPageContent[0]["_sDownloadUrl"].ToString();
+			
 			// If there is an available compatible version sets it as that, otherwises sets it as NA
-			Array<string> compatibleVersions = mod["_sVersion"] == null
-				? new Array<string>() { "NA" }
-				: new Array<string>() { mod["_sVersion"].ToString() };
-			modList[gameId].Add(new Mod(mod["_sName"].ToString(), downloadUrl, compatibleVersions, sourceId,
-				null));
+			List<string> compatibleVersions = mod["_sVersion"] == null
+				? new List<string>() { "NA" }
+				: new List<string>() { mod["_sVersion"].ToString() };
+			
+			modList[gameId].Add(new Mod
+			{
+				ModName = mod["_sName"].ToString(), 
+				ModUrl = downloadUrl, 
+				CompatibleVersions = compatibleVersions, 
+				Source = sourceId, 
+				InstalledPath = null
+			});
 		}
 
 		return modList;
@@ -53,9 +58,10 @@ public partial class BananaGrabber : Node
 		// Searches for the game ID using the name from banana mods
 		string searchContent = _httpClient.GetAsync("https://gamebanana.com/apiv11/Util/Game/NameMatch?_sName=" + gameName).Result.Content.ReadAsStringAsync().Result;
 		var jsonContent = JObject.Parse($@"{searchContent}");
-		var returnValue = jsonContent["_aRecords"]?[0]?["_idRow"]!.ToString().ToInt();
+		var modId = jsonContent["_aRecords"]?[0]?["_idRow"]!.ToString();
+		
 		// If the return is null replace with our version (-1)
-		returnValue ??= -1;
-		return (int)returnValue;
+		int returnValue = modId == null ? -1 : int.Parse(modId);
+		return returnValue;
 	}
 }

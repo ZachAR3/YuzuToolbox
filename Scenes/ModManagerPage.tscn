@@ -154,6 +154,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_g8nhx")
+_installedModsPath = "user://InstalledMods.json"
 _modList = NodePath("ModsList")
 _gamePickerButton = NodePath("Header/GameSelection")
 _sourcePickerButton = NodePath("Header/SourceSelection")
