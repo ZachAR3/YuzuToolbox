@@ -5,14 +5,15 @@ using System.Threading.Tasks;
 using Godot.Collections;
 using HtmlAgilityPack;
 
-public partial class OfficialManager : Node
+public partial class OfficialGrabber : Node
 {
     private const string Quote = "\"";
     
     
-    public async Task<Dictionary<string, Array<Mod>>> GetAvailableMods(Dictionary<string, Array<Mod>> officialModList, Dictionary<string, Game> installedGames, string gameId, int sourceId)
+    public async Task<Dictionary<string, Array<Mod>>> GetAvailableMods(Dictionary<string, Array<Mod>> modList, 
+        Dictionary<string, Game> installedGames, string gameId, int sourceId)
     {
-        officialModList[gameId] = new Array<Mod>();
+        modList[gameId] = new Array<Mod>();
 
         var htmlWeb = new HtmlWeb();
         var modsSourcePage = htmlWeb.Load("https://github.com/yuzu-emu/yuzu/wiki/Switch-Mods");
@@ -42,10 +43,10 @@ public partial class OfficialManager : Node
                     versions.Add(version.InnerText);
                 }
                 titleIndex++;
-                officialModList[gameId].Add(new Mod(modName, downloadUrl, versions, sourceId, null));
+                modList[gameId].Add(new Mod(modName, downloadUrl, versions, sourceId, null));
             }
         }
 
-        return officialModList;
+        return modList;
     }
 }

@@ -141,7 +141,7 @@ public partial class ModManager : Control
 		switch (source)
 		{
 			case (int)Sources.Official:
-				OfficialManager officialManager = new OfficialManager();
+				OfficialGrabber officialManager = new OfficialGrabber();
 				try
 				{
 					_selectedSourceMods = await officialManager.GetAvailableMods(_selectedSourceMods, _installedGames, gameId, (int)Sources.Official);
@@ -156,7 +156,20 @@ public partial class ModManager : Control
 				break;
 			
 			case (int)Sources.Banana:
+				BananaGrabber bananaGrabber = new BananaGrabber();
+				try
+				{
+					_selectedSourceMods = await bananaGrabber.GetAvailableMods(_selectedSourceMods, _installedGames, gameId, (int)Sources.Banana);
+					_availableMods = _selectedSourceMods;
+				}
+				catch (ArgumentException argumentException)
+				{
+					_tools.ErrorPopup($@"Failed to retrieve mod list for ID:{gameId} | Title:{_titles[gameId]}. The game may not have available mods.", _errorLabel, _errorPopup);
+					_loadingPanel.Visible = false;
+				}
+
 				break;
+				
 			case (int)Sources.All:
 				// Code for getting all available mods and adding it to selected source mods
 				break;
@@ -355,6 +368,7 @@ public partial class ModManager : Control
 		{
 			await Task.Run(async () =>
 			{
+				GD.Print(mod.ModUrl);
 				// Gets download path, and if using windows replaces /'s with \'s
 				string downloadPath = _osUsed == "Linux"
 					? $@"{Globals.Instance.Settings.ModsLocation}/{gameId}/{mod.ModName}-Download"
