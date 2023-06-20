@@ -3,9 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Godot.Collections;
+using SevenZip;
+using Environment = System.Environment;
 using HttpClient = System.Net.Http.HttpClient;
 
 public partial class ModManager : Control
@@ -15,7 +18,7 @@ public partial class ModManager : Control
 	[Export()] private Label _errorLabel;
 	[Export()] private PopupMenu _confirmationPopup;
 
-	[ExportGroup("ModManager")] 
+	[ExportGroup("ModManager")]
 	[Export()] private int _selectionPaddingLeft = 4;
 	[Export()] private ItemList _modList;
 	[Export()] private OptionButton _gamePickerButton;
@@ -24,8 +27,7 @@ public partial class ModManager : Control
 	[Export()] private Texture2D _installedIcon;
 	[Export()] private Button _modLocationButton;
 	[Export()] private Panel _loadingPanel;
-
-	private const string Quote = "\"";
+	
 	private string _currentGameId;
 	private Tools _tools = new Tools();
 	private string _osUsed = OS.GetName();
@@ -52,7 +54,11 @@ public partial class ModManager : Control
 
 	// Godot Functions
 	private void Initiate()
-	{	
+	{
+		// Sets the 7zip dll path
+		SevenZipBase.SetLibraryPath(ProjectSettings.GlobalizePath("res://7ZipDlls/7z.dll"));
+		//SevenZipBase.SetLibraryPath("C:\\Program Files\\7-Zip\\7z.dll");
+
 		_titleRequester.Connect("request_completed", new Callable(this, nameof(GetTitles)));
 
 		_sourceNames.Insert((int)Sources.Official, "Official");
@@ -189,17 +195,16 @@ public partial class ModManager : Control
 			{
 				string[] modInfo = modDirectory.GetFile().Split("!");
 				string modName = modInfo[0];
-				string modVersion = modInfo.Length > 1 ? modInfo[1] : "N/A";
+				string modVersion = modInfo.Length > 1 ? modInfo[1] : "NA";
 				var compatibleVersions = new Array<string> { modVersion };
 				int modSource = modInfo.Length > 2 ? _sourceNames.IndexOf(modInfo[2]) : -1;
-
 				Mod availableMod = IsModAvailable(gameId, modName, modSource);
 
 				// If the mod isn't found in any online sources sets it to be just be a local mod with no source or url.
 				if (availableMod == null)
 				{
 					_installedMods[gameId].Add(new Mod(modName, null, compatibleVersions, -1, modDirectory));
-					return;
+					continue;
 				}
 
 				// Sets the installed location
@@ -245,9 +250,9 @@ public partial class ModManager : Control
 	// Adds available and local mods to mod list
 	private void AddMods(string gameId)
 	{
-		if (!_selectedSourceMods.ContainsKey(gameId))
+		if (!_selectedSourceMods.ContainsKey(gameId) && !_installedMods.ContainsKey(gameId))
 		{
-			GD.Print("Cannot find games for:" + gameId);
+			GD.Print("Cannot find mods for:" + gameId);
 			_loadingPanel.Visible = false;
 			return;
 		}
@@ -257,7 +262,7 @@ public partial class ModManager : Control
 		{
 			foreach (var mod in installedMods)
 			{
-				_modList.AddItem($@"  {mod.ModName} - Supports:{string.Join(", ", mod.CompatibleVersions)}  ",
+				_modList.AddItem($@"  {mod.ModName} || Supports:{string.Join(", ", mod.CompatibleVersions)}  ",
 					icon: _installedIcon);
 			}
 		}
@@ -266,7 +271,7 @@ public partial class ModManager : Control
 		{
 			foreach (var mod in selectedSourceMods)
 			{
-				_modList.AddItem($@"  {mod.ModName} - Supports:{string.Join(", ", mod.CompatibleVersions)}  ");
+				_modList.AddItem($@"  {mod.ModName} || Supports:{string.Join(", ", mod.CompatibleVersions)}  ");
 			}
 		}
 
@@ -368,7 +373,6 @@ public partial class ModManager : Control
 		{
 			await Task.Run(async () =>
 			{
-				GD.Print(mod.ModUrl);
 				// Gets download path, and if using windows replaces /'s with \'s
 				string downloadPath = _osUsed == "Linux"
 					? $@"{Globals.Instance.Settings.ModsLocation}/{gameId}/{mod.ModName}-Download"
@@ -376,18 +380,30 @@ public partial class ModManager : Control
 
 					// Gets install path, and if using windows replaces /'s with \'s
 				string installPath = _osUsed == "Linux" 
-					? $@"{Globals.Instance.Settings.ModsLocation}/{gameId}/{mod.ModName}!{mod.CompatibleVersions.Last()}!{mod.Source}" 
+					? $@"{Globals.Instance.Settings.ModsLocation}/{gameId}/{mod.ModName}!{mod.CompatibleVersions.Last()}!{_sourceNames[mod.Source]}" 
 					: $@"{Globals.Instance.Settings.ModsLocation}\{gameId}\{mod.ModName.Replace(":", ".")}!{mod.CompatibleVersions.Last()}!{_sourceNames[mod.Source]}";
 
 				HttpClient httpClient = new HttpClient();
-				byte[] downloadData = await httpClient.GetAsync(mod.ModUrl).Result.Content.ReadAsByteArrayAsync();
-				await File.WriteAllBytesAsync(downloadPath, downloadData);
-				System.IO.Compression.ZipFile.ExtractToDirectory(downloadPath, installPath + "-temp");
-
-				// Extracts first folder from the zip and moves it into appropriately named folder
-				string modFolder = Directory.GetDirectories(installPath + "-temp")[0];
-				Tools.MoveFilesAndDirs(modFolder, installPath);
-
+				await using (var downloadStream = await httpClient.GetStreamAsync(mod.ModUrl))
+				{
+					await using (var downloadPathStream = new FileStream(downloadPath, FileMode.CreateNew))
+					{
+						await downloadStream.CopyToAsync(downloadPathStream);
+					}
+				}
+				
+				using (var extractor = new SevenZipExtractor(downloadPath))
+				{
+					Directory.CreateDirectory(installPath + "-temp");
+					await extractor.ExtractArchiveAsync(installPath + "-temp");
+				}
+				
+				 // Extracts all the folders from the zip and moves it into appropriately named folder
+				 foreach (var folder in Directory.GetDirectories(installPath + "-temp"))
+				 {
+				 	Tools.MoveFilesAndDirs(folder, installPath);
+				 }
+				
 				// Cleanup
 				Directory.Delete(installPath + "-temp", true);
 				File.Delete(downloadPath);
@@ -426,22 +442,24 @@ public partial class ModManager : Control
 				}
 			}
 
+			// Removes the mod from our installed list
+			_installedMods[gameId].Remove(mod);
+			
+			// If the mod is available online re-adds it to the source list
 			if (mod.ModUrl != null)
 			{
-				_installedMods[gameId].Remove(mod);
-
 				// If there is no mod list for the game id creates one
 				_availableMods[gameId] =
 					!_availableMods.ContainsKey(gameId) ? new Array<Mod>() : _availableMods[gameId];
 				_availableMods[gameId].Add(mod);
-				
-				// Deletes directory contents, then the directory itself.
-				Tools.DeleteDirectoryContents(mod.InstalledPath);
-				Directory.Delete(mod.InstalledPath, true);
-				
-				// Refreshes the mod list
-				SelectGame(_gamePickerButton.Selected);
 			}
+
+			// Deletes directory contents, then the directory itself.
+			Tools.DeleteDirectoryContents(mod.InstalledPath);
+			Directory.Delete(mod.InstalledPath, true);
+			
+			// Refreshes the mod list
+			SelectGame(_gamePickerButton.Selected);
 
 			return true;
 		}
@@ -508,7 +526,7 @@ public partial class ModManager : Control
 		{
 			foreach (var mod in installedMods)
 			{
-				if (_modList.GetItemText(modIndex).Split("-")[0].Trim() == (mod.ModName))
+				if (_modList.GetItemText(modIndex).Split("||")[0].Trim() == (mod.ModName))
 				{
 					await RemoveMod(_currentGameId, mod);
 					return;
@@ -521,7 +539,7 @@ public partial class ModManager : Control
 		{
 			foreach (var mod in selectedSourceMods)
 			{
-				if (_modList.GetItemText(modIndex).Split("-")[0].Trim() == (mod.ModName))
+				if (_modList.GetItemText(modIndex).Split("||")[0].Trim() == (mod.ModName))
 				{
 					await InstallMod(_currentGameId, mod);
 					break;

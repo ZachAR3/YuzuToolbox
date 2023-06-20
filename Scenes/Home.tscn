@@ -47,7 +47,7 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 theme = ExtResource("1_c22a4")
 script = ExtResource("1_p51ic")
-_appVersion = 2.4
+_appVersion = 2.5
 _saveManagerVersion = 2.0
 _darkBg = NodePath("DarkBG")
 _lightBg = NodePath("LightBG")
@@ -183,7 +183,6 @@ tab_alignment = 1
 metadata/_edit_use_anchors_ = true
 
 [node name="Installer" parent="MainPage" node_paths=PackedStringArray("_errorPopup", "_errorLabel", "_confirmationPopup", "_latestVersionLabel") instance=ExtResource("10_7mm46")]
-visible = false
 layout_mode = 2
 _errorPopup = NodePath("../../ErrorPopup")
 _errorLabel = NodePath("../../ErrorPopup/ErrorLabel")
@@ -198,6 +197,7 @@ _errorLabel = NodePath("../../ErrorPopup/ErrorLabel")
 _confirmationPopup = NodePath("../../ConfirmPopup")
 
 [node name="ModManager" parent="MainPage" node_paths=PackedStringArray("_errorPopup", "_errorLabel", "_confirmationPopup") instance=ExtResource("12_3uycp")]
+visible = false
 layout_mode = 2
 _errorPopup = NodePath("../../ErrorPopup")
 _errorLabel = NodePath("../../ErrorPopup/ErrorLabel")
