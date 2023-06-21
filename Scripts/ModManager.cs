@@ -20,17 +20,23 @@ public partial class ModManager : Control
 	[Export()] private string _installedModsPath;
 	[Export()] private int _selectionPaddingLeft = 4;
 	[Export()] private ItemList _modList;
-	[Export()] private OptionButton _gamePickerButton;
-	[Export()] private OptionButton _sourcePickerButton;
+	[Export()] private ProgressBar _downloadBar;
+	[Export()] private Timer _downloadUpdateTimer;
+	[Export()] private HttpRequest _downloadRequester;
 	[Export()] private HttpRequest _titleRequester;
 	[Export()] private Texture2D _installedIcon;
-	[Export()] private Button _modLocationButton;
 	[Export()] private Panel _loadingPanel;
-	
+	[Export()] private OptionButton _gamePickerButton;
+	[Export()] private OptionButton _sourcePickerButton;
+	[Export()] private Button _modLocationButton;
+	[Export()] private Button _refreshButton;
+	[Export()] private Button _updateAllButton;
+	[Export()] private Button _updateSelectedButton;
+
+
 	private string _currentGameId;
 	private Tools _tools = new Tools();
 	private string _osUsed = OS.GetName();
-	//private JsonSerializer _jsonSerializer = new JsonSerializer();
 
 
 	// Code for handling sources and their associated names with each
@@ -73,7 +79,7 @@ public partial class ModManager : Control
 			Globals.Instance.SaveManager.WriteSave(Globals.Instance.Settings);
 		}
 		_modLocationButton.Text = Globals.Instance.Settings.ModsLocation.PadLeft(Globals.Instance.Settings.ModsLocation.Length + _selectionPaddingLeft, ' ');
-		
+
 		AddSources();
 		GetGamesAndMods();
 	}
@@ -324,6 +330,7 @@ public partial class ModManager : Control
 			{
 				if (mod.ModUrl != null)
 				{
+					// TOBO
 					_loadingPanel.Visible = true;
 					var modUpdated = await UpdateMod(installedGame.Key, mod, true);
 					if (modUpdated != true)
@@ -334,6 +341,7 @@ public partial class ModManager : Control
 					}
 			
 					SelectGame(_gamePickerButton.Selected);
+					//TOBO
 					_loadingPanel.Visible = false;
 				}
 			}
@@ -365,7 +373,6 @@ public partial class ModManager : Control
 		catch (Exception updateError)
 		{
 			_tools.ErrorPopup($@"failed to update mod:{updateError}", _errorLabel, _errorPopup);
-			_loadingPanel.Visible = false;
 			throw;
 		}
 	}
@@ -388,22 +395,24 @@ public partial class ModManager : Control
 					? $@"{Globals.Instance.Settings.ModsLocation}/{gameId}/Managed{mod.ModName}" 
 					: $@"{Globals.Instance.Settings.ModsLocation}\{gameId}\Managed{mod.ModName.Replace(":", ".")}";
 
-				HttpClient httpClient = new HttpClient();
-				await using (var downloadStream = await httpClient.GetStreamAsync(mod.ModUrl))
-				{
-					await using (var downloadPathStream = new FileStream(downloadPath, FileMode.CreateNew))
-					{
-						await downloadStream.CopyToAsync(downloadPathStream);
-					}
-				}
+				DisableInteraction();
 				
+				// Downloads the mod zip to the download path
+				_downloadRequester.DownloadFile = downloadPath;
+				_downloadRequester.Request(mod.ModUrl);
+				_downloadUpdateTimer.Start();
+				await ToSignal(_downloadRequester, "request_completed");
+				_downloadBar.Value = 100;
+				_downloadUpdateTimer.Stop();
+
+				// Extracts the mod into a temp path
 				using (var extractor = new SevenZipExtractor(downloadPath))
 				{
 					Directory.CreateDirectory(installPath + "-temp");
 					await extractor.ExtractArchiveAsync(installPath + "-temp");
 				}
 				
-				 // Extracts all the folders from the zip and moves it into appropriately named folder
+				 // Moves the files from the temp folder into the install path
 				 foreach (var folder in Directory.GetDirectories(installPath + "-temp"))
 				 {
 				 	Tools.MoveFilesAndDirs(folder, installPath);
@@ -431,6 +440,8 @@ public partial class ModManager : Control
 		}
 		
 		// If no exceptions were encountered saves the installed mods json and returns true
+		DisableInteraction(false);
+		_loadingPanel.Visible = false;
 		SaveInstalledMods();
 		return true;
 	}
@@ -448,8 +459,8 @@ public partial class ModManager : Control
 					return false;
 				}
 			}
-
-			// Removes the mod from our installed list
+			
+			DisableInteraction();
 			_installedMods[gameId].Remove(mod);
 			
 			// If the mod is available online re-adds it to the source list
@@ -467,6 +478,8 @@ public partial class ModManager : Control
 			
 			// Refreshes the mod list
 			SelectGame(_gamePickerButton.Selected);
+			
+			DisableInteraction(false);
 		}
 		catch (Exception removeError)
 		{
@@ -531,8 +544,24 @@ public partial class ModManager : Control
 		var serializedMods = JsonSerializer.Serialize(_installedMods);
 		File.WriteAllText(_installedModsPath, serializedMods);
 	}
-	
-	
+
+
+	private void DisableInteraction(bool interactionDisabled = true)
+	{
+		for (int itemIndex = 0; itemIndex < _modList.ItemCount; itemIndex++)
+		{
+			_modList.SetItemDisabled(itemIndex, interactionDisabled);
+		}
+
+		_gamePickerButton.Disabled = interactionDisabled;
+		_sourcePickerButton.Disabled = interactionDisabled;
+		_modLocationButton.Disabled = interactionDisabled;
+		_refreshButton.Disabled = interactionDisabled;
+		_updateAllButton.Disabled = interactionDisabled;
+		_updateSelectedButton.Disabled = interactionDisabled;
+	}
+
+
 	// Signal functions
 	private async void ModClicked(int modIndex)
 	{
@@ -626,5 +655,10 @@ public partial class ModManager : Control
 	private void RefreshPressed()
 	{
 		Refresh(_selectedSource);
+	}
+	
+	private void UpdateDownloadProgress()
+	{
+		_downloadBar.Value = (float)_downloadRequester.GetDownloadedBytes() / _downloadRequester.GetBodySize() * 100;
 	}
 }
