@@ -4,12 +4,6 @@ using System.Collections.Generic;
 
 public partial class Game : Node
 {
-	public string GameName;
+	public string GameName { set; get; }
 
-
-	public Game (string gameName)
-	{
-		GameName = gameName;
-	}
-	
 }

@@ -3,17 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-//using Godot.Collections;
-using Microsoft.VisualBasic;
 using SevenZip;
-using YuzuEAUpdateManager.Scripts.Sources;
-using Environment = System.Environment;
 using HttpClient = System.Net.Http.HttpClient;
-//using JsonSerializer = Newtonsoft.Json.JsonSerializer;
 
 public partial class ModManager : Control
 {
@@ -123,7 +117,7 @@ public partial class ModManager : Control
 				string gameId = gameModFolder.GetFile(); // Gets game id by grabbing the folders name
 				if (_titles.TryGetValue(gameId, out var gameName))
 				{
-					_installedGames[gameId] = new Game(gameName);
+					_installedGames[gameId] = new() { GameName = gameName};
 					await Task.Run(() => GetAvailableMods(gameId, source));
 					GetInstalledMods(gameId);
 					_gamePickerButton.AddItem($@"    {gameName}");
@@ -435,7 +429,9 @@ public partial class ModManager : Control
 			_loadingPanel.Visible = false;
 			throw;
 		}
-
+		
+		// If no exceptions were encountered saves the installed mods json and returns true
+		SaveInstalledMods();
 		return true;
 	}
 	
@@ -471,8 +467,6 @@ public partial class ModManager : Control
 			
 			// Refreshes the mod list
 			SelectGame(_gamePickerButton.Selected);
-
-			return true;
 		}
 		catch (Exception removeError)
 		{
@@ -480,6 +474,9 @@ public partial class ModManager : Control
 			_loadingPanel.Visible = false;
 			return false;
 		}
+
+		SaveInstalledMods();
+		return true;
 	}
 	
 	
