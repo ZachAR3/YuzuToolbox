@@ -13,6 +13,7 @@ using SevenZip;
 using YuzuEAUpdateManager.Scripts.Sources;
 using Environment = System.Environment;
 using HttpClient = System.Net.Http.HttpClient;
+//using JsonSerializer = Newtonsoft.Json.JsonSerializer;
 
 public partial class ModManager : Control
 {
@@ -35,6 +36,7 @@ public partial class ModManager : Control
 	private string _currentGameId;
 	private Tools _tools = new Tools();
 	private string _osUsed = OS.GetName();
+	//private JsonSerializer _jsonSerializer = new JsonSerializer();
 
 
 	// Code for handling sources and their associated names with each
@@ -55,12 +57,16 @@ public partial class ModManager : Control
 	private Dictionary<string, Game> _installedGames = new Dictionary<string, Game>();
 	private Dictionary<string, List<Mod>> _availableMods = new Dictionary<string, List<Mod>>();
 	private Dictionary<string, List<Mod>> _installedMods = new Dictionary<string, List<Mod>>();
+	
 
 	// Godot Functions
 	private void Initiate()
 	{
 		// Sets the 7zip dll path
 		SevenZipBase.SetLibraryPath(ProjectSettings.GlobalizePath("res://7ZipDlls/7z.dll"));
+
+		// Converts the given local path to an absolute one upon run time
+		_installedModsPath = ProjectSettings.GlobalizePath(_installedModsPath);
 
 		_titleRequester.Connect("request_completed", new Callable(this, nameof(GetTitles)));
 
@@ -78,6 +84,13 @@ public partial class ModManager : Control
 		GetGamesAndMods();
 	}
 
+	
+	public override void _Notification(int notification)
+	{
+		if (notification == NotificationWMCloseRequest)
+			SaveInstalledMods();
+	}
+	
 
 	// Custom functions
 	private async void GetGamesAndMods(int source = (int)Sources.Official)
@@ -122,7 +135,6 @@ public partial class ModManager : Control
 				}
 
 			}
-
 
 			// Sets the first game as selected by default
 			if (_installedGames.Count > 0)
@@ -184,7 +196,6 @@ public partial class ModManager : Control
 				// Code for getting all available mods and adding it to selected source mods
 				break;
 		}
-
 	}
 
 
@@ -192,37 +203,50 @@ public partial class ModManager : Control
 	{
 		try
 		{
-			// Initializes installed mods for the given title.
+			// Initializes the list of mods for the given game,
 			_installedMods[gameId] = new List<Mod>();
 			
-			foreach (var modDirectory in Directory.GetDirectories($@"{Globals.Instance.Settings.ModsLocation}/{gameId}"))
+			if (File.Exists(_installedModsPath))
 			{
-				string[] modInfo = modDirectory.GetFile().Split("!");
-				string modName = modInfo[0];
-				string modVersion = modInfo.Length > 1 ? modInfo[1] : "NA";
-				var compatibleVersions = new List<string> { modVersion };
-				int modSource = modInfo.Length > 2 ? _sourceNames.IndexOf(modInfo[2]) : -1;
-				Mod availableMod = IsModAvailable(gameId, modName, modSource);
-
-				// If the mod isn't found in any online sources sets it to be just be a local mod with no source or url.
-				if (availableMod == null)
+				var installedModsJson = JsonSerializer.Deserialize<Dictionary<string, List<Mod>>>(File.ReadAllText(_installedModsPath));
+				if (installedModsJson.TryGetValue(gameId, out var gameMods))
 				{
-					_installedMods[gameId].Add(new Mod 
+					_installedMods[gameId] = gameMods;
+				};
+			}
+
+			// Adds local mods that aren't in the data base
+			foreach (var modDirectory in
+			         Directory.GetDirectories($@"{Globals.Instance.Settings.ModsLocation}/{gameId}"))
+			{
+				if (!modDirectory.GetFile().StartsWith("Managed"))
+				{
+					//_installedMods[gameId].Add(new Mod());
+					_installedMods[gameId].Add(new()
 					{
-						ModName = modName, 
+						ModName = modDirectory.GetFile(),
 						ModUrl = null, 
-						CompatibleVersions = compatibleVersions, 
+						CompatibleVersions = { "NA" }, 
 						Source = -1, 
 						InstalledPath = modDirectory
 					});
-					continue;
 				}
+			}
 
-				// Sets the installed location
-				availableMod.InstalledPath = modDirectory;
-				
-				_installedMods[gameId].Add(availableMod);
-				_availableMods[gameId].Remove(availableMod);
+			// Really inefficient system to remove installed mods from available based on the name TODO
+			if (_availableMods.ContainsKey(gameId))
+			{
+				foreach (var mod in _installedMods[gameId])
+				{
+					foreach (var availableMod in new List<Mod>(_availableMods[gameId]))
+					{
+						if (availableMod.ModName == mod.ModName)
+						{
+							_availableMods[gameId].Remove(availableMod);
+							_selectedSourceMods[gameId].Remove(availableMod);
+						}
+					}
+				}
 			}
 		}
 		catch (Exception installedError)
@@ -234,28 +258,29 @@ public partial class ModManager : Control
 	}
 
 
+	// TODO needs to be renabled in conjuction with other systems Issue #40
 	// Checks if a mod is available for download, if so returns the mod
-	private Mod IsModAvailable(string gameId, string modName, int source = -1)
-	{
-		if (_availableMods.TryGetValue(gameId, out var availableMods))
-		{
-			foreach (Mod availableMod in availableMods)
-			{
-				if (availableMod.ModName == modName || availableMod.ModName == modName.Replace(".", ":"))
-				{
-					if (source != -1 && source != availableMod.Source)
-					{
-						continue;
-					}
-
-					_availableMods[gameId].Remove(availableMod);
-					return availableMod;
-				}
-			}
-		}
-
-		return null;
-	}
+	// private Mod IsModAvailable(string gameId, string modName, int source = -1)
+	// {
+	// 	if (_availableMods.TryGetValue(gameId, out var availableMods))
+	// 	{
+	// 		foreach (Mod availableMod in availableMods)
+	// 		{
+	// 			if (availableMod.ModName == modName || availableMod.ModName == modName.Replace(".", ":"))
+	// 			{
+	// 				if (source != -1 && source != availableMod.Source)
+	// 				{
+	// 					continue;
+	// 				}
+	//
+	// 				_availableMods[gameId].Remove(availableMod);
+	// 				return availableMod;
+	// 			}
+	// 		}
+	// 	}
+	//
+	// 	return null;
+	// }
 	
 
 	// Adds available and local mods to mod list
@@ -326,8 +351,7 @@ public partial class ModManager : Control
 		foreach (var installedGame in _installedGames)
 		{
 			// Mods list is temporarily duplicated to avoid issues with indexing when removing and re-adding the mods during update.
-			// TODO may need fix for duplication
-			foreach (var mod in _installedMods[installedGame.Key])
+			foreach (var mod in new List<Mod>(_installedMods[installedGame.Key]))
 			{
 				if (mod.ModUrl != null)
 				{
@@ -392,8 +416,8 @@ public partial class ModManager : Control
 
 					// Gets install path, and if using windows replaces /'s with \'s
 				string installPath = _osUsed == "Linux" 
-					? $@"{Globals.Instance.Settings.ModsLocation}/{gameId}/{mod.ModName}!{mod.CompatibleVersions.Last()}!{_sourceNames[mod.Source]}" 
-					: $@"{Globals.Instance.Settings.ModsLocation}\{gameId}\{mod.ModName.Replace(":", ".")}!{mod.CompatibleVersions.Last()}!{_sourceNames[mod.Source]}";
+					? $@"{Globals.Instance.Settings.ModsLocation}/{gameId}/Managed{mod.ModName}" 
+					: $@"{Globals.Instance.Settings.ModsLocation}\{gameId}\Managed{mod.ModName.Replace(":", ".")}";
 
 				HttpClient httpClient = new HttpClient();
 				await using (var downloadStream = await httpClient.GetStreamAsync(mod.ModUrl))
@@ -528,6 +552,13 @@ public partial class ModManager : Control
 			_sourcePickerButton.AddItem(source.PadLeft(source.Length + _selectionPaddingLeft));
 		}
 	}
+
+
+	private void SaveInstalledMods()
+	{
+		var serializedMods = JsonSerializer.Serialize(_installedMods);
+		File.WriteAllText(_installedModsPath, serializedMods);
+	}
 	
 	
 	// Signal functions
@@ -587,11 +618,10 @@ public partial class ModManager : Control
 			{
 				return;
 			}
-			
-			_loadingPanel.Visible = true;
-			
-			if (_modList.GetItemText(selectedMods[0]).Split("-")[0].Trim() == (mod.ModName))
+
+			if (_modList.GetItemText(selectedMods[0]).Split("||")[0].Trim() == (mod.ModName))
 			{
+				_loadingPanel.Visible = true;
 				if (mod.ModUrl != null)
 				{
 					await UpdateMod(_currentGameId, mod);
@@ -600,6 +630,7 @@ public partial class ModManager : Control
 				// Used to update UI with installed icon
 				SelectGame(_gamePickerButton.Selected);
 				_loadingPanel.Visible = false;
+				return;
 			}
 		}
 	}
