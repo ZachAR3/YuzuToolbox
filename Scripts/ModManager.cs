@@ -7,7 +7,6 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using SevenZip;
-using HttpClient = System.Net.Http.HttpClient;
 
 public partial class ModManager : Control
 {
@@ -32,10 +31,11 @@ public partial class ModManager : Control
 	[Export()] private Button _refreshButton;
 	[Export()] private Button _updateAllButton;
 	[Export()] private Button _updateSelectedButton;
+	[Export()] private Button _loadMoreButton;
 
 
 	private string _currentGameId;
-	private Tools _tools = new Tools();
+	private Tools _tools = new();
 	private string _osUsed = OS.GetName();
 
 
@@ -57,6 +57,11 @@ public partial class ModManager : Control
 	private Dictionary<string, Game> _installedGames = new Dictionary<string, Game>();
 	private Dictionary<string, List<Mod>> _availableMods = new Dictionary<string, List<Mod>>();
 	private Dictionary<string, List<Mod>> _installedMods = new Dictionary<string, List<Mod>>();
+
+	private BananaGrabber _bananaGrabber = new BananaGrabber();
+	private OfficialGrabber _officialManager = new OfficialGrabber();
+	
+	private int _modsPage = 1;
 	
 
 	// Godot Functions
@@ -67,6 +72,8 @@ public partial class ModManager : Control
 
 		// Converts the given local path to an absolute one upon run time
 		_installedModsPath = ProjectSettings.GlobalizePath(_installedModsPath);
+
+		_loadMoreButton.Disabled = true;
 
 		_titleRequester.Connect("request_completed", new Callable(this, nameof(GetTitles)));
 
@@ -124,7 +131,6 @@ public partial class ModManager : Control
 				if (_titles.TryGetValue(gameId, out var gameName))
 				{
 					_installedGames[gameId] = new() { GameName = gameName};
-					await Task.Run(() => GetAvailableMods(gameId, source));
 					GetInstalledMods(gameId);
 					_gamePickerButton.AddItem($@"    {gameName}");
 				}
@@ -135,6 +141,9 @@ public partial class ModManager : Control
 				}
 
 			}
+			
+			_currentGameId = GetGameIdFromValue(_gamePickerButton.GetItemText(0).Trim(), _installedGames);
+			await Task.Run(() => GetAvailableMods(_currentGameId, source));
 
 			// Sets the first game as selected by default
 			if (_installedGames.Count > 0)
@@ -163,10 +172,9 @@ public partial class ModManager : Control
 		switch (source)
 		{
 			case (int)Sources.Official:
-				OfficialGrabber officialManager = new OfficialGrabber();
 				try
 				{
-					_selectedSourceMods = await officialManager.GetAvailableMods(_selectedSourceMods, _installedGames, gameId, (int)Sources.Official);
+					_selectedSourceMods = await _officialManager.GetAvailableMods(_selectedSourceMods, _installedGames, gameId, (int)Sources.Official);
 					_availableMods = _selectedSourceMods;
 				}
 				catch (ArgumentException argumentException)
@@ -178,10 +186,9 @@ public partial class ModManager : Control
 				break;
 			
 			case (int)Sources.Banana:
-				BananaGrabber bananaGrabber = new BananaGrabber();
 				try
 				{
-					_selectedSourceMods = await bananaGrabber.GetAvailableMods(_selectedSourceMods, _installedGames, gameId, (int)Sources.Banana);
+					_selectedSourceMods = await _bananaGrabber.GetAvailableMods(_selectedSourceMods, _installedGames, gameId, (int)Sources.Banana, _modsPage);
 					_availableMods = _selectedSourceMods;
 				}
 				catch (ArgumentException argumentException)
@@ -195,6 +202,22 @@ public partial class ModManager : Control
 			case (int)Sources.All:
 				// Code for getting all available mods and adding it to selected source mods
 				break;
+		}
+		
+		// Really inefficient system to remove installed mods from available based on the name TODO
+		if (_availableMods.ContainsKey(gameId))
+		{
+			foreach (var mod in _installedMods[gameId])
+			{
+				foreach (var availableMod in new List<Mod>(_availableMods[gameId]))
+				{
+					if (availableMod.ModName == mod.ModName)
+					{
+						_availableMods[gameId].Remove(availableMod);
+						_selectedSourceMods[gameId].Remove(availableMod);
+					}
+				}
+			}
 		}
 	}
 
@@ -232,22 +255,6 @@ public partial class ModManager : Control
 					});
 				}
 			}
-
-			// Really inefficient system to remove installed mods from available based on the name TODO
-			if (_availableMods.ContainsKey(gameId))
-			{
-				foreach (var mod in _installedMods[gameId])
-				{
-					foreach (var availableMod in new List<Mod>(_availableMods[gameId]))
-					{
-						if (availableMod.ModName == mod.ModName)
-						{
-							_availableMods[gameId].Remove(availableMod);
-							_selectedSourceMods[gameId].Remove(availableMod);
-						}
-					}
-				}
-			}
 		}
 		catch (Exception installedError)
 		{
@@ -255,6 +262,24 @@ public partial class ModManager : Control
 			_loadingPanel.Visible = false;
 			throw;
 		}
+	}
+
+
+	private async void GetMoreMods()
+	{
+		_modsPage++;
+
+		_loadingPanel.Visible = true;
+		DisableInteraction();
+		await Task.Run(async () =>
+		{
+			_selectedSourceMods = await _bananaGrabber.GetAvailableMods(_selectedSourceMods, _installedGames,
+				_currentGameId,
+				_selectedSource, _modsPage);
+		});
+		DisableInteraction(false);
+		_loadingPanel.Visible = false;
+		SelectGame(_gamePickerButton.GetSelectableItem());
 	}
 
 
@@ -604,6 +629,17 @@ public partial class ModManager : Control
 			_tools.ErrorPopup("source not found, please file a bug report. Defaulting back to official", _errorLabel, _errorPopup);
 			_sourcePickerButton.Select(0);
 			return;
+		}
+
+		switch (_selectedSource)
+		{
+			case (int)Sources.Official:
+				GD.Print("Disable");
+				_loadMoreButton.Disabled = true;
+				break;
+			case (int)Sources.Banana:
+				_loadMoreButton.Disabled = false;
+				break;
 		}
 		
 		Refresh(_selectedSource);

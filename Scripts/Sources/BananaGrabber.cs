@@ -9,9 +9,12 @@ public class BananaGrabber
 	private readonly HttpClient _httpClient = new HttpClient();
 	
 	
-	public async Task<Dictionary<string, List<Mod>>> GetAvailableMods(Dictionary<string, List<Mod>> modList, Dictionary<string, Game> installedGames, string gameId, int sourceId)
+	public async Task<Dictionary<string, List<Mod>>> GetAvailableMods(Dictionary<string, List<Mod>> modList, Dictionary<string, Game> installedGames, string gameId, int sourceId, int page = 1)
 	{
-		modList[gameId] = new List<Mod>();
+		if (!modList.ContainsKey(gameId))
+		{
+			modList[gameId] = new List<Mod>();
+		}
 		
 		int bananaGameId = GetGameModId(installedGames[gameId].GameName);
 		if (bananaGameId == -1)
@@ -19,9 +22,8 @@ public class BananaGrabber
 			return null;
 		}
 		
-		int currentPage = 1;
 		string gameModsSource = _httpClient
-			.GetAsync($@"https://gamebanana.com/apiv11/Game/{bananaGameId}/Subfeed?_nPage={currentPage}").Result
+			.GetAsync($@"https://gamebanana.com/apiv11/Game/{bananaGameId}/Subfeed?_nPage={page}").Result
 			.Content
 			.ReadAsStringAsync().Result;
 		var jsonMods = JObject.Parse(gameModsSource);

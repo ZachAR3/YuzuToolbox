@@ -10,7 +10,10 @@ public class OfficialGrabber
     
     public async Task<Dictionary<string, List<Mod>>> GetAvailableMods(Dictionary<string, List<Mod>> modList, Dictionary<string, Game> installedGames, string gameId, int sourceId)
     {
-        modList[gameId] = new List<Mod>();
+        if (!modList.ContainsKey(gameId))
+        {
+            modList[gameId] = new List<Mod>();
+        }
 
         var htmlWeb = new HtmlWeb();
         var modsSourcePage = htmlWeb.Load("https://github.com/yuzu-emu/yuzu/wiki/Switch-Mods");

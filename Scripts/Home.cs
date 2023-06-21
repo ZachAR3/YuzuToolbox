@@ -44,8 +44,11 @@ public partial class Home : Control
 		// Set save manager version
 		Globals.Instance.SaveManager.Version = _saveManagerVersion;
 
-		// Mute by default the music
+		// Set the theme
 		SetTheme(Globals.Instance.Settings.LightModeEnabled);
+		
+		// Sets scaling (Called manually to hopefully fix #31
+		WindowResized();
 		
 		// Signals
 		Resized += WindowResized;

@@ -146,7 +146,7 @@ animations = [{
 "speed": 30.0
 }]
 
-[node name="ModManager" type="Control" node_paths=PackedStringArray("_modList", "_downloadBar", "_downloadUpdateTimer", "_downloadRequester", "_titleRequester", "_loadingPanel", "_gamePickerButton", "_sourcePickerButton", "_modLocationButton", "_refreshButton", "_updateAllButton", "_updateSelectedButton") groups=["Initiate"]]
+[node name="ModManager" type="Control" node_paths=PackedStringArray("_modList", "_downloadBar", "_downloadUpdateTimer", "_downloadRequester", "_titleRequester", "_loadingPanel", "_gamePickerButton", "_sourcePickerButton", "_modLocationButton", "_refreshButton", "_updateAllButton", "_updateSelectedButton", "_loadMoreButton") groups=["Initiate"]]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -168,6 +168,7 @@ _modLocationButton = NodePath("Header/ModLocationButton")
 _refreshButton = NodePath("SideBar/RefreshButton")
 _updateAllButton = NodePath("SideBar/UpdateAll")
 _updateSelectedButton = NodePath("SideBar/UpdateSelected")
+_loadMoreButton = NodePath("SideBar/LoadMore")
 metadata/_edit_use_anchors_ = true
 
 [node name="Header" type="GridContainer" parent="."]
@@ -253,6 +254,15 @@ text = "Update selected
 "
 metadata/_edit_use_anchors_ = true
 
+[node name="VerticalSpacer" type="Control" parent="SideBar"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="LoadMore" type="Button" parent="SideBar"]
+layout_mode = 2
+size_flags_vertical = 8
+text = "Load more"
+
 [node name="ModsList" type="ItemList" parent="."]
 clip_contents = false
 layout_mode = 1
@@ -334,5 +344,6 @@ metadata/_edit_use_anchors_ = true
 [connection signal="pressed" from="SideBar/RefreshButton" to="." method="RefreshPressed"]
 [connection signal="pressed" from="SideBar/UpdateAll" to="." method="UpdateAll"]
 [connection signal="pressed" from="SideBar/UpdateSelected" to="." method="UpdateSelectedPressed"]
+[connection signal="pressed" from="SideBar/LoadMore" to="." method="GetMoreMods"]
 [connection signal="item_activated" from="ModsList" to="." method="ModClicked"]
 [connection signal="timeout" from="DownloadUpdateTimer" to="." method="UpdateDownloadProgress"]
