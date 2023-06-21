@@ -277,7 +277,7 @@ public partial class ModManager : Control
 		{
 			tempModsList = await _bananaGrabber.GetAvailableMods(_selectedSourceMods, _installedGames,
 				_currentGameId,
-				_selectedSource, 41);
+				_selectedSource, _modsPage);
 		});
 
 		// If our old list is the same as the new one, disabled the load more as no more mods are available.
