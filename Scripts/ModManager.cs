@@ -142,6 +142,7 @@ public partial class ModManager : Control
 
 			}
 			
+			// Sets the current game ID as default item and then gets the avaialable mods for the default game.
 			_currentGameId = GetGameIdFromValue(_gamePickerButton.GetItemText(0).Trim(), _installedGames);
 			await Task.Run(() => GetAvailableMods(_currentGameId, source));
 
@@ -235,7 +236,7 @@ public partial class ModManager : Control
 				if (installedModsJson.TryGetValue(gameId, out var gameMods))
 				{
 					_installedMods[gameId] = gameMods;
-				};
+				}
 			}
 
 			// Adds local mods that aren't in the data base
@@ -268,17 +269,30 @@ public partial class ModManager : Control
 	private async void GetMoreMods()
 	{
 		_modsPage++;
-
 		_loadingPanel.Visible = true;
 		DisableInteraction();
+		
+		var tempModsList = new Dictionary<string, List<Mod>>();
 		await Task.Run(async () =>
 		{
-			_selectedSourceMods = await _bananaGrabber.GetAvailableMods(_selectedSourceMods, _installedGames,
+			tempModsList = await _bananaGrabber.GetAvailableMods(_selectedSourceMods, _installedGames,
 				_currentGameId,
-				_selectedSource, _modsPage);
+				_selectedSource, 41);
 		});
+
+		// If our old list is the same as the new one, disabled the load more as no more mods are available.
+		if (tempModsList == _selectedSourceMods)
+		{
+			_loadMoreButton.Disabled = true;
+		}
+		else
+		{
+			_selectedSourceMods = tempModsList;
+		}
+		
 		DisableInteraction(false);
 		_loadingPanel.Visible = false;
+		
 		SelectGame(_gamePickerButton.GetSelectableItem());
 	}
 
@@ -317,7 +331,7 @@ public partial class ModManager : Control
 
 	private void GetTitles(long result, long responseCode, string[] headers, byte[] body)
 	{
-		string[] gamesList = Encoding.UTF8.GetString(body).Split("<tr>"); // Splits the list into the begginings of each game
+		string[] gamesList = Encoding.UTF8.GetString(body).Split("<tr>"); // Splits the list into the bbeginnings of each game
 		var gameList = gamesList.ToList(); // Converted to list so first and second item (headers and example text at top) can be removed
 		gameList.RemoveRange(0, 2);
 
@@ -355,8 +369,6 @@ public partial class ModManager : Control
 			{
 				if (mod.ModUrl != null)
 				{
-					// TOBO
-					_loadingPanel.Visible = true;
 					var modUpdated = await UpdateMod(installedGame.Key, mod, true);
 					if (modUpdated != true)
 					{
@@ -366,8 +378,6 @@ public partial class ModManager : Control
 					}
 			
 					SelectGame(_gamePickerButton.Selected);
-					//TOBO
-					_loadingPanel.Visible = false;
 				}
 			}
 		}
