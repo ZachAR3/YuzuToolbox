@@ -258,31 +258,6 @@ public partial class ModManager : Control
 	}
 
 
-	// TODO needs to be renabled in conjuction with other systems Issue #40
-	// Checks if a mod is available for download, if so returns the mod
-	// private Mod IsModAvailable(string gameId, string modName, int source = -1)
-	// {
-	// 	if (_availableMods.TryGetValue(gameId, out var availableMods))
-	// 	{
-	// 		foreach (Mod availableMod in availableMods)
-	// 		{
-	// 			if (availableMod.ModName == modName || availableMod.ModName == modName.Replace(".", ":"))
-	// 			{
-	// 				if (source != -1 && source != availableMod.Source)
-	// 				{
-	// 					continue;
-	// 				}
-	//
-	// 				_availableMods[gameId].Remove(availableMod);
-	// 				return availableMod;
-	// 			}
-	// 		}
-	// 	}
-	//
-	// 	return null;
-	// }
-	
-
 	// Adds available and local mods to mod list
 	private void AddMods(string gameId)
 	{
