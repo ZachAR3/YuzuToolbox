@@ -147,7 +147,7 @@ public partial class ModManager : Control
 			{
 				// Sets the current game ID as default item and then gets the avaialable mods for the default game.
 				_currentGameId = GetGameIdFromValue(_gamePickerButton.GetItemText(0).Trim(), _installedGames);
-				await Task.Run(() => GetAvailableMods(_currentGameId, source));
+				await Task.Run(async () => await GetAvailableMods(_currentGameId, source));
 				SelectGame(0);
 			}
 			else
@@ -159,7 +159,7 @@ public partial class ModManager : Control
 	}
 
 	
-	private async void GetAvailableMods(string gameId, int source)
+	private async Task GetAvailableMods(string gameId, int source)
 	{
 		if (gameId == null || !_installedGames.ContainsKey(gameId))
 		{
@@ -654,7 +654,7 @@ public partial class ModManager : Control
 			
 			foreach (var mod in localSourceMods)
 			{
-				if (mod.ModName.ToLower().Trim().Contains(searchQuery))
+				if (mod.ModName.ToLower().Trim().Contains(searchQuery) || searchQuery == "")
 				{
 					if (mod.InstalledPath != null)
 					{
