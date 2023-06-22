@@ -13,7 +13,10 @@
     <PackageReference Include="WindowsShortcutFactory" Version="1.1.0" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="7ZipDlls\7z.dll">
+    <Content Include="7ZipDlls\7zWindows.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="7ZipDlls\7zzLinux">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

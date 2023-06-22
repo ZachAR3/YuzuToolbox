@@ -11,7 +11,7 @@ using WindowsShortcutFactory;
 public partial class Home : Control
 {
 	[ExportGroup("App")]
-	[Export()] private float _appVersion = 2.2f;
+	[Export()] private float _appVersion = 2f;
 	[Export()] private TextureRect _darkBg;
 	[Export()] private TextureRect _lightBg;
 	[Export()] private ColorRect _downloadWindowApp;
