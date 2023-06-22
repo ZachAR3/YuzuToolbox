@@ -68,7 +68,8 @@ public partial class ModManager : Control
 	private void Initiate()
 	{
 		// Sets the 7zip dll path
-		SevenZipBase.SetLibraryPath(ProjectSettings.GlobalizePath("res://7ZipDlls/7z.dll"));
+		string[] dllPaths = Directory.GetFiles(".", "*.dll", SearchOption.AllDirectories);
+		SevenZipBase.SetLibraryPath(Path.GetFullPath(dllPaths.First(path => Path.GetFileName(path) == "7z.dll")));
 
 		// Converts the given local path to an absolute one upon run time
 		_installedModsPath = ProjectSettings.GlobalizePath(_installedModsPath);
