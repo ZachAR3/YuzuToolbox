@@ -57,7 +57,6 @@ public partial class ModManager : Control
 	// Game id, mod names List
 	private Dictionary<string, Game> _installedGames = new Dictionary<string, Game>();
 	private Dictionary<string, List<Mod>> _installedMods = new Dictionary<string, List<Mod>>();
-	//private Dictionary<string, List<Mod>> _availableMods = new Dictionary<string, List<Mod>>();
 
 	private BananaGrabber _bananaGrabber = new BananaGrabber();
 	private OfficialGrabber _officialManager = new OfficialGrabber();
@@ -215,14 +214,6 @@ public partial class ModManager : Control
 				
 				break;
 		}
-		
-		// Duplicates all of our mods into available mods to be used when using search functionality. TODO
-		// _availableMods = new Dictionary<string, List<Mod>>();
-		// foreach (var modDict in _selectedSourceMods)
-		// {
-		// 	List<Mod> copiedList = new List<Mod>(modDict.Value);
-		// 	_availableMods.Add(modDict.Key, copiedList);
-		// }
 
 		// Really inefficient system to remove installed mods from available based on the name TODO
 		if (_selectedSourceMods.ContainsKey(gameId))
