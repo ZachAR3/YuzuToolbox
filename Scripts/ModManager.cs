@@ -55,7 +55,6 @@ public partial class ModManager : Control
 	private Dictionary<string, string> _titles = new Dictionary<string, string>();
 	// Game id, mod names List
 	private Dictionary<string, Game> _installedGames = new Dictionary<string, Game>();
-	private Dictionary<string, List<Mod>> _availableMods = new Dictionary<string, List<Mod>>();
 	private Dictionary<string, List<Mod>> _installedMods = new Dictionary<string, List<Mod>>();
 
 	private BananaGrabber _bananaGrabber = new BananaGrabber();
@@ -79,6 +78,7 @@ public partial class ModManager : Control
 
 		_sourceNames.Insert((int)Sources.Official, "Official");
 		_sourceNames.Insert((int)Sources.Banana, "Banana");
+		_sourceNames.Insert((int)Sources.All, "All");
 
 		if (Globals.Instance.Settings.ModsLocation == null)
 		{
@@ -176,7 +176,6 @@ public partial class ModManager : Control
 				try
 				{
 					_selectedSourceMods = await _officialManager.GetAvailableMods(_selectedSourceMods, _installedGames, gameId, (int)Sources.Official);
-					_availableMods = _selectedSourceMods;
 				}
 				catch (ArgumentException argumentException)
 				{
@@ -190,7 +189,6 @@ public partial class ModManager : Control
 				try
 				{
 					_selectedSourceMods = await _bananaGrabber.GetAvailableMods(_selectedSourceMods, _installedGames, gameId, (int)Sources.Banana, _modsPage);
-					_availableMods = _selectedSourceMods;
 				}
 				catch (ArgumentException argumentException)
 				{
@@ -201,21 +199,31 @@ public partial class ModManager : Control
 				break;
 				
 			case (int)Sources.All:
-				// Code for getting all available mods and adding it to selected source mods
+				try 
+				{
+					// Adds both official and banana mods the our source list
+					_selectedSourceMods = await _officialManager.GetAvailableMods(_selectedSourceMods, _installedGames, gameId, (int)Sources.Official);
+					_selectedSourceMods = await _bananaGrabber.GetAvailableMods(_selectedSourceMods, _installedGames, gameId, (int)Sources.Banana, _modsPage);
+				}
+				catch (ArgumentException argumentException)
+				{
+					_tools.ErrorPopup($@"Failed to retrieve mod list for ID:{gameId} | Title:{_titles[gameId]}. The game may not have available mods.", _errorLabel, _errorPopup);
+					_loadingPanel.Visible = false;
+				}
+				
 				break;
 		}
-		
+
 		// Really inefficient system to remove installed mods from available based on the name TODO
-		if (_availableMods.ContainsKey(gameId))
+		if (_selectedSourceMods.ContainsKey(gameId))
 		{
 			foreach (var mod in _installedMods[gameId])
 			{
-				foreach (var availableMod in new List<Mod>(_availableMods[gameId]))
+				foreach (var selectedSourceMod in new List<Mod>(_selectedSourceMods[gameId]))
 				{
-					if (availableMod.ModName == mod.ModName)
+					if (selectedSourceMod.ModName == mod.ModName)
 					{
-						_availableMods[gameId].Remove(availableMod);
-						_selectedSourceMods[gameId].Remove(availableMod);
+						_selectedSourceMods[gameId].Remove(selectedSourceMod);
 					}
 				}
 			}
@@ -376,11 +384,11 @@ public partial class ModManager : Control
 						_loadingPanel.Visible = false;
 						return;
 					}
-			
-					SelectGame(_gamePickerButton.Selected);
 				}
 			}
 		}
+		
+		SelectGame(_gamePickerButton.Selected);
 	}
 	
 	
@@ -403,13 +411,15 @@ public partial class ModManager : Control
 				return false;
 			}
 			await InstallMod(gameId, mod);
-			return true;
 		}
 		catch (Exception updateError)
 		{
 			_tools.ErrorPopup($@"failed to update mod:{updateError}", _errorLabel, _errorPopup);
 			throw;
 		}
+		
+		SelectGame(_gamePickerButton.Selected);
+		return true;
 	}
 
 	
@@ -462,9 +472,9 @@ public partial class ModManager : Control
 				_installedMods[_currentGameId] = !_installedMods.ContainsKey(_currentGameId)
 					? new List<Mod>()
 					: _installedMods[_currentGameId];
-				_installedMods[_currentGameId].Add(mod);
 				
-				_availableMods[_currentGameId].Remove(mod);
+				_installedMods[_currentGameId].Add(mod);
+				_selectedSourceMods[_currentGameId].Remove(mod);
 			});
 		}
 		catch (Exception installError)
@@ -499,21 +509,18 @@ public partial class ModManager : Control
 			_installedMods[gameId].Remove(mod);
 			
 			// If the mod is available online re-adds it to the source list
-			if (mod.ModUrl != null)
+			if (mod.ModUrl != null && _selectedSource == mod.Source || _selectedSource is (int)Sources.All)
 			{
 				// If there is no mod list for the game id creates one
-				_availableMods[gameId] =
-					!_availableMods.ContainsKey(gameId) ? new List<Mod>() : _availableMods[gameId];
-				_availableMods[gameId].Add(mod);
+				_selectedSourceMods[gameId] =
+					!_selectedSourceMods.ContainsKey(gameId) ? new List<Mod>() : _selectedSourceMods[gameId];
+				_selectedSourceMods[gameId].Add(mod);
 			}
 
 			// Deletes directory contents, then the directory itself.
 			Tools.DeleteDirectoryContents(mod.InstalledPath);
 			Directory.Delete(mod.InstalledPath, true);
-			
-			// Refreshes the mod list
-			SelectGame(_gamePickerButton.Selected);
-			
+
 			DisableInteraction(false);
 		}
 		catch (Exception removeError)
@@ -594,6 +601,10 @@ public partial class ModManager : Control
 		_refreshButton.Disabled = interactionDisabled;
 		_updateAllButton.Disabled = interactionDisabled;
 		_updateSelectedButton.Disabled = interactionDisabled;
+		if (_selectedSource is (int)Sources.Banana or (int)Sources.All)
+		{
+			_loadMoreButton.Disabled = interactionDisabled;
+		}
 	}
 
 
@@ -608,6 +619,8 @@ public partial class ModManager : Control
 				if (_modList.GetItemText(modIndex).Split("||")[0].Trim() == (mod.ModName))
 				{
 					await RemoveMod(_currentGameId, mod);
+					//Used to update UI with installed icon	
+					SelectGame(_gamePickerButton.Selected);
 					return;
 				}
 			}
@@ -621,11 +634,11 @@ public partial class ModManager : Control
 				if (_modList.GetItemText(modIndex).Split("||")[0].Trim() == (mod.ModName))
 				{
 					await InstallMod(_currentGameId, mod);
-					break;
+					//Used to update UI with installed icon	
+					SelectGame(_gamePickerButton.Selected);
+					return;
 				}
 			}
-			// Used to update UI with installed icon	
-			SelectGame(_gamePickerButton.Selected);
 		}
 	}
 
@@ -644,10 +657,12 @@ public partial class ModManager : Control
 		switch (_selectedSource)
 		{
 			case (int)Sources.Official:
-				GD.Print("Disable");
 				_loadMoreButton.Disabled = true;
 				break;
 			case (int)Sources.Banana:
+				_loadMoreButton.Disabled = false;
+				break;
+			case (int)Sources.All:
 				_loadMoreButton.Disabled = false;
 				break;
 		}
