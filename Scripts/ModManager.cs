@@ -67,7 +67,7 @@ public partial class ModManager : Control
 	// Godot Functions
 	private void Initiate()
 	{
-		// Sets the 7zip dll path
+		// Sets the 7zip dll paths
 		string[] dllPaths = Directory.GetFiles(".", "7z*", SearchOption.AllDirectories);
 		string sevenZipDllPath = _osUsed == "Linux"
 			? dllPaths.First(path => Path.GetFileName(path) == "7zzLinux")
