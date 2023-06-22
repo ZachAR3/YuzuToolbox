@@ -48,18 +48,18 @@ public partial class ModManager : Control
 		All
 	}
 	
-	private List<string> _sourceNames = new List<string>();
-	private Dictionary<string, List<Mod>> _selectedSourceMods = new Dictionary<string, List<Mod>>();
+	private List<string> _sourceNames = new();
+	private Dictionary<string, List<Mod>> _selectedSourceMods = new();
 	private int _selectedSource = (int)Sources.Official;
 	
 	// Game id, game name
-	private Dictionary<string, string> _titles = new Dictionary<string, string>();
+	private Dictionary<string, string> _titles = new();
 	// Game id, mod names List
-	private Dictionary<string, Game> _installedGames = new Dictionary<string, Game>();
-	private Dictionary<string, List<Mod>> _installedMods = new Dictionary<string, List<Mod>>();
+	private Dictionary<string, Game> _installedGames = new();
+	private Dictionary<string, List<Mod>> _installedMods = new();
 
-	private BananaGrabber _bananaGrabber = new BananaGrabber();
-	private OfficialGrabber _officialManager = new OfficialGrabber();
+	private BananaGrabber _bananaGrabber = new();
+	private OfficialGrabber _officialManager = new();
 	
 	private int _modsPage = 1;
 	
@@ -68,8 +68,11 @@ public partial class ModManager : Control
 	private void Initiate()
 	{
 		// Sets the 7zip dll path
-		string[] dllPaths = Directory.GetFiles(".", "*.dll", SearchOption.AllDirectories);
-		SevenZipBase.SetLibraryPath(Path.GetFullPath(dllPaths.First(path => Path.GetFileName(path) == "7z.dll")));
+		string[] dllPaths = Directory.GetFiles(".", "7z*", SearchOption.AllDirectories);
+		string sevenZipDllPath = _osUsed == "Linux"
+			? dllPaths.First(path => Path.GetFileName(path) == "7zzLinux")
+			: dllPaths.First(path => Path.GetFileName(path) == "7zWindows.dll");
+		SevenZipBase.SetLibraryPath(Path.GetFullPath(sevenZipDllPath));
 
 		// Converts the given local path to an absolute one upon run time
 		_installedModsPath = ProjectSettings.GlobalizePath(_installedModsPath);
@@ -353,8 +356,15 @@ public partial class ModManager : Control
 
 	private void GetTitles(long result, long responseCode, string[] headers, byte[] body)
 	{
-		string[] gamesList = Encoding.UTF8.GetString(body).Split("<tr>"); // Splits the list into the bbeginnings of each game
+		string[] gamesList = Encoding.UTF8.GetString(body).Split("<tr>"); // Splits the list into the beginnings of each game
 		var gameList = gamesList.ToList(); // Converted to list so first and second item (headers and example text at top) can be removed
+
+		if (gameList.Count < 2)
+		{
+			_tools.ErrorPopup("cannot retrieve titles", _errorLabel, _errorPopup);
+			return;
+		}
+		
 		gameList.RemoveRange(0, 2);
 
 		foreach (string game in gameList)
