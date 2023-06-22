@@ -22,11 +22,9 @@ public class BananaGrabber
 			return null;
 		}
 		
-		string gameModsSource = _httpClient
-			.GetAsync($@"https://gamebanana.com/apiv11/Game/{bananaGameId}/Subfeed?_nPage={page}").Result
-			.Content
-			.ReadAsStringAsync().Result;
-		var jsonMods = JObject.Parse(gameModsSource);
+		var gameModsSource = await _httpClient
+			.GetAsync($@"https://gamebanana.com/apiv11/Game/{bananaGameId}/Subfeed?_nPage={page}");
+		var jsonMods = JObject.Parse(await gameModsSource.Content.ReadAsStringAsync());
 
 
 		foreach (var mod in jsonMods["_aRecords"])

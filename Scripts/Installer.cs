@@ -383,7 +383,7 @@ Categories=Game;Emulator;Qt;
 	private  void OnShadersLocationButtonPressed()
 	{
 		var shadersLocationInput = _tools
-			.OpenFileChooser(Globals.Instance.Settings.ShadersLocation, _errorLabel, _errorPopup).Result;
+			.OpenFileChooser(Globals.Instance.Settings.ShadersLocation, _errorLabel, _errorPopup);
 		if (shadersLocationInput != null)
 		{
 			Globals.Instance.Settings.ShadersLocation = shadersLocationInput;
@@ -397,7 +397,7 @@ Categories=Game;Emulator;Qt;
 	private void OnInstallLocationButtonPressed()
 	{
 		var saveDirectoryLocationInput = _tools
-			.OpenFileChooser(Globals.Instance.Settings.SaveDirectory, _errorLabel, _errorPopup).Result;
+			.OpenFileChooser(Globals.Instance.Settings.SaveDirectory, _errorLabel, _errorPopup);
 		if (saveDirectoryLocationInput != null)
 		{
 			Globals.Instance.Settings.SaveDirectory = saveDirectoryLocationInput;

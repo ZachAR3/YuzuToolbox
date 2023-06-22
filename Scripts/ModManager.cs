@@ -685,8 +685,7 @@ public partial class ModManager : Control
 	
 	private void ModLocationPressed()
 	{
-		var modLocationInput = _tools.OpenFileChooser(Globals.Instance.Settings.ModsLocation, _errorLabel, _errorPopup)
-			.Result;
+		var modLocationInput = _tools.OpenFileChooser(Globals.Instance.Settings.ModsLocation, _errorLabel, _errorPopup);
 		if (modLocationInput != null)
 		{
 			Globals.Instance.Settings.ModsLocation = modLocationInput;

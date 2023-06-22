@@ -12,7 +12,6 @@ public partial class Home : Control
 {
 	[ExportGroup("App")]
 	[Export()] private float _appVersion = 2.2f;
-	[Export()] private float _saveManagerVersion = 1.9f;
 	[Export()] private TextureRect _darkBg;
 	[Export()] private TextureRect _lightBg;
 	[Export()] private ColorRect _downloadWindowApp;
@@ -40,9 +39,6 @@ public partial class Home : Control
 	{
 		// Sets minimum window size to prevent text clipping and UI breaking at smaller scales.
 		DisplayServer.WindowSetMinSize(new Vector2I(1024, 576));
-		
-		// Set save manager version
-		Globals.Instance.SaveManager.Version = _saveManagerVersion;
 
 		// Set the theme
 		SetTheme(Globals.Instance.Settings.LightModeEnabled);

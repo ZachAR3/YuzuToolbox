@@ -136,7 +136,7 @@ public partial class Tools : Godot.Node
 
 	
 	// File chooser functions
-	public async Task<string> OpenFileChooser(string startingDirectory, Godot.Label errorLabel, Popup errorPopup)
+	public string OpenFileChooser(string startingDirectory, Godot.Label errorLabel, Popup errorPopup)
 	{
 		try
 		{

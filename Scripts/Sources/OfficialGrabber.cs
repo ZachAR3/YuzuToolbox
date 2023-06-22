@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
 
 public class OfficialGrabber
 {
     private const string Quote = "\"";
+    private readonly HttpClient _httpClient = new HttpClient();
     
     
     public async Task<Dictionary<string, List<Mod>>> GetAvailableMods(Dictionary<string, List<Mod>> modList, Dictionary<string, Game> installedGames, string gameId, int sourceId)
@@ -14,9 +16,11 @@ public class OfficialGrabber
         {
             modList[gameId] = new List<Mod>();
         }
-
-        var htmlWeb = new HtmlWeb();
-        var modsSourcePage = htmlWeb.Load("https://github.com/yuzu-emu/yuzu/wiki/Switch-Mods");
+        
+        var modsSourcePageResponse = await _httpClient.GetAsync("https://github.com/yuzu-emu/yuzu/wiki/Switch-Mods");
+        var modsSourcePage = new HtmlDocument();
+        modsSourcePage.LoadHtml(await modsSourcePageResponse.Content.ReadAsStringAsync());
+        
         // List of elements, which MOSTLY contain mods (not all)
         var mods = modsSourcePage.DocumentNode.SelectNodes(
             $@"//h3[contains(., {Quote}{installedGames[gameId].GameName}{Quote})]/following::table[1]//td//a");
