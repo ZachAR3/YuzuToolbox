@@ -5,7 +5,7 @@ A simple tool to download and update early access builds of yuzu from the [Pinea
 * Simple management tools such as clearing shader caches / install directory
 * Shortcut creation and automatic unpacking
 * Basic backup tool (allows save directory to be duplicated into another directory and then restored when desired)
-* Mod management features (downloading / installing from Yuzu mods wiki + ability to uninstall and detect manually installed mods)
+* Mod management features (downloading, installing and updating mods from a variety of sources; + ability to uninstall and detect manually installed mods)
 
 # Dependencies
 GTK runtime:
