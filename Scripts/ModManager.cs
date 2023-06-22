@@ -6,7 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using SevenZip;
+using SharpCompress.Archives;
+using SharpCompress.Common;
 
 public partial class ModManager : Control
 {
@@ -67,13 +68,6 @@ public partial class ModManager : Control
 	// Godot Functions
 	private void Initiate()
 	{
-		// Sets the 7zip dll paths
-		string[] dllPaths = Directory.GetFiles(".", "7z*", SearchOption.AllDirectories);
-		string sevenZipDllPath = _osUsed == "Linux"
-			? dllPaths.First(path => Path.GetFileName(path) == "7zzLinux")
-			: dllPaths.First(path => Path.GetFileName(path) == "7zWindows.dll");
-		SevenZipBase.SetLibraryPath(Path.GetFullPath(sevenZipDllPath));
-
 		// Converts the given local path to an absolute one upon run time
 		_installedModsPath = ProjectSettings.GlobalizePath(_installedModsPath);
 
@@ -147,13 +141,13 @@ public partial class ModManager : Control
 
 			}
 			
-			// Sets the current game ID as default item and then gets the avaialable mods for the default game.
-			_currentGameId = GetGameIdFromValue(_gamePickerButton.GetItemText(0).Trim(), _installedGames);
-			await Task.Run(() => GetAvailableMods(_currentGameId, source));
 
 			// Sets the first game as selected by default
 			if (_installedGames.Count > 0)
 			{
+				// Sets the current game ID as default item and then gets the avaialable mods for the default game.
+				_currentGameId = GetGameIdFromValue(_gamePickerButton.GetItemText(0).Trim(), _installedGames);
+				await Task.Run(() => GetAvailableMods(_currentGameId, source));
 				SelectGame(0);
 			}
 			else
@@ -165,7 +159,7 @@ public partial class ModManager : Control
 	}
 
 	
-	private async Task GetAvailableMods(string gameId, int source)
+	private async void GetAvailableMods(string gameId, int source)
 	{
 		if (gameId == null || !_installedGames.ContainsKey(gameId))
 		{
@@ -474,11 +468,23 @@ public partial class ModManager : Control
 				_downloadBar.Value = 100;
 				_downloadUpdateTimer.Stop();
 
-				// Extracts the mod into a temp path
-				using (var extractor = new SevenZipExtractor(downloadPath))
+				await using (var stream = File.OpenRead(downloadPath))
 				{
+					var reader = ArchiveFactory.Open(stream);
+    
 					Directory.CreateDirectory(installPath + "-temp");
-					await extractor.ExtractArchiveAsync(installPath + "-temp");
+    
+					foreach (var entry in reader.Entries)
+					{
+						if (!entry.IsDirectory)
+						{
+							entry.WriteToDirectory(installPath + "-temp", new ExtractionOptions()
+							{
+								ExtractFullPath = true,
+								Overwrite = true
+							});
+						}
+					}
 				}
 				
 				 // Moves the files from the temp folder into the install path
