@@ -14,14 +14,14 @@ public partial class Globals : Node
 	{
 		SaveManager.Version = 2f;
 		Settings = SaveManager.GetSettings();
-		SetFirstTimeStartupPaths();
+		SetDefaultPaths();
 		
 		_instance = this;
 
 		GetTree().CallDeferred("call_group", "Initiate", "Initiate");
 	}
 
-	public void SetFirstTimeStartupPaths()
+	private void SetDefaultPaths()
 	{
 		// Sets app data path default for first startup
 		if (Settings.AppDataPath == null)

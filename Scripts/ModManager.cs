@@ -37,6 +37,7 @@ public partial class ModManager : Control
 	private string _currentGameId;
 	private Tools _tools = new();
 	private string _osUsed = OS.GetName();
+	private const string TitleSplitter = "||";
 
 
 	// Code for handling sources and their associated names with each
@@ -56,6 +57,7 @@ public partial class ModManager : Control
 	// Game id, mod names List
 	private Dictionary<string, Game> _installedGames = new Dictionary<string, Game>();
 	private Dictionary<string, List<Mod>> _installedMods = new Dictionary<string, List<Mod>>();
+	//private Dictionary<string, List<Mod>> _availableMods = new Dictionary<string, List<Mod>>();
 
 	private BananaGrabber _bananaGrabber = new BananaGrabber();
 	private OfficialGrabber _officialManager = new OfficialGrabber();
@@ -213,6 +215,14 @@ public partial class ModManager : Control
 				
 				break;
 		}
+		
+		// Duplicates all of our mods into available mods to be used when using search functionality. TODO
+		// _availableMods = new Dictionary<string, List<Mod>>();
+		// foreach (var modDict in _selectedSourceMods)
+		// {
+		// 	List<Mod> copiedList = new List<Mod>(modDict.Value);
+		// 	_availableMods.Add(modDict.Key, copiedList);
+		// }
 
 		// Really inefficient system to remove installed mods from available based on the name TODO
 		if (_selectedSourceMods.ContainsKey(gameId))
@@ -274,7 +284,7 @@ public partial class ModManager : Control
 	}
 
 
-	private async void GetMoreMods()
+	private async void LoadNextPage()
 	{
 		_modsPage++;
 		_loadingPanel.Visible = true;
@@ -283,9 +293,21 @@ public partial class ModManager : Control
 		var tempModsList = new Dictionary<string, List<Mod>>();
 		await Task.Run(async () =>
 		{
-			tempModsList = await _bananaGrabber.GetAvailableMods(_selectedSourceMods, _installedGames,
-				_currentGameId,
-				_selectedSource, _modsPage);
+			switch (_selectedSource)
+			{
+				case (int)Sources.Official:
+					break;
+				case (int)Sources.Banana:
+					tempModsList = await _bananaGrabber.GetAvailableMods(_selectedSourceMods, _installedGames,
+						_currentGameId,
+						_selectedSource, _modsPage);
+					break;
+				case (int)Sources.All:
+					tempModsList = await _bananaGrabber.GetAvailableMods(_selectedSourceMods, _installedGames,
+						_currentGameId,
+						_selectedSource, _modsPage);
+					break;
+			}
 		});
 
 		// If our old list is the same as the new one, disabled the load more as no more mods are available.
@@ -609,6 +631,38 @@ public partial class ModManager : Control
 
 
 	// Signal functions
+	private void SearchUpdated(string newSearch)
+	{
+		if (_selectedSourceMods.TryGetValue(_currentGameId, out var sourceMods))
+		{
+			var localSourceMods = new List<Mod>(sourceMods);
+			var searchQuery = newSearch.ToLower().Trim();
+			_modList.Clear();
+			
+			if (_installedMods.ContainsKey(_currentGameId))
+			{
+				localSourceMods.InsertRange(0, _installedMods[_currentGameId]);
+			}
+			
+			foreach (var mod in localSourceMods)
+			{
+				if (mod.ModName.ToLower().Trim().Contains(searchQuery))
+				{
+					if (mod.InstalledPath != null)
+					{
+						_modList.AddItem($@"  {mod.ModName} || Supports:{string.Join(", ", mod.CompatibleVersions)}  ",
+							icon: _installedIcon);
+					}
+					else
+					{
+						_modList.AddItem($@"  {mod.ModName} || Supports:{string.Join(", ", mod.CompatibleVersions)}  ");
+					}
+				}
+			}
+		}
+	}
+	
+	
 	private async void ModClicked(int modIndex)
 	{
 		// If the mod is found in the installed mods list removes it
@@ -616,7 +670,7 @@ public partial class ModManager : Control
 		{
 			foreach (var mod in installedMods)
 			{
-				if (_modList.GetItemText(modIndex).Split("||")[0].Trim() == (mod.ModName))
+				if (_modList.GetItemText(modIndex).Split(TitleSplitter)[0].Trim() == (mod.ModName))
 				{
 					await RemoveMod(_currentGameId, mod);
 					//Used to update UI with installed icon	
@@ -631,7 +685,7 @@ public partial class ModManager : Control
 		{
 			foreach (var mod in selectedSourceMods)
 			{
-				if (_modList.GetItemText(modIndex).Split("||")[0].Trim() == (mod.ModName))
+				if (_modList.GetItemText(modIndex).Split(TitleSplitter)[0].Trim() == (mod.ModName))
 				{
 					await InstallMod(_currentGameId, mod);
 					//Used to update UI with installed icon	
@@ -681,7 +735,7 @@ public partial class ModManager : Control
 				return;
 			}
 
-			if (_modList.GetItemText(selectedMods[0]).Split("||")[0].Trim() == (mod.ModName))
+			if (_modList.GetItemText(selectedMods[0]).Split(TitleSplitter)[0].Trim() == (mod.ModName))
 			{
 				_loadingPanel.Visible = true;
 				if (mod.ModUrl != null)
