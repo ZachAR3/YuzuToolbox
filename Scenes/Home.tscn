@@ -175,7 +175,7 @@ text = "Music"
 [node name="MainPage" type="TabContainer" parent="."]
 layout_mode = 1
 anchors_preset = -1
-anchor_top = 0.0703704
+anchor_top = 0.0731481
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
@@ -184,7 +184,6 @@ tab_alignment = 1
 metadata/_edit_use_anchors_ = true
 
 [node name="Installer" parent="MainPage" node_paths=PackedStringArray("_errorPopup", "_errorLabel", "_confirmationPopup", "_latestVersionLabel") instance=ExtResource("10_7mm46")]
-visible = false
 layout_mode = 2
 _errorPopup = NodePath("../../ErrorPopup")
 _errorLabel = NodePath("../../ErrorPopup/ErrorLabel")
@@ -199,15 +198,17 @@ _errorLabel = NodePath("../../ErrorPopup/ErrorLabel")
 _confirmationPopup = NodePath("../../ConfirmPopup")
 
 [node name="ModManager" parent="MainPage" node_paths=PackedStringArray("_errorPopup", "_errorLabel", "_confirmationPopup") instance=ExtResource("12_3uycp")]
+visible = false
 layout_mode = 2
 _errorPopup = NodePath("../../ErrorPopup")
 _errorLabel = NodePath("../../ErrorPopup/ErrorLabel")
 _confirmationPopup = NodePath("../../ConfirmPopup")
 
-[node name="Settings" parent="MainPage" node_paths=PackedStringArray("_modManager") instance=ExtResource("12_3ds3g")]
+[node name="Settings" parent="MainPage" node_paths=PackedStringArray("_modManager", "_confirmationPopup") instance=ExtResource("12_3ds3g")]
 visible = false
 layout_mode = 2
 _modManager = NodePath("../ModManager")
+_confirmationPopup = NodePath("../../ConfirmPopup")
 
 [node name="ErrorPopup" type="PopupPanel" parent="."]
 initial_position = 2
@@ -220,10 +221,10 @@ anchor_left = 0.00666667
 anchor_top = 0.0133333
 anchor_right = 0.993333
 anchor_bottom = 0.986667
-offset_left = -1.0
-offset_top = -0.99999
-offset_right = 1.00018
-offset_bottom = 0.999908
+offset_left = 3.0
+offset_top = 3.0
+offset_right = 597.0
+offset_bottom = 297.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3

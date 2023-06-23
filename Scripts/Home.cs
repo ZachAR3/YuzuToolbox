@@ -72,7 +72,7 @@ public partial class Home : Control
 		_modList.IconScale = scaleRatio;
 		_modMangerLoadingSprite.Scale = new Vector2(scaleRatio, scaleRatio);
 		_modManagerLoadingLabel.AddThemeFontSizeOverride("font_size", (int)(scaleRatio * 64));
-		_headerLabel.AddThemeFontSizeOverride("font_size", (int)(scaleRatio * 76));
+		_headerLabel.AddThemeFontSizeOverride("font_size", (int)(scaleRatio * 49));
 		_latestVersionLabel.AddThemeFontSizeOverride("font_size", (int)(scaleRatio * 32));
 		_currentTheme.DefaultFontSize = Mathf.Clamp((int)(scaleRatio * 35), 20, 50);
 	}

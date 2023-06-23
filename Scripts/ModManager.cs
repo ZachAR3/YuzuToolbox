@@ -133,6 +133,7 @@ public partial class ModManager : Control
 				{
 					_installedGames[gameId] = new() { GameName = gameName};
 					GetInstalledMods(gameId);
+					await Task.Run(async () => await GetAvailableMods(gameId, source));
 					_gamePickerButton.AddItem($@"    {gameName}");
 				}
 				else
@@ -147,9 +148,6 @@ public partial class ModManager : Control
 			// Sets the first game as selected by default
 			if (_installedGames.Count > 0)
 			{
-				// Sets the current game ID as default item and then gets the avaialable mods for the default game.
-				_currentGameId = GetGameIdFromValue(_gamePickerButton.GetItemText(0).Trim(), _installedGames);
-				await Task.Run(async () => await GetAvailableMods(_currentGameId, source));
 				SelectGame(0);
 			}
 			else
