@@ -9,7 +9,7 @@ A simple tool to download and update early access builds of yuzu from the [Pinea
 
 # Installing
 To install the program simply go to the [releases page](https://github.com/ZachAR3/PineappleEA-GUI/releases) and download the zip file for your os. 
-Extract the zip file to its own folder and you're done!
+Extract the zip file to its own folder and ensure you have the GTK runtime installed (if you're on linux it should be installed by default on windows install it from the link provoided under dependencies)
 
 # Usage
 Simply launch the program and set your install location, then click download and wait for it to finish.
