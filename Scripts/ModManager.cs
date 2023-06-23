@@ -252,15 +252,20 @@ public partial class ModManager : Control
 			{
 				if (!modDirectory.GetFile().StartsWith("Managed"))
 				{
-					//_installedMods[gameId].Add(new Mod());
-					_installedMods[gameId].Add(new()
+					Mod modToAdd = new()
 					{
 						ModName = modDirectory.GetFile(),
 						ModUrl = null, 
-						CompatibleVersions = { "NA" }, 
+						CompatibleVersions = new List<string> { "NA" }, 
 						Source = -1, 
 						InstalledPath = modDirectory
-					});
+					};
+					
+					if (_installedMods[gameId].Any(mod => mod.InstalledPath == modToAdd.InstalledPath))
+					{
+						return;
+					}
+					_installedMods[gameId].Add(modToAdd);
 				}
 			}
 		}
@@ -270,6 +275,8 @@ public partial class ModManager : Control
 			_loadingPanel.Visible = false;
 			throw;
 		}
+		
+		SaveInstalledMods();
 	}
 
 
