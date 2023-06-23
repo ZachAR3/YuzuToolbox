@@ -24,14 +24,6 @@ public partial class ToolsPage : Control
 	// Godot Functions
 	public override void _Ready()
 	{
-		if (Globals.Instance.Settings.FromSaveDirectory == null)
-		{
-			Globals.Instance.Settings.FromSaveDirectory = _osUsed == "Linux"
-				? $@"{Globals.Instance.Settings.AppDataPath}nand/user/save"
-				: $@"{Globals.Instance.Settings.AppDataPath}nand\user\save";
-			Globals.Instance.SaveManager.WriteSave(Globals.Instance.Settings);
-		}
-		
 		_fromSaveDirectoryButton.Text = Globals.Instance.Settings.FromSaveDirectory;
 		_toSaveDirectoryButton.Text = Globals.Instance.Settings.ToSaveDirectory;
 	}

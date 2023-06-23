@@ -78,12 +78,7 @@ public partial class ModManager : Control
 		_sourceNames.Insert((int)Sources.Official, "Official");
 		_sourceNames.Insert((int)Sources.Banana, "Banana");
 		_sourceNames.Insert((int)Sources.All, "All");
-
-		if (Globals.Instance.Settings.ModsLocation == null)
-		{
-			Globals.Instance.Settings.ModsLocation = $@"{Globals.Instance.Settings.AppDataPath}load";
-			Globals.Instance.SaveManager.WriteSave(Globals.Instance.Settings);
-		}
+		
 		_modLocationButton.Text = Globals.Instance.Settings.ModsLocation.PadLeft(Globals.Instance.Settings.ModsLocation.Length + _selectionPaddingLeft, ' ');
 
 		AddSources();
@@ -95,6 +90,13 @@ public partial class ModManager : Control
 	{
 		if (notification == NotificationWMCloseRequest)
 			SaveInstalledMods();
+	}
+	
+	
+	public void ResetInstalled()
+	{
+		_installedMods = new Dictionary<string, List<Mod>>();
+		SaveInstalledMods();
 	}
 	
 
@@ -767,9 +769,14 @@ public partial class ModManager : Control
 		{
 			Globals.Instance.Settings.ModsLocation = modLocationInput;
 		}
-		
-		_modLocationButton.Text = Globals.Instance.Settings.ModsLocation.PadLeft(Globals.Instance.Settings.ModsLocation.Length + _selectionPaddingLeft, ' ');
-		
+
+		if (Globals.Instance.Settings.ModsLocation != null)
+		{
+			_modLocationButton.Text =
+				Globals.Instance.Settings.ModsLocation.PadLeft(
+					Globals.Instance.Settings.ModsLocation.Length + _selectionPaddingLeft, ' ');
+		}
+
 		Globals.Instance.SaveManager.WriteSave(Globals.Instance.Settings);
 	}
 

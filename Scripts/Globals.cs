@@ -21,10 +21,10 @@ public partial class Globals : Node
 		GetTree().CallDeferred("call_group", "Initiate", "Initiate");
 	}
 
-	private void SetDefaultPaths()
+	public void SetDefaultPaths()
 	{
 		// Sets app data path default for first startup
-		if (Settings.AppDataPath == null)
+		if (string.IsNullOrEmpty(Settings.AppDataPath))
 		{
 			if (OS.GetName() == "Linux")
 			{
@@ -36,15 +36,27 @@ public partial class Globals : Node
 				Settings.AppDataPath =
 					$@"{System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData)}\yuzu\";
 			}
-			SaveManager.WriteSave(Settings);
 		}
 		
 		// Sets shaders location default for first startup
-		if (Settings.ShadersLocation == null)
+		if (string.IsNullOrEmpty(Settings.ShadersLocation))
 		{
 			Settings.ShadersLocation = $@"{Settings.AppDataPath}shader";
-			SaveManager.WriteSave(Settings);
 		}
+		
+		if (string.IsNullOrEmpty(Settings.ModsLocation))
+		{
+			Settings.ModsLocation = $@"{Settings.AppDataPath}load";
+		}
+
+		if (string.IsNullOrEmpty(Settings.FromSaveDirectory))
+		{
+			Settings.FromSaveDirectory = OS.GetName() == "Linux"
+				? $@"{Settings.AppDataPath}nand/user/save"
+				: $@"{Settings.AppDataPath}nand\user\save";
+		}
+		
+		SaveManager.WriteSave(Settings);
 	}
 
 }
