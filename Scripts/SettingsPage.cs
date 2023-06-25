@@ -4,7 +4,7 @@ using System;
 public partial class SettingsPage : Node
 {
     [Export()] private ModManager _modManager;
-    [Export()] private PopupMenu _confirmationPopup;
+    [Export()] private LineEdit _githubTokenLineEdit;
 
     private Tools _tools = new();
     
@@ -12,7 +12,7 @@ public partial class SettingsPage : Node
     // Signal functions
     private async void ResetSettingsPressed()
     {
-        var confirm = await _tools.ConfirmationPopup(_confirmationPopup);
+        var confirm = await _tools.ConfirmationPopup();
         if (confirm != true)
         {
             return;
@@ -24,11 +24,20 @@ public partial class SettingsPage : Node
 
     private async void ResetInstalledModsPressed()
     {
-        var confirm = await _tools.ConfirmationPopup(_confirmationPopup);
+        var confirm = await _tools.ConfirmationPopup();
         if (confirm != true)
         {
             return;
         }
         _modManager.ResetInstalled();
+    }
+
+
+    private void GithubTokenEntered(string token)
+    {
+        Globals.Instance.Settings.GithubApiToken = token;
+        Globals.Instance.SaveManager.WriteSave();
+        Globals.Instance.AuthenticateGithubClient();
+        _githubTokenLineEdit.Text = "Success!";
     }
 }

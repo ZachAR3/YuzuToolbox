@@ -2,21 +2,33 @@ using Godot;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Mono.Unix;
+using Octokit;
 using WindowsShortcutFactory;
+using Label = Godot.Label;
 
 public partial class Installer : Control
 {
 	// Exported variables (Primarily for the UI / Interactions)
 	[ExportGroup("General")]
-	[Export()] private Popup _errorPopup;
-	[Export()] private Label _errorLabel;
-	[Export()] private PopupMenu _confirmationPopup;
 	[Export()] private Label _latestVersionLabel;
+	[Export()] private Tools _tools;
 
-	[ExportGroup("Installer")] [Export()] private Godot.Image _icon;
+	[ExportGroup("Installer")] 
+	[Export()] private string _repoName;
+	[Export()] private string _repoOwner;
+	[Export()] private string _pineappleLatestUrl;
+	[Export()] private string _pineappleDownloadBaseUrl;
+	[Export()] private string _titlesKeySite;
+	[Export()] private string _windowsFolderName = "yuzu-windows-msvc-early-access";
+	[Export()] private string _yuzuBaseString = "Yuzu-EA-";
+	[Export()] private string _saveName;
+	[Export()] private int _previousVersionsToAdd = 10;
+	[Export()] private int _versionsPerPage = 10;
+	[Export()] private Image _icon;
 	[Export()] private OptionButton _versionButton;
 	[Export()] private CheckBox _createShortcutButton;
 	[Export()] private Button _installLocationButton;
@@ -30,24 +42,15 @@ public partial class Installer : Control
 	[Export()] private CheckBox _autoUnpackButton;
 	[Export()] private CheckBox _customVersionCheckBox;
 	[Export()] private SpinBox _customVersionSpinBox;
-	[Export()] private HttpRequest _latestReleaseRequester;
 	[Export()] private HttpRequest _downloadRequester;
 	[Export()] private TextureRect _extractWarning;
 	[Export()] private TextureRect _downloadWarning;
 	[Export()] private TextureRect _clearShadersWarning;
-	[Export()] private string _pineappleLatestUrl;
-	[Export()] private string _pineappleDownloadBaseUrl;
-	[Export()] private string _titlesKeySite;
-	[Export()] private string _windowsFolderName = "yuzu-windows-msvc-early-access";
-	[Export()] private string _yuzuBaseString = "Yuzu-EA-";
-	[Export()] private string _saveName;
-	[Export()] private int _previousVersionsToAdd = 10;
 
 	// Internal variables
 	private String _osUsed = OS.GetName();
 	private string _yuzuExtensionString;
-	private Tools _tools = new Tools();
-
+	
 
 	// Godot functions
 	private void Initiate()
@@ -78,7 +81,6 @@ public partial class Installer : Control
 		_downloadButton.GrabFocus();
 
 		// Signals TODO (should be redone to use .Connect() instead, since += is semi-broken)
-		_latestReleaseRequester.RequestCompleted += AddVersions;
 		_downloadButton.Pressed += InstallSelectedVersion;
 		_installLocationButton.Pressed += OnInstallLocationButtonPressed;
 		_downloadRequester.RequestCompleted += VersionDownloadCompleted;
@@ -87,7 +89,7 @@ public partial class Installer : Control
 		_customVersionCheckBox.Toggled += CustomVersionSpinBoxEditable;
 		_autoUnpackButton.Toggled += AutoUnpackToggled;
 
-		_latestReleaseRequester.Request(_pineappleLatestUrl);
+		AddVersions();
 	}
 
 
@@ -96,7 +98,7 @@ public partial class Installer : Control
 	private async void InstallSelectedVersion()
 	{
 		// Launches confirmation window, and cancels if not confirmed.
-		var confirm = await _tools.ConfirmationPopup(_confirmationPopup);
+		var confirm = await _tools.ConfirmationPopup();
 		if (confirm != true)
 		{
 			return;
@@ -193,8 +195,7 @@ Categories=Game;Emulator;Qt;
 				{
 					shortcutPath = $@"{Globals.Instance.Settings.SaveDirectory}/{linuxShortcutName}";
 					_tools.ErrorPopup(
-						$@"Error creating shortcut, creating new at {shortcutPath}. Error:{shortcutError}", _errorLabel,
-						_errorPopup);
+						$@"Error creating shortcut, creating new at {shortcutPath}. Error:{shortcutError}");
 					File.WriteAllText(shortcutPath, shortcutContent);
 					throw;
 				}
@@ -225,8 +226,7 @@ Categories=Game;Emulator;Qt;
 			{
 				yuzuShortcutPath = $@"{Globals.Instance.Settings.SaveDirectory}/{windowsShortcutName}";
 				_tools.ErrorPopup(
-					$@"cannot create shortcut, ensure app is running as admin. Placing instead at {yuzuShortcutPath}. Exception:{shortcutError}",
-					_errorLabel, _errorPopup);
+					$@"cannot create shortcut, ensure app is running as admin. Placing instead at {yuzuShortcutPath}. Exception:{shortcutError}");
 				windowsShortcut.Save(yuzuShortcutPath);
 				throw;
 			}
@@ -235,32 +235,37 @@ Categories=Game;Emulator;Qt;
 	}
 
 
-	private void AddVersions(long result, long responseCode, string[] headers, byte[] body)
+	private async void AddVersions()
 	{
-		if (result == (int)HttpRequest.Result.Success)
+		try
 		{
-			int latestVersion = GetLatestVersion(Encoding.UTF8.GetString(body));
+			var gitHubClient = Globals.Instance.LocalGithubClient;
+
+			var latestRelease =
+				await gitHubClient.Repository.Release.GetLatest(_repoOwner, _repoName);
+			int latestVersion = latestRelease.TagName.Split("-").Last().ToInt();
+			
 			_customVersionSpinBox.Value = latestVersion;
 			_latestVersionLabel.Text = $"Latest: {latestVersion.ToString()}";
-
+			
 			//Add a version item for the latest and the dictated amount of previous versions.
 			for (int previousIndex = 0; previousIndex < _previousVersionsToAdd; previousIndex++)
 			{
 				_versionButton.AddItem((latestVersion - previousIndex).ToString(), latestVersion - previousIndex);
 			}
-
+			
 			//Checks if there is already a version installed, and if so adds it.
 			if (Globals.Instance.Settings.InstalledVersion != -1)
 			{
 				AddInstalledVersion();
 			}
+			
 
 			_downloadButton.Disabled = false;
 		}
-		else
+		catch (Exception versionPullException)
 		{
-			_tools.CallDeferred("ErrorPopup", "Failed to get latest versions error code: " + responseCode, _errorLabel,
-				_errorPopup);
+				_tools.CallDeferred("ErrorPopup", "Failed to get latest versions error code: " + versionPullException);
 		}
 	}
 
@@ -383,7 +388,7 @@ Categories=Game;Emulator;Qt;
 	private  void OnShadersLocationButtonPressed()
 	{
 		var shadersLocationInput = _tools
-			.OpenFileChooser(Globals.Instance.Settings.ShadersLocation, _errorLabel, _errorPopup);
+			.OpenFileChooser(Globals.Instance.Settings.ShadersLocation);
 		if (shadersLocationInput != null)
 		{
 			Globals.Instance.Settings.ShadersLocation = shadersLocationInput;
@@ -397,7 +402,7 @@ Categories=Game;Emulator;Qt;
 	private void OnInstallLocationButtonPressed()
 	{
 		var saveDirectoryLocationInput = _tools
-			.OpenFileChooser(Globals.Instance.Settings.SaveDirectory, _errorLabel, _errorPopup);
+			.OpenFileChooser(Globals.Instance.Settings.SaveDirectory);
 		if (saveDirectoryLocationInput != null)
 		{
 			Globals.Instance.Settings.SaveDirectory = saveDirectoryLocationInput;

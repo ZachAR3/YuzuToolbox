@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://Scripts/SettingsPage.cs" id="1_angmk"]
 
-[node name="Settings" type="Control"]
+[node name="Settings" type="Control" node_paths=PackedStringArray("_githubTokenLineEdit")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -10,6 +10,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_angmk")
+_githubTokenLineEdit = NodePath("SettingsContainer/GithubTokenLineEdit")
 
 [node name="SettingsContainer" type="GridContainer" parent="."]
 layout_mode = 1
@@ -37,5 +38,14 @@ text = "Reset installed mods:"
 [node name="ResetInstalledMods" type="Button" parent="SettingsContainer"]
 layout_mode = 2
 
+[node name="GithubTokenLabel" type="Label" parent="SettingsContainer"]
+layout_mode = 2
+text = "Reset installed mods:"
+
+[node name="GithubTokenLineEdit" type="LineEdit" parent="SettingsContainer"]
+layout_mode = 2
+placeholder_text = "Enter Github token here:"
+
 [connection signal="pressed" from="SettingsContainer/ResetSettings" to="." method="ResetSettingsPressed"]
 [connection signal="pressed" from="SettingsContainer/ResetInstalledMods" to="." method="ResetInstalledModsPressed"]
+[connection signal="text_submitted" from="SettingsContainer/GithubTokenLineEdit" to="." method="GithubTokenEntered"]

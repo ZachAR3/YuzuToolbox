@@ -5,26 +5,33 @@ using System.Runtime.Loader;
 using System.Threading.Tasks;
 using Godot.Collections;
 using Gtk;
+using Octokit;
+using Application = Gtk.Application;
+using HttpClient = System.Net.Http.HttpClient;
 
 public partial class Tools : Godot.Node
 {
+	[Export] private Godot.Label _errorLabel;
+	[Export] private Popup _errorPopup;
+	[Export] private PopupMenu _confirmationPopup;
+	
 	// Internal variables
 	private bool? _confirmationChoice;
 	private FileChooserDialog _fileChooser;
 
 
 	// General functions
-	public async Task<bool?> ConfirmationPopup(PopupMenu confirmationPopup, string titleText = "Are you sure?")
+	public async Task<bool?> ConfirmationPopup(string titleText = "Are you sure?")
 	{
 		// Checks if the confirmationPopup is already connected to the ConfirmationPressed signal, if not, connect it.
-		if (!confirmationPopup.IsConnected("index_pressed", new Callable(this, nameof(ConfirmationPressed))))
+		if (!_confirmationPopup.IsConnected("index_pressed", new Callable(this, nameof(ConfirmationPressed))))
 		{
-			confirmationPopup.Connect("index_pressed", new Callable(this, nameof(ConfirmationPressed)));
+			_confirmationPopup.Connect("index_pressed", new Callable(this, nameof(ConfirmationPressed)));
 		}
 
-		confirmationPopup.Title = titleText;
-		confirmationPopup.PopupCentered();
-		await ToSignal(confirmationPopup, "index_pressed");
+		_confirmationPopup.Title = titleText;
+		_confirmationPopup.PopupCentered();
+		await ToSignal(_confirmationPopup, "index_pressed");
 		return _confirmationChoice;
 	}
 	
@@ -126,17 +133,17 @@ public partial class Tools : Godot.Node
 	}
 	
 	
-	public void ErrorPopup(String error, Godot.Label errorLabel, Popup errorPopup)
+	public void ErrorPopup(String error)
 	{
-		errorLabel.Text = $@"Error:{error}";
-		errorPopup.Visible = true;
-		errorPopup.InitialPosition = Godot.Window.WindowInitialPosition.Absolute;
-		errorPopup.PopupCentered();
+		_errorLabel.Text = $@"Error:{error}";
+		_errorPopup.Visible = true;
+		_errorPopup.InitialPosition = Godot.Window.WindowInitialPosition.Absolute;
+		_errorPopup.PopupCentered();
 	}
 
 	
 	// File chooser functions
-	public string OpenFileChooser(string startingDirectory, Godot.Label errorLabel, Popup errorPopup)
+	public string OpenFileChooser(string startingDirectory)
 	{
 		try
 		{
@@ -144,7 +151,7 @@ public partial class Tools : Godot.Node
 		}
 		catch (Exception gtkError)
 		{
-			ErrorPopup("opening GTK window failed. Ensure you have GTK runtime installed: " + gtkError, errorLabel, errorPopup);
+			ErrorPopup("opening GTK window failed. Ensure you have GTK runtime installed: " + gtkError);
 			throw;
 		}
 		_fileChooser = new FileChooserDialog("Select a File", null, FileChooserAction.SelectFolder);
@@ -193,5 +200,47 @@ public partial class Tools : Godot.Node
 		// Clean up resources
 		_fileChooser.Dispose();
 		Application.Quit();
+	}
+	
+	
+	public async Task<Exception> DownloadFolder(string owner, string repo, string folderPath, string destinationPath)
+	{
+		try
+		{
+			HttpClient httpClient = new();
+			var gitHubClient = Globals.Instance.LocalGithubClient;
+
+			// Retrieve the repository content for the specified folder
+			var contents = await gitHubClient.Repository.Content.GetAllContents(owner, repo, folderPath);
+
+			// Create the destination folder
+			Directory.CreateDirectory(destinationPath);
+
+			// Download and copy each file in the folder
+			foreach (var content in contents)
+			{
+				if (content.Type == ContentType.File)
+				{
+					var fileContent = await httpClient.GetStringAsync(content.DownloadUrl);
+					var filePath = Path.Combine(destinationPath, content.Name);
+
+					// Write the file content to disk
+					await File.WriteAllTextAsync(filePath, fileContent);
+				}
+				else if (content.Type == ContentType.Dir)
+				{
+					var subFolderPath = Path.Combine(destinationPath, content.Name);
+
+					// Recursively download and copy the contents of sub-folders
+					await DownloadFolder(owner, repo, content.Path, subFolderPath);
+				}
+			}
+
+			return null;
+		}
+		catch (Exception downloadException)
+		{
+			return downloadException;
+		}
 	}
 }

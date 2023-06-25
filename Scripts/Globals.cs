@@ -1,5 +1,7 @@
 using Godot;
 using System;
+using System.IO;
+using Octokit;
 
 public partial class Globals : Node
 {
@@ -7,14 +9,19 @@ public partial class Globals : Node
 
 	public static Globals Instance => _instance;
 	
-	public ResourceSaveManager SaveManager = new ResourceSaveManager();
-	public SettingsResource Settings = new SettingsResource();
+	public ResourceSaveManager SaveManager = new();
+	public SettingsResource Settings = new();
+	public readonly GitHubClient LocalGithubClient = new(new ProductHeaderValue("PineappleEA-GUI"));
 
 	public override void _Ready()
 	{
-		SaveManager.Version = 2f;
+		SaveManager.Version = 2.1f;
 		Settings = SaveManager.GetSettings();
 		SetDefaultPaths();
+		if (!string.IsNullOrEmpty(Settings.GithubApiToken))
+		{
+			AuthenticateGithubClient();
+		}
 		
 		_instance = this;
 
@@ -26,37 +33,34 @@ public partial class Globals : Node
 		// Sets app data path default for first startup
 		if (string.IsNullOrEmpty(Settings.AppDataPath))
 		{
-			if (OS.GetName() == "Linux")
-			{
-				Settings.AppDataPath =
-					$@"{System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData)}/yuzu/";
-			}
-			else if (OS.GetName() == "Windows")
-			{
-				Settings.AppDataPath =
-					$@"{System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData)}\yuzu\";
-			}
+			Settings.AppDataPath =
+				Path.Join(System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData),
+					"yuzu");
 		}
 		
 		// Sets shaders location default for first startup
 		if (string.IsNullOrEmpty(Settings.ShadersLocation))
 		{
-			Settings.ShadersLocation = $@"{Settings.AppDataPath}shader";
+			Settings.ShadersLocation = Path.Join(Settings.AppDataPath, "shader");
 		}
 		
 		if (string.IsNullOrEmpty(Settings.ModsLocation))
 		{
-			Settings.ModsLocation = $@"{Settings.AppDataPath}load";
+			Settings.ModsLocation = Path.Join(Settings.AppDataPath, "load");
 		}
 
 		if (string.IsNullOrEmpty(Settings.FromSaveDirectory))
 		{
-			Settings.FromSaveDirectory = OS.GetName() == "Linux"
-				? $@"{Settings.AppDataPath}nand/user/save"
-				: $@"{Settings.AppDataPath}nand\user\save";
+			Settings.FromSaveDirectory = Path.Join(Settings.AppDataPath, "nand", "user", "save");
 		}
 		
 		SaveManager.WriteSave(Settings);
+	}
+
+
+	public void AuthenticateGithubClient()
+	{
+		LocalGithubClient.Credentials = new Credentials(Settings.GithubApiToken);
 	}
 
 }

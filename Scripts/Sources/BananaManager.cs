@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using HttpClient = System.Net.Http.HttpClient;
 
-public class BananaGrabber
+public class BananaManager
 {
 	private readonly HttpClient _httpClient = new HttpClient();
 	

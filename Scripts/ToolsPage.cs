@@ -4,11 +4,9 @@ using System.Threading.Tasks;
 
 public partial class ToolsPage : Control
 {
-	[ExportGroup("General")]
-	[Export()] private Popup _errorPopup;
-	[Export()] private Label _errorLabel;
-	[Export()] private PopupMenu _confirmationPopup;
-	
+	[ExportGroup("General")] 
+	[Export()] private Tools _tools;
+
 	[ExportGroup("Tools")] 
 	[Export()] private Button _clearInstallFolderButton;
 	[Export()] private Button _clearShadersToolButton;
@@ -17,7 +15,6 @@ public partial class ToolsPage : Control
 	[Export()] private Button _fromSaveDirectoryButton;
 	[Export()] private Button _toSaveDirectoryButton;
 	
-	private Tools _tools = new Tools();
 	private string _osUsed = OS.GetName();
 	
 	
@@ -32,7 +29,7 @@ public partial class ToolsPage : Control
 	// Signal functions
 	private async void ClearInstallFolderButtonPressed()
 	{
-		var confirm = await _tools.ConfirmationPopup(_confirmationPopup);
+		var confirm = await _tools.ConfirmationPopup();
 		if (confirm == false)
 		{
 			return;
@@ -41,7 +38,7 @@ public partial class ToolsPage : Control
 		// Clears the install folder, if failed notifies user
 		if (!_tools.ClearInstallationFolder(Globals.Instance.Settings.SaveDirectory))
 		{
-			_tools.ErrorPopup("failed to clear installation folder", _errorLabel, _errorPopup);
+			_tools.ErrorPopup("failed to clear installation folder");
 			_clearInstallFolderButton.Text = "Clear failed!";
 		}
 		else
@@ -54,7 +51,7 @@ public partial class ToolsPage : Control
 	
 	private async void ClearShaderButtonPressed()
 	{
-		var confirm = await _tools.ConfirmationPopup(_confirmationPopup);
+		var confirm = await _tools.ConfirmationPopup();
 		if (confirm == false)
 		{
 			return;
@@ -63,7 +60,7 @@ public partial class ToolsPage : Control
 		// Clears the shaders, if returned an error notifies user.
 		if (!_tools.ClearShaders(Globals.Instance.Settings.ShadersLocation))
 		{
-			_tools.ErrorPopup("failed to clear shaders", _errorLabel, _errorPopup);
+			_tools.ErrorPopup("failed to clear shaders");
 			_clearShadersToolButton.Text = "Clear failed!";
 		}
 		else
@@ -82,7 +79,7 @@ public partial class ToolsPage : Control
 		}
 		catch (Exception backupError)
 		{ 
-			_tools.ErrorPopup("failed to create save backup exception:" + backupError, _errorLabel, _errorPopup);
+			_tools.ErrorPopup("failed to create save backup exception:" + backupError);
 			throw;
 		}
 
@@ -98,7 +95,7 @@ public partial class ToolsPage : Control
 		}
 		catch (Exception restoreError)
 		{
-			_tools.ErrorPopup("failed to restore saves, exception: " + restoreError, _errorLabel, _errorPopup);
+			_tools.ErrorPopup("failed to restore saves, exception: " + restoreError);
 			throw;
 		}
 	}
@@ -107,7 +104,7 @@ public partial class ToolsPage : Control
 	private void OnFromSaveDirectoryButtonPressed()
 	{
 		var fromSaveDirectoryInput = _tools
-			.OpenFileChooser(Globals.Instance.Settings.FromSaveDirectory, _errorLabel, _errorPopup);
+			.OpenFileChooser(Globals.Instance.Settings.FromSaveDirectory);
 		if (fromSaveDirectoryInput != null)
 		{
 			Globals.Instance.Settings.FromSaveDirectory = fromSaveDirectoryInput;
@@ -120,7 +117,7 @@ public partial class ToolsPage : Control
 	private void OnToSaveDirectoryButtonPressed()
 	{
 		var toSaveDirectoryInput = _tools
-			.OpenFileChooser(Globals.Instance.Settings.ToSaveDirectory, _errorLabel, _errorPopup);
+			.OpenFileChooser(Globals.Instance.Settings.ToSaveDirectory);
 		if (toSaveDirectoryInput != null)
 		{
 			Globals.Instance.Settings.ToSaveDirectory = toSaveDirectoryInput;

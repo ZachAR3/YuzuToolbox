@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://c7wdbnvnydnxk"]
+[gd_scene load_steps=19 format=3 uid="uid://c7wdbnvnydnxk"]
 
 [ext_resource type="Theme" uid="uid://cnnid0n04kfr7" path="res://Themes/DarkTheme.tres" id="1_c22a4"]
 [ext_resource type="Script" path="res://Scripts/Home.cs" id="1_p51ic"]
@@ -12,6 +12,7 @@
 [ext_resource type="PackedScene" uid="uid://cwwmo68jd12gd" path="res://Scenes/ToolsPage.tscn" id="11_27f86"]
 [ext_resource type="PackedScene" uid="uid://deatvphh34eq0" path="res://Scenes/SettingsPage.tscn" id="12_3ds3g"]
 [ext_resource type="PackedScene" uid="uid://bdihe2bmwmgtp" path="res://Scenes/ModManagerPage.tscn" id="12_3uycp"]
+[ext_resource type="Script" path="res://Scripts/Tools.cs" id="13_s0bjf"]
 
 [sub_resource type="Gradient" id="Gradient_awkjf"]
 interpolation_mode = 2
@@ -48,7 +49,7 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 theme = ExtResource("1_c22a4")
 script = ExtResource("1_p51ic")
-_appVersion = 3.0
+_appVersion = 3.1
 _darkBg = NodePath("DarkBG")
 _lightBg = NodePath("LightBG")
 _downloadWindowApp = NodePath("MainPage/Installer/DownloadWindow/Window")
@@ -183,32 +184,25 @@ grow_vertical = 2
 tab_alignment = 1
 metadata/_edit_use_anchors_ = true
 
-[node name="Installer" parent="MainPage" node_paths=PackedStringArray("_errorPopup", "_errorLabel", "_confirmationPopup", "_latestVersionLabel") instance=ExtResource("10_7mm46")]
+[node name="Installer" parent="MainPage" node_paths=PackedStringArray("_latestVersionLabel", "_tools") instance=ExtResource("10_7mm46")]
 layout_mode = 2
-_errorPopup = NodePath("../../ErrorPopup")
-_errorLabel = NodePath("../../ErrorPopup/ErrorLabel")
-_confirmationPopup = NodePath("../../ConfirmPopup")
 _latestVersionLabel = NodePath("../../Header/HeaderLabels/LastestVersion")
+_tools = NodePath("../../Tools")
 
-[node name="Tools" parent="MainPage" node_paths=PackedStringArray("_errorPopup", "_errorLabel", "_confirmationPopup") instance=ExtResource("11_27f86")]
+[node name="Tools" parent="MainPage" node_paths=PackedStringArray("_tools") instance=ExtResource("11_27f86")]
 visible = false
 layout_mode = 2
-_errorPopup = NodePath("../../ErrorPopup")
-_errorLabel = NodePath("../../ErrorPopup/ErrorLabel")
-_confirmationPopup = NodePath("../../ConfirmPopup")
+_tools = NodePath("../../Tools")
 
-[node name="ModManager" parent="MainPage" node_paths=PackedStringArray("_errorPopup", "_errorLabel", "_confirmationPopup") instance=ExtResource("12_3uycp")]
+[node name="ModManager" parent="MainPage" node_paths=PackedStringArray("_tools") instance=ExtResource("12_3uycp")]
 visible = false
 layout_mode = 2
-_errorPopup = NodePath("../../ErrorPopup")
-_errorLabel = NodePath("../../ErrorPopup/ErrorLabel")
-_confirmationPopup = NodePath("../../ConfirmPopup")
+_tools = NodePath("../../Tools")
 
-[node name="Settings" parent="MainPage" node_paths=PackedStringArray("_modManager", "_confirmationPopup") instance=ExtResource("12_3ds3g")]
+[node name="Settings" parent="MainPage" node_paths=PackedStringArray("_modManager") instance=ExtResource("12_3ds3g")]
 visible = false
 layout_mode = 2
 _modManager = NodePath("../ModManager")
-_confirmationPopup = NodePath("../../ConfirmPopup")
 
 [node name="ErrorPopup" type="PopupPanel" parent="."]
 initial_position = 2
@@ -221,10 +215,10 @@ anchor_left = 0.00666667
 anchor_top = 0.0133333
 anchor_right = 0.993333
 anchor_bottom = 0.986667
-offset_left = 3.0
-offset_top = 3.0
-offset_right = 597.0
-offset_bottom = 297.0
+offset_left = -1.0
+offset_top = -0.99999
+offset_right = 1.00018
+offset_bottom = 0.999908
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3
@@ -245,6 +239,12 @@ item_0/text = "Confirm"
 item_0/id = 0
 item_1/text = "Cancel"
 item_1/id = 1
+
+[node name="Tools" type="Node" parent="." node_paths=PackedStringArray("_errorLabel", "_errorPopup", "_confirmationPopup")]
+script = ExtResource("13_s0bjf")
+_errorLabel = NodePath("../ErrorPopup/ErrorLabel")
+_errorPopup = NodePath("../ErrorPopup")
+_confirmationPopup = NodePath("../ConfirmPopup")
 
 [connection signal="toggled" from="Header/Option/LightMode" to="." method="SetTheme"]
 [connection signal="toggled" from="Header/Option/MuteButton" to="." method="ToggledMusicButton"]

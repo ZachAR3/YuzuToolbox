@@ -4,12 +4,12 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
 
-public class OfficialGrabber
+public class OfficialManager
 {
     private const string Quote = "\"";
-    private readonly HttpClient _httpClient = new HttpClient();
-    
-    
+    private readonly HttpClient _httpClient = new();
+
+
     public async Task<Dictionary<string, List<Mod>>> GetAvailableMods(Dictionary<string, List<Mod>> modList, Dictionary<string, Game> installedGames, string gameId, int sourceId)
     {
         if (!modList.ContainsKey(gameId))

@@ -6,13 +6,14 @@ using Godot.Collections;
 
 public partial class SettingsResource : Resource
 {
-	[Export()] public String SaveDirectory = null;
-	[Export()] public String ShadersLocation = null;
-	[Export()] public String FromSaveDirectory = null;
-	[Export()] public String ToSaveDirectory = null;
-	[Export()] public String ModsLocation = null;
+	[Export()] public string SaveDirectory;
+	[Export()] public string ShadersLocation;
+	[Export()] public string FromSaveDirectory;
+	[Export()] public string ToSaveDirectory;
+	[Export()] public string ModsLocation;
 	[Export()] public int InstalledVersion = -1;
-	[Export()] public bool LightModeEnabled = false;
+	[Export()] public bool LightModeEnabled;
 	[Export()] public bool Muted = true;
-	[Export()] public String AppDataPath = null;
+	[Export()] public string AppDataPath;
+	[Export()] public string GithubApiToken;
 }
