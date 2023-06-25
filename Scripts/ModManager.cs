@@ -6,8 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using SharpCompress.Archives;
-using SharpCompress.Common;
 using YuzuEAUpdateManager.Scripts.Sources;
 
 public partial class ModManager : Control
@@ -45,9 +43,10 @@ public partial class ModManager : Control
 		All
 	}
 
-	private List<string> _sourceNames = new();
+	private List<string> _sourceNames;
 	private Dictionary<string, List<Mod>> _selectedSourceMods = new();
 	private int _selectedSource = (int)Sources.Official;
+	private Dictionary<int, string> _gameSpecificSources = new();
 
 	// Game id, game name
 	private Dictionary<string, string> _titles = new();
@@ -74,10 +73,10 @@ public partial class ModManager : Control
 
 		_titleRequester.Connect("request_completed", new Callable(this, nameof(GetTitles)));
 
-		_sourceNames.Insert((int)Sources.Official, "Official");
-		_sourceNames.Insert((int)Sources.Banana, "Banana");
-		_sourceNames.Insert((int)Sources.TotkHolo, "TOTKHolo");
-		_sourceNames.Insert((int)Sources.All, "All");
+		_sourceNames = Enum.GetNames(typeof(Sources)).ToList();
+		
+		// Sets zelda totk specific source with game id and source value
+		_gameSpecificSources[(int)Sources.TotkHolo] = "0100F2C0115B6000";
 
 		_modLocationButton.Text =
 			Globals.Instance.Settings.ModsLocation.PadLeft(
@@ -103,7 +102,7 @@ public partial class ModManager : Control
 
 
 	// Custom functions
-	private async void GetGamesAndMods(int source = (int)Sources.Official)
+	private async Task GetGamesAndMods(int source = (int)Sources.Official, int selectedGame = 0)
 	{
 		await Task.Run(async () =>
 		{
@@ -135,8 +134,12 @@ public partial class ModManager : Control
 				{
 					_installedGames[gameId] = new() { GameName = gameName };
 					GetInstalledMods(gameId);
-					await Task.Run(async () => await GetAvailableMods(gameId, source));
 					_gamePickerButton.AddItem($@"    {gameName}");
+					if (_gameSpecificSources.ContainsKey(_selectedSource) && !_gameSpecificSources.ContainsValue(gameId))
+					{
+						continue;
+					}
+					await Task.Run(async () => await GetAvailableMods(gameId, source));
 				}
 				else
 				{
@@ -150,7 +153,9 @@ public partial class ModManager : Control
 			// Sets the first game as selected by default
 			if (_installedGames.Count > 0)
 			{
-				SelectGame(0);
+				selectedGame = Math.Clamp(selectedGame, 0, _installedGames.Count - 1);
+				_gamePickerButton.Selected = selectedGame;
+				SelectGame(selectedGame);
 			}
 			else
 			{
@@ -226,6 +231,11 @@ public partial class ModManager : Control
 						gameId, (int)Sources.Official);
 					_selectedSourceMods = await _bananaManager.GetAvailableMods(_selectedSourceMods, _installedGames,
 						gameId, (int)Sources.Banana, _modsPage);
+					if (_currentGameId == _gameSpecificSources[(int)Sources.TotkHolo])
+					{
+						_selectedSourceMods = await _totkHoloManager.GetAvailableMods(_selectedSourceMods,
+							gameId, (int)Sources.TotkHolo);
+					}
 				}
 				catch (ArgumentException argumentException)
 				{
@@ -317,8 +327,6 @@ public partial class ModManager : Control
 		{
 			switch (_selectedSource)
 			{
-				case (int)Sources.Official:
-					break;
 				case (int)Sources.Banana:
 					tempModsList = await _bananaManager.GetAvailableMods(_selectedSourceMods, _installedGames,
 						_currentGameId,
@@ -478,13 +486,24 @@ public partial class ModManager : Control
 	}
 
 
-	private void SelectGame(int gameIndex)
+	private async void SelectGame(int gameIndex)
 	{
 		// Gets the keys we can equate as an List
 		_currentGameId = GetGameIdFromValue(_gamePickerButton.GetItemText(gameIndex).Trim(), _installedGames);
 		// Clears old mods from our list
 		_modList.Clear();
-		AddMods(_currentGameId);
+
+		_sourcePickerButton.Clear();
+		AddSources();
+
+		if (_gameSpecificSources.ContainsKey(_selectedSource) && !_gameSpecificSources.ContainsValue(_currentGameId))
+		{
+			await Refresh();
+		}
+		else
+		{
+			AddMods(_currentGameId);
+		}
 	}
 
 
@@ -502,26 +521,40 @@ public partial class ModManager : Control
 	}
 
 
-	private void Refresh(int source = (int)Sources.Official)
+	private async Task Refresh(int source = (int)Sources.Official)
 	{
 		// Clean up
 		_modList.Clear();
-		_gamePickerButton.Clear();
 		_selectedSourceMods.Clear();
 		_installedGames.Clear();
 		_titles.Clear();
-
+		
 		// Re-grabs and adds the mods
-		GetGamesAndMods(source);
+		int selectedGame = _gamePickerButton.Selected;
+		_gamePickerButton.Clear();
+		_selectedSource = source;
+		
+		await GetGamesAndMods(source, selectedGame);
 	}
 
 
 	private void AddSources()
-	{
-		foreach (string source in _sourceNames)
+	{	
+		foreach (var source in Enum.GetValues(typeof(Sources)))
 		{
-			_sourcePickerButton.AddItem(source.PadLeft(source.Length + _selectionPaddingLeft));
+			switch (source)
+			{
+				// Breaks if source is totkholo but selected game isn't
+				case Sources.TotkHolo when _currentGameId != _gameSpecificSources[(int)Sources.TotkHolo]:
+					break;
+				
+				default:
+					_sourcePickerButton.AddItem(_sourceNames[(int)source].PadLeft(_sourceNames[(int)source].Length + _selectionPaddingLeft));
+					break;
+			}
 		}
+
+		_sourcePickerButton.Select(_selectedSource);
 	}
 
 
@@ -549,6 +582,33 @@ public partial class ModManager : Control
 		{
 			_loadMoreButton.Disabled = interactionDisabled;
 		}
+	}
+	
+	
+	private async Task SelectSource(int sourceIndex)
+	{
+		_selectedSource = _sourceNames.IndexOf(_sourcePickerButton.GetItemText(sourceIndex).Trim());
+		if (_selectedSource == -1)
+		{
+			_tools.ErrorPopup("source not found, please file a bug report. Defaulting back to official");
+			_sourcePickerButton.Select(0);
+			return;
+		}
+
+		switch (_selectedSource)
+		{
+			case (int)Sources.Banana:
+				_loadMoreButton.Disabled = false;
+				break;
+			case (int)Sources.All:
+				_loadMoreButton.Disabled = false;
+				break;
+			default:
+				_loadMoreButton.Disabled = true;
+				break;
+		}
+
+		await Refresh(_selectedSource);
 	}
 	
 	
@@ -605,8 +665,8 @@ public partial class ModManager : Control
 			SelectedSourceMods = _selectedSourceMods
 		};
 	}
-	
-	
+
+
 	// Signal functions
 	private void SearchUpdated(string newSearch)
 	{
@@ -680,34 +740,6 @@ public partial class ModManager : Control
 	}
 
 
-	// Refreshes the mods with the newly selected source
-	private void SelectSource(int sourceIndex)
-	{
-		_selectedSource = _sourceNames.IndexOf(_sourcePickerButton.GetItemText(sourceIndex).Trim());
-		if (_selectedSource == -1)
-		{
-			_tools.ErrorPopup("source not found, please file a bug report. Defaulting back to official");
-			_sourcePickerButton.Select(0);
-			return;
-		}
-
-		switch (_selectedSource)
-		{
-			case (int)Sources.Banana:
-				_loadMoreButton.Disabled = false;
-				break;
-			case (int)Sources.All:
-				_loadMoreButton.Disabled = false;
-				break;
-			default:
-				_loadMoreButton.Disabled = true;
-				break;
-		}
-
-		Refresh(_selectedSource);
-	}
-
-
 	private async void UpdateSelectedPressed()
 	{
 		foreach (Mod mod in _installedMods[_currentGameId])
@@ -762,5 +794,11 @@ public partial class ModManager : Control
 	private void UpdateDownloadProgress()
 	{
 		_downloadBar.Value = (float)_downloadRequester.GetDownloadedBytes() / _downloadRequester.GetBodySize() * 100;
+	}
+
+
+	private void SourceSelected(int selectedSource)
+	{
+		SelectSource(selectedSource);
 	}
 }

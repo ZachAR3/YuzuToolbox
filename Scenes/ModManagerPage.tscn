@@ -349,7 +349,7 @@ metadata/_edit_use_anchors_ = true
 [node name="TitleRequester" type="HTTPRequest" parent="."]
 
 [connection signal="item_selected" from="Header/GameSelection" to="." method="SelectGame"]
-[connection signal="item_selected" from="Header/SourceSelection" to="." method="SelectSource"]
+[connection signal="item_selected" from="Header/SourceSelection" to="." method="SourceSelected"]
 [connection signal="pressed" from="Header/ModLocationButton" to="." method="ModLocationPressed"]
 [connection signal="pressed" from="SideBar/RefreshButton" to="." method="RefreshPressed"]
 [connection signal="pressed" from="SideBar/UpdateAll" to="." method="UpdateAll"]

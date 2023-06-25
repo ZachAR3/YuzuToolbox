@@ -33,8 +33,10 @@ public partial class Globals : Node
 		// Sets app data path default for first startup
 		if (string.IsNullOrEmpty(Settings.AppDataPath))
 		{
-			Settings.AppDataPath =
-				Path.Join(System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData),
+			Settings.AppDataPath = OS.GetName() == "Linux"
+				? Path.Join(System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData),
+					"yuzu")
+				: Path.Join(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData),
 					"yuzu");
 		}
 		
