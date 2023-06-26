@@ -56,7 +56,11 @@ public partial class StandardModManagement : Node
 						}
 					}
 				}
-				
+
+				if (Directory.Exists(installPath))
+				{
+					Tools.DeleteDirectoryContents(installPath);
+				}
 				// Moves the files from the temp folder into the install path
 				foreach (var folder in Directory.GetDirectories(installPath + "-temp"))
 				{ 

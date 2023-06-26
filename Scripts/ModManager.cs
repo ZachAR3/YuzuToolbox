@@ -636,28 +636,15 @@ public partial class ModManager : Control
 	{
 		if (_selectedSourceMods.TryGetValue(_currentGameId, out var sourceMods))
 		{
-			var localSourceMods = new List<Mod>(sourceMods);
 			var searchQuery = newSearch.ToLower().Trim();
 			_modList.Clear();
+			AddMods(_currentGameId);
 
-			if (_installedMods.ContainsKey(_currentGameId))
+			for (int modIndex = _modList.ItemCount - 1; modIndex >= 0; modIndex--)
 			{
-				localSourceMods.InsertRange(0, _installedMods[_currentGameId]);
-			}
-
-			foreach (var mod in localSourceMods)
-			{
-				if (mod.ModName.ToLower().Trim().Contains(searchQuery) || searchQuery == "")
+				if (!_modList.GetItemText(modIndex).ToLower().Trim().Contains(searchQuery))
 				{
-					if (mod.InstalledPath != null)
-					{
-						_modList.AddItem($@"  {mod.ModName} || Supports:{string.Join(", ", mod.CompatibleVersions)}  ",
-							icon: _installedIcon);
-					}
-					else
-					{
-						_modList.AddItem($@"  {mod.ModName} || Supports:{string.Join(", ", mod.CompatibleVersions)}  ");
-					}
+					_modList.RemoveItem(modIndex);
 				}
 			}
 		}
