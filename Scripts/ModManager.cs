@@ -220,19 +220,10 @@ public partial class ModManager : Control
 			_loadingPanel.Visible = false;
 		}
 
-		// Really inefficient system to remove installed mods from available based on the name TODO
 		if (_selectedSourceMods.ContainsKey(gameId))
 		{
-			foreach (var mod in _installedMods[gameId])
-			{
-				foreach (var selectedSourceMod in new List<Mod>(_selectedSourceMods[gameId]))
-				{
-					if (selectedSourceMod.ModName == mod.ModName)
-					{
-						_selectedSourceMods[gameId].Remove(selectedSourceMod);
-					}
-				}
-			}
+			var installedModNames = new HashSet<string>(_installedMods[gameId].Select(mod => mod.ModName.ToLower().Trim()));
+			_selectedSourceMods[gameId].RemoveAll(mod => installedModNames.Contains(mod.ModName.ToLower().Trim()));
 		}
 	}
 
