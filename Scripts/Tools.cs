@@ -1,9 +1,7 @@
 using Godot;
 using System;
 using System.IO;
-using System.Runtime.Loader;
 using System.Threading.Tasks;
-using Godot.Collections;
 using Gtk;
 using Octokit;
 using Application = Gtk.Application;

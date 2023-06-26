@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Gtk;
 using YuzuEAUpdateManager.Scripts.Sources;
 using Button = Godot.Button;
 using ProgressBar = Godot.ProgressBar;
@@ -146,7 +145,7 @@ public partial class ModManager : Control
 				}
 				else
 				{
-					// TODO: Find a better solution for informing user
+					_tools.ErrorPopup($@"could not find associated game title for: {gameId}");
 					GD.Print("Cannot find title:" + gameId);
 				}
 

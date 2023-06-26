@@ -1,8 +1,5 @@
 using Godot;
-using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using Godot.Collections;
+
 
 public partial class SettingsResource : Resource
 {

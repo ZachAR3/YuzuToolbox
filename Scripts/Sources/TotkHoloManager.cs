@@ -1,9 +1,6 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using Godot;
-using Mono.Posix;
-using FileAccess = Godot.FileAccess;
 using HttpClient = System.Net.Http.HttpClient;
 
 namespace YuzuEAUpdateManager.Scripts.Sources;

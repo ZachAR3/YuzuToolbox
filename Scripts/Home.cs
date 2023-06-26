@@ -1,12 +1,6 @@
 using Godot;
-using System;
-using System.Diagnostics;
-using System.IO;
-using System.Text;
 using Godot.Collections;
-using Mono.Unix;
-using ProgressBar = Godot.ProgressBar;
-using WindowsShortcutFactory;
+
 
 public partial class Home : Control
 {
