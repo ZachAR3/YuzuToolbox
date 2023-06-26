@@ -5,8 +5,15 @@ public partial class SettingsPage : Node
 {
     [Export()] private ModManager _modManager;
     [Export()] private LineEdit _githubTokenLineEdit;
+    [Export()] private Tools _tools;
 
-    private Tools _tools = new();
+    [Export()] private CheckBox _getCompatibleVersionsButton;
+
+
+    private void Initiate()
+    {
+        _getCompatibleVersionsButton.ButtonPressed = Globals.Instance.Settings.GetCompatibleVersions;
+    }
     
     
     // Signal functions
@@ -39,5 +46,12 @@ public partial class SettingsPage : Node
         Globals.Instance.SaveManager.WriteSave();
         Globals.Instance.AuthenticateGithubClient();
         _githubTokenLineEdit.Text = "Success!";
+    }
+
+
+    private void GetCompatibleToggled(bool getCompatible)
+    {
+        Globals.Instance.Settings.GetCompatibleVersions = getCompatible;
+        Globals.Instance.SaveManager.WriteSave();
     }
 }

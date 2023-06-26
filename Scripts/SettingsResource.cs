@@ -16,4 +16,5 @@ public partial class SettingsResource : Resource
 	[Export()] public bool Muted = true;
 	[Export()] public string AppDataPath;
 	[Export()] public string GithubApiToken;
+	[Export()] public bool GetCompatibleVersions;
 }

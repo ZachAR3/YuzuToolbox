@@ -176,75 +176,45 @@ public partial class ModManager : Control
 		}
 
 		// Grabs the mods from the specified source.
-		switch (source)
+		try
 		{
-			case (int)Sources.Official:
-				try
-				{
+			switch (source)
+			{
+				case (int)Sources.Official:
 					_selectedSourceMods = await _officialManager.GetAvailableMods(_selectedSourceMods, _installedGames,
 						gameId, (int)Sources.Official);
-				}
-				catch (ArgumentException argumentException)
-				{
-					_tools.ErrorPopup(
-						$@"Failed to retrieve mod list for ID:{gameId} | Title:{_titles[gameId]}. The game may not have available mods.");
-					_loadingPanel.Visible = false;
-				}
+					break;
 
-				break;
+					case (int)Sources.Banana:
+						_selectedSourceMods = await _bananaManager.GetAvailableMods(_selectedSourceMods, _installedGames,
+							gameId, (int)Sources.Banana, _modsPage);
+						break;
 
-			case (int)Sources.Banana:
-				try
-				{
-					_selectedSourceMods = await _bananaManager.GetAvailableMods(_selectedSourceMods, _installedGames,
-						gameId, (int)Sources.Banana, _modsPage);
-				}
-				catch (ArgumentException argumentException)
-				{
-					_tools.ErrorPopup(
-						$@"Failed to retrieve mod list for ID:{gameId} | Title:{_titles[gameId]}. The game may not have available mods.");
-					_loadingPanel.Visible = false;
-				}
+					case (int)Sources.TotkHolo:
+						_selectedSourceMods =
+							await _totkHoloManager.GetAvailableMods(_selectedSourceMods, gameId, (int)Sources.TotkHolo,
+								Globals.Instance.Settings.GetCompatibleVersions);
+						break;
 
-				break;
-
-			case (int)Sources.TotkHolo:
-				try
-				{
-					_selectedSourceMods =
-						await _totkHoloManager.GetAvailableMods(_selectedSourceMods, gameId, (int)Sources.TotkHolo);
+					case (int)Sources.All:
+						// Adds both official and banana mods the our source list
+						_selectedSourceMods = await _officialManager.GetAvailableMods(_selectedSourceMods, _installedGames,
+							gameId, (int)Sources.Official);
+						_selectedSourceMods = await _bananaManager.GetAvailableMods(_selectedSourceMods, _installedGames,
+							gameId, (int)Sources.Banana, _modsPage);
+						if (_currentGameId == _gameSpecificSources[(int)Sources.TotkHolo])
+						{
+							_selectedSourceMods = await _totkHoloManager.GetAvailableMods(_selectedSourceMods,
+								gameId, (int)Sources.TotkHolo, Globals.Instance.Settings.GetCompatibleVersions);
+						}
+						break;
 				}
-				catch (ArgumentException argumentException)
-				{
-					_tools.ErrorPopup(
-						$@"Failed to retrieve mod list for ID:{gameId} | Title:{_titles[gameId]}. The game may not have available mods.");
-					_loadingPanel.Visible = false;
-				}
-
-				break;
-
-			case (int)Sources.All:
-				try
-				{
-					// Adds both official and banana mods the our source list
-					_selectedSourceMods = await _officialManager.GetAvailableMods(_selectedSourceMods, _installedGames,
-						gameId, (int)Sources.Official);
-					_selectedSourceMods = await _bananaManager.GetAvailableMods(_selectedSourceMods, _installedGames,
-						gameId, (int)Sources.Banana, _modsPage);
-					if (_currentGameId == _gameSpecificSources[(int)Sources.TotkHolo])
-					{
-						_selectedSourceMods = await _totkHoloManager.GetAvailableMods(_selectedSourceMods,
-							gameId, (int)Sources.TotkHolo);
-					}
-				}
-				catch (ArgumentException argumentException)
-				{
-					_tools.ErrorPopup(
-						$@"Failed to retrieve mod list for ID:{gameId} | Title:{_titles[gameId]}. The game may not have available mods.");
-					_loadingPanel.Visible = false;
-				}
-
-				break;
+		}
+		catch (ArgumentException argumentException)
+		{
+			_tools.ErrorPopup(
+				$@"Failed to retrieve mod list for ID:{gameId} | Title:{_titles[gameId]}. The game may not have available mods. Exception:{argumentException}");
+			_loadingPanel.Visible = false;
 		}
 
 		// Really inefficient system to remove installed mods from available based on the name TODO
@@ -341,14 +311,8 @@ public partial class ModManager : Control
 		});
 
 		// If our old list is the same as the new one, disabled the load more as no more mods are available.
-		if (tempModsList == _selectedSourceMods)
-		{
-			_loadMoreButton.Disabled = true;
-		}
-		else
-		{
-			_selectedSourceMods = tempModsList;
-		}
+		_loadMoreButton.Disabled = tempModsList == _selectedSourceMods || _loadMoreButton.Disabled;
+		_selectedSourceMods = tempModsList;
 
 		DisableInteraction(false);
 		_loadingPanel.Visible = false;
@@ -496,7 +460,7 @@ public partial class ModManager : Control
 		_sourcePickerButton.Clear();
 		AddSources();
 
-		if (_gameSpecificSources.ContainsKey(_selectedSource) && !_gameSpecificSources.ContainsValue(_currentGameId))
+		if (_gameSpecificSources.ContainsKey(_selectedSource) && _gameSpecificSources[_selectedSource] != _currentGameId)
 		{
 			await Refresh();
 		}
@@ -545,7 +509,7 @@ public partial class ModManager : Control
 			switch (source)
 			{
 				// Breaks if source is totkholo but selected game isn't
-				case Sources.TotkHolo when _currentGameId != _gameSpecificSources[(int)Sources.TotkHolo]:
+				case Sources.TotkHolo when _currentGameId != _gameSpecificSources[(int)source]:
 					break;
 				
 				default:
@@ -555,13 +519,6 @@ public partial class ModManager : Control
 		}
 
 		_sourcePickerButton.Select(_selectedSource);
-	}
-
-
-	private void SaveInstalledMods()
-	{
-		var serializedMods = JsonSerializer.Serialize(_installedMods);
-		File.WriteAllText(_installedModsPath, serializedMods);
 	}
 
 
@@ -613,6 +570,13 @@ public partial class ModManager : Control
 	
 	
 	// Helper functions
+	private void SaveInstalledMods()
+	{
+		var serializedMods = JsonSerializer.Serialize(_installedMods);
+		File.WriteAllText(_installedModsPath, serializedMods);
+	}
+	
+	
 	private async Task InstallMod(string gameId, Mod mod)
 	{
 		UpdateManagers();

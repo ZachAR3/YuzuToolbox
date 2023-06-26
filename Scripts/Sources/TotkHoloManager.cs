@@ -31,7 +31,6 @@ public class TotkHoloManager
         string gameId, int sourceId, bool getCompatibleVersions = false)
     {
         _gitHubClient = Globals.Instance.LocalGithubClient;
-        
         if (!modList.ContainsKey(gameId))
         {
             modList[gameId] = new List<Mod>();
@@ -42,8 +41,6 @@ public class TotkHoloManager
 
         // Throws an exception if the mods list is null
         _ = modContents ?? throw new ArgumentException("Failed to retrieve mods for", gameId);
-
-        // DownloadFolder(RepoOwner, RepoName, "Mods/Aspect Ratio", "C:\\Users\\Zachary\\Desktop");
 
 
         foreach (var modType in modContents)
@@ -142,6 +139,7 @@ public class TotkHoloManager
             }
         }
 
+        GD.Print("No compatible versions found returning NA");
         return new List<string> { "NA" };
     }
 }

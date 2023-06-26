@@ -199,10 +199,11 @@ visible = false
 layout_mode = 2
 _tools = NodePath("../../Tools")
 
-[node name="Settings" parent="MainPage" node_paths=PackedStringArray("_modManager") instance=ExtResource("12_3ds3g")]
+[node name="Settings" parent="MainPage" node_paths=PackedStringArray("_modManager", "_tools") instance=ExtResource("12_3ds3g")]
 visible = false
 layout_mode = 2
 _modManager = NodePath("../ModManager")
+_tools = NodePath("../../Tools")
 
 [node name="ErrorPopup" type="PopupPanel" parent="."]
 initial_position = 2
