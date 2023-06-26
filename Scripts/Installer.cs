@@ -3,10 +3,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Mono.Unix;
-using Octokit;
 using WindowsShortcutFactory;
 using Label = Godot.Label;
 
@@ -76,19 +73,8 @@ public partial class Installer : Control
 		_extractWarning.Visible = false;
 		_downloadWarning.Visible = false;
 		_clearShadersWarning.Visible = false;
-
-
+		
 		_downloadButton.GrabFocus();
-
-		// Signals TODO (should be redone to use .Connect() instead, since += is semi-broken)
-		_downloadButton.Pressed += InstallSelectedVersion;
-		_installLocationButton.Pressed += OnInstallLocationButtonPressed;
-		_downloadRequester.RequestCompleted += VersionDownloadCompleted;
-		_downloadUpdateTimer.Timeout += UpdateDownloadBar;
-		_shadersLocationButton.Pressed += OnShadersLocationButtonPressed;
-		_customVersionCheckBox.Toggled += CustomVersionSpinBoxEditable;
-		_autoUnpackButton.Toggled += AutoUnpackToggled;
-
 		AddVersions();
 	}
 

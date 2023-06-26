@@ -265,5 +265,8 @@ rounded = true
 [node name="DownloadProgressUpdater" type="Timer" parent="DownloadWindow/Window"]
 wait_time = 0.1
 
+[connection signal="pressed" from="ControlsContainer/LocationButton" to="." method="OnInstallLocationButtonPressed"]
 [connection signal="toggled" from="ControlsContainer/ExtractButton" to="." method="AutoUnpackToggled"]
 [connection signal="toggled" from="ControlsContainer/ClearShadersButton" to="." method="ClearShadersToggle"]
+[connection signal="pressed" from="DownloadButton" to="." method="InstallSelectedVersion"]
+[connection signal="request_completed" from="DownloadRequester" to="." method="VersionDownloadCompleted"]

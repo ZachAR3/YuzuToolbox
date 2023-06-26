@@ -6,7 +6,10 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Gtk;
 using YuzuEAUpdateManager.Scripts.Sources;
+using Button = Godot.Button;
+using ProgressBar = Godot.ProgressBar;
 
 public partial class ModManager : Control
 {
@@ -336,8 +339,9 @@ public partial class ModManager : Control
 		{
 			foreach (var mod in installedMods)
 			{
-				_modList.AddItem($@"  {mod.ModName} || Supports:{string.Join(", ", mod.CompatibleVersions)}  ",
+				var modIndex = _modList.AddItem($@"  {mod.ModName} || Supports:{string.Join(", ", mod.CompatibleVersions)}  ",
 					icon: _installedIcon);
+				_modList.SetItemMetadata(modIndex, mod.ModName);
 			}
 		}
 
@@ -345,7 +349,8 @@ public partial class ModManager : Control
 		{
 			foreach (var mod in selectedSourceMods)
 			{
-				_modList.AddItem($@"  {mod.ModName} || Supports:{string.Join(", ", mod.CompatibleVersions)}  ");
+				var modIndex = _modList.AddItem($@"  {mod.ModName} || Supports:{string.Join(", ", mod.CompatibleVersions)}  ");
+				_modList.SetItemMetadata(modIndex, mod.ModName);
 			}
 		}
 
@@ -658,7 +663,7 @@ public partial class ModManager : Control
 		{
 			foreach (var mod in installedMods)
 			{
-				if (_modList.GetItemText(modIndex).Split(TitleSplitter)[0].Trim() == (mod.ModName))
+				if ((string)_modList.GetItemMetadata(modIndex) == mod.ModName)
 				{
 					DisableInteraction();
 					await DeleteMod(_currentGameId, mod, _selectedSource, (int)Sources.All);
@@ -676,7 +681,7 @@ public partial class ModManager : Control
 		{
 			foreach (var mod in selectedSourceMods)
 			{
-				if (_modList.GetItemText(modIndex).Split(TitleSplitter)[0].Trim() == (mod.ModName))
+				if ((string)_modList.GetItemMetadata(modIndex) == mod.ModName)
 				{
 					DisableInteraction();
 					await InstallMod(_currentGameId, mod);
