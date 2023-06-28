@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=22 format=3 uid="uid://dky537toysr34"]
+[gd_resource type="Theme" load_steps=23 format=3 uid="uid://dky537toysr34"]
 
 [ext_resource type="StyleBox" uid="uid://vlr1yex4wojy" path="res://Themes/Styleboxes/LightFocus.tres" id="1_8v17i"]
 [ext_resource type="StyleBox" uid="uid://blb2snsxt2fi" path="res://Themes/Styleboxes/LightNormal.tres" id="2_3crai"]
@@ -8,6 +8,7 @@
 [ext_resource type="StyleBox" uid="uid://e4urf7jlgsqv" path="res://Themes/Styleboxes/DarkLoadingLoadbar.tres" id="6_khrqj"]
 [ext_resource type="StyleBox" uid="uid://cu00el1bpwh3q" path="res://Themes/Styleboxes/LightDisabled.tres" id="7_dn0p5"]
 [ext_resource type="StyleBox" uid="uid://ct4a4b2lcwimn" path="res://Themes/Styleboxes/LightVSeparator.tres" id="7_tu21u"]
+[ext_resource type="StyleBox" uid="uid://c1jbx25ak4li5" path="res://Themes/Styleboxes/LightErrorConsole.tres" id="9_3eb4v"]
 
 [sub_resource type="Image" id="Image_f51od"]
 data = {
@@ -167,6 +168,7 @@ ProgressBar/colors/font_color = Color(0, 0, 0, 1)
 ProgressBar/fonts/font = ExtResource("4_b371y")
 ProgressBar/styles/background = ExtResource("5_haxb1")
 ProgressBar/styles/fill = ExtResource("6_khrqj")
+RichTextLabel/colors/default_color = Color(0, 0, 0, 1)
 TabContainer/colors/drop_mark_color = Color(0, 0, 0, 1)
 TabContainer/colors/font_disabled_color = Color(0, 0, 0, 0.501961)
 TabContainer/colors/font_selected_color = Color(0, 0, 0, 1)
@@ -175,8 +177,10 @@ TabContainer/styles/panel = SubResource("StyleBoxEmpty_qkau6")
 TabContainer/styles/tab_disabled = ExtResource("7_dn0p5")
 TabContainer/styles/tab_selected = ExtResource("3_rq4t7")
 TabContainer/styles/tab_unselected = ExtResource("2_3crai")
-TextEdit/colors/font_color = Color(0, 0, 0, 1)
-TextEdit/styles/focus = ExtResource("1_8v17i")
-TextEdit/styles/normal = ExtResource("2_3crai")
+TextEdit/colors/font_color = Color(0.427451, 0, 0.0627451, 1)
+TextEdit/colors/font_readonly_color = Color(0.427451, 0, 0.0627451, 1)
+TextEdit/styles/focus = ExtResource("9_3eb4v")
+TextEdit/styles/normal = ExtResource("9_3eb4v")
+TextEdit/styles/read_only = ExtResource("9_3eb4v")
 TooltipPanel/styles/panel = SubResource("StyleBoxFlat_5jsxt")
 VSeparator/styles/separator = ExtResource("7_tu21u")

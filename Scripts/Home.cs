@@ -17,6 +17,7 @@ public partial class Home : Control
 	[Export()] private ColorRect _header;
 	[Export()] private Label _headerLabel;
 	[Export()] private Label _latestVersionLabel;
+	[Export()] private Control _errorConsole;
 
 	[ExportGroup("ModManager")]
 	[Export()] private ItemList _modList;
@@ -36,12 +37,21 @@ public partial class Home : Control
 
 		// Set the theme
 		SetTheme(Globals.Instance.Settings.LightModeEnabled);
-		
+
 		// Sets scaling (Called manually to hopefully fix #31
 		WindowResized();
-		
+
 		// Signals
 		Resized += WindowResized;
+	}
+
+
+	public override void _Input(InputEvent @event)
+	{
+		if (@event.IsActionPressed("OpenConsole"))
+		{
+			_errorConsole.Visible = !_errorConsole.Visible;
+		}
 	}
 
 
