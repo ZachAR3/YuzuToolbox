@@ -40,6 +40,7 @@ public partial class ResourceSaveManager : Resource
             // If the save is from a previous version, reset the settings
             if (lastSave.Version != Version)
             {
+                Tools.Instance.ErrorPopup("Save version is incompatible with app, resetting user settings.");
                 GD.Print("Save version is different, resetting settings");
                 _settings = new SettingsResource();
                 WriteSave();

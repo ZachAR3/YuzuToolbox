@@ -16,7 +16,6 @@ public partial class StandardModManagement : Node
 
 	public HttpRequest DownloadRequester;
     public Timer DownloadUpdateTimer;
-    public Tools ToolsNode;
     public Panel LoadingPanel;
     
     
@@ -83,7 +82,7 @@ public partial class StandardModManagement : Node
 		}
 		catch (Exception installError)
 		{
-			ToolsNode.ErrorPopup($@"failed to install mod:{installError}");
+			Tools.Instance.ErrorPopup($@"failed to install mod:{installError}");
 			throw;
 		}
 
@@ -98,7 +97,7 @@ public partial class StandardModManagement : Node
 		{
 			if (!noConfirmation)
 			{
-				var confirm = await ToolsNode.ConfirmationPopup($@"Delete {mod.ModName}?");
+				var confirm = await Tools.Instance.ConfirmationPopup($@"Delete {mod.ModName}?");
 				if (confirm == false)
 				{
 					return false;
@@ -122,7 +121,7 @@ public partial class StandardModManagement : Node
 		}
 		catch (Exception removeError)
 		{
-			ToolsNode.ErrorPopup("failed to remove mod:" + removeError);
+			Tools.Instance.ErrorPopup("failed to remove mod:" + removeError);
 			return false;
 		}
 

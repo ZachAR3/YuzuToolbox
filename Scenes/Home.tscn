@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://c7wdbnvnydnxk"]
+[gd_scene load_steps=20 format=3 uid="uid://c7wdbnvnydnxk"]
 
 [ext_resource type="Theme" uid="uid://cnnid0n04kfr7" path="res://Themes/DarkTheme.tres" id="1_c22a4"]
 [ext_resource type="Script" path="res://Scripts/Home.cs" id="1_p51ic"]
@@ -13,6 +13,7 @@
 [ext_resource type="PackedScene" uid="uid://deatvphh34eq0" path="res://Scenes/SettingsPage.tscn" id="12_3ds3g"]
 [ext_resource type="PackedScene" uid="uid://bdihe2bmwmgtp" path="res://Scenes/ModManagerPage.tscn" id="12_3uycp"]
 [ext_resource type="Script" path="res://Scripts/Tools.cs" id="13_s0bjf"]
+[ext_resource type="PackedScene" uid="uid://b52pqn56qpbg2" path="res://Scenes/ErrorConsole.tscn" id="14_1b731"]
 
 [sub_resource type="Gradient" id="Gradient_awkjf"]
 interpolation_mode = 2
@@ -184,26 +185,22 @@ grow_vertical = 2
 tab_alignment = 1
 metadata/_edit_use_anchors_ = true
 
-[node name="Installer" parent="MainPage" node_paths=PackedStringArray("_latestVersionLabel", "_tools") instance=ExtResource("10_7mm46")]
+[node name="Installer" parent="MainPage" node_paths=PackedStringArray("_latestVersionLabel") instance=ExtResource("10_7mm46")]
 layout_mode = 2
 _latestVersionLabel = NodePath("../../Header/HeaderLabels/LastestVersion")
-_tools = NodePath("../../Tools")
 
-[node name="Tools" parent="MainPage" node_paths=PackedStringArray("_tools") instance=ExtResource("11_27f86")]
+[node name="Tools" parent="MainPage" instance=ExtResource("11_27f86")]
 visible = false
 layout_mode = 2
-_tools = NodePath("../../Tools")
 
-[node name="ModManager" parent="MainPage" node_paths=PackedStringArray("_tools") instance=ExtResource("12_3uycp")]
+[node name="ModManager" parent="MainPage" instance=ExtResource("12_3uycp")]
 visible = false
 layout_mode = 2
-_tools = NodePath("../../Tools")
 
-[node name="Settings" parent="MainPage" node_paths=PackedStringArray("_modManager", "_tools") instance=ExtResource("12_3ds3g")]
+[node name="Settings" parent="MainPage" node_paths=PackedStringArray("_modManager") instance=ExtResource("12_3ds3g")]
 visible = false
 layout_mode = 2
 _modManager = NodePath("../ModManager")
-_tools = NodePath("../../Tools")
 
 [node name="ErrorPopup" type="PopupPanel" parent="."]
 initial_position = 2
@@ -240,6 +237,10 @@ item_0/text = "Confirm"
 item_0/id = 0
 item_1/text = "Cancel"
 item_1/id = 1
+
+[node name="ErrorConsole" parent="." instance=ExtResource("14_1b731")]
+visible = false
+layout_mode = 1
 
 [node name="Tools" type="Node" parent="." node_paths=PackedStringArray("_errorLabel", "_errorPopup", "_confirmationPopup")]
 script = ExtResource("13_s0bjf")

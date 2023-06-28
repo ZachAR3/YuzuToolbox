@@ -16,8 +16,7 @@ public class TotkHoloManager
 {
     private const string RepoOwner = "HolographicWings";
     private const string RepoName = "TOTK-Mods-collection";
-
-    public Tools ToolsNode;
+    
     public Dictionary<string, List<Mod>> InstalledMods;
     public Dictionary<string, List<Mod>> SelectedSourceMods;
 
@@ -99,10 +98,10 @@ public class TotkHoloManager
                 string installPath = Path
                     .Join(Globals.Instance.Settings.ModsLocation, gameId, $@"Managed{mod.ModName.Replace(":", ".")}");
 
-                var exception = await ToolsNode.DownloadFolder(RepoOwner, RepoName, mod.ModUrl, installPath);
+                var exception = await Tools.Instance.DownloadFolder(RepoOwner, RepoName, mod.ModUrl, installPath);
                 if (exception != null)
                 {
-                    ToolsNode.ErrorPopup($@"failed to download: {mod.ModName}. Exception: {exception}");
+                    Tools.Instance.ErrorPopup($@"failed to download: {mod.ModName}. Exception: {exception}");
                     return;
                 }
                 
@@ -117,7 +116,7 @@ public class TotkHoloManager
         }
         catch (Exception installError)
         {
-            ToolsNode.ErrorPopup($@"failed to install mod:{installError}");
+            Tools.Instance.ErrorPopup($@"failed to install mod:{installError}");
         }
     }
     

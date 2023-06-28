@@ -15,7 +15,6 @@ public partial class Installer : Control
 	// Exported variables (Primarily for the UI / Interactions)
 	[ExportGroup("General")]
 	[Export()] private Label _latestVersionLabel;
-	[Export()] private Tools _tools;
 
 	[ExportGroup("Installer")] 
 	[Export()] private string _repoName;
@@ -87,7 +86,7 @@ public partial class Installer : Control
 	private async void InstallSelectedVersion()
 	{
 		// Launches confirmation window, and cancels if not confirmed.
-		var confirm = await _tools.ConfirmationPopup();
+		var confirm = await Tools.Instance.ConfirmationPopup();
 		if (confirm != true)
 		{
 			return;
@@ -183,7 +182,7 @@ Categories=Game;Emulator;Qt;
 				catch (Exception shortcutError)
 				{
 					shortcutPath = $@"{Globals.Instance.Settings.SaveDirectory}/{linuxShortcutName}";
-					_tools.ErrorPopup(
+					Tools.Instance.ErrorPopup(
 						$@"Error creating shortcut, creating new at {shortcutPath}. Error:{shortcutError}");
 					File.WriteAllText(shortcutPath, shortcutContent);
 					throw;
@@ -214,7 +213,7 @@ Categories=Game;Emulator;Qt;
 			catch (Exception shortcutError)
 			{
 				yuzuShortcutPath = $@"{Globals.Instance.Settings.SaveDirectory}/{windowsShortcutName}";
-				_tools.ErrorPopup(
+				Tools.Instance.ErrorPopup(
 					$@"cannot create shortcut, ensure app is running as admin. Placing instead at {yuzuShortcutPath}. Exception:{shortcutError}");
 				windowsShortcut.Save(yuzuShortcutPath);
 				throw;
@@ -254,7 +253,7 @@ Categories=Game;Emulator;Qt;
 		}
 		catch (Exception versionPullException)
 		{
-				_tools.CallDeferred("ErrorPopup", "Failed to get latest versions error code: " + versionPullException);
+			Tools.Instance.CallDeferred("ErrorPopup", "Failed to get latest versions error code: " + versionPullException);
 		}
 	}
 
@@ -295,7 +294,7 @@ Categories=Game;Emulator;Qt;
 		// Fall back version grabber
 		catch (RateLimitExceededException)
 		{
-			_tools.ErrorPopup("Github API rate limit exceeded, falling back to web-scraper. Some sources may not function until requests have reset");
+			Tools.Instance.ErrorPopup("Github API rate limit exceeded, falling back to web-scraper. Some sources may not function until requests have reset");
 			
 			var httpClient = new System.Net.Http.HttpClient();
 			var rawVersionData = httpClient.GetAsync(_pineappleLatestUrl).Result.Content.ReadAsStringAsync().Result;
@@ -379,7 +378,7 @@ Categories=Game;Emulator;Qt;
 
 		if (_clearShadersButton.ButtonPressed)
 		{
-			_tools.ClearShaders(Globals.Instance.Settings.ShadersLocation);
+			Tools.Instance.ClearShaders(Globals.Instance.Settings.ShadersLocation);
 			;
 		}
 	}
@@ -388,7 +387,7 @@ Categories=Game;Emulator;Qt;
 	// Signal functions
 	private  void OnShadersLocationButtonPressed()
 	{
-		var shadersLocationInput = _tools
+		var shadersLocationInput = Tools.Instance
 			.OpenFileChooser(Globals.Instance.Settings.ShadersLocation);
 		if (shadersLocationInput != null)
 		{
@@ -402,7 +401,7 @@ Categories=Game;Emulator;Qt;
 	
 	private void OnInstallLocationButtonPressed()
 	{
-		var saveDirectoryLocationInput = _tools
+		var saveDirectoryLocationInput = Tools.Instance
 			.OpenFileChooser(Globals.Instance.Settings.SaveDirectory);
 		if (saveDirectoryLocationInput != null)
 		{

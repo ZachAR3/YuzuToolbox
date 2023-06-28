@@ -5,7 +5,6 @@ public partial class SettingsPage : Node
 {
     [Export()] private ModManager _modManager;
     [Export()] private LineEdit _githubTokenLineEdit;
-    [Export()] private Tools _tools;
 
     [Export()] private CheckBox _getCompatibleVersionsButton;
 
@@ -19,7 +18,7 @@ public partial class SettingsPage : Node
     // Signal functions
     private async void ResetSettingsPressed()
     {
-        var confirm = await _tools.ConfirmationPopup();
+        var confirm = await Tools.Instance.ConfirmationPopup();
         if (confirm != true)
         {
             return;
@@ -31,7 +30,7 @@ public partial class SettingsPage : Node
 
     private async void ResetInstalledModsPressed()
     {
-        var confirm = await _tools.ConfirmationPopup();
+        var confirm = await Tools.Instance.ConfirmationPopup();
         if (confirm != true)
         {
             return;

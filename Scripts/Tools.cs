@@ -12,10 +12,18 @@ public partial class Tools : Godot.Node
 	[Export] private Godot.Label _errorLabel;
 	[Export] private Popup _errorPopup;
 	[Export] private PopupMenu _confirmationPopup;
+
+	public static Tools Instance;
 	
 	// Internal variables
 	private bool? _confirmationChoice;
 	private FileChooserDialog _fileChooser;
+
+
+	public override void _Ready()
+	{
+		Instance = this;
+	}
 
 
 	// General functions
