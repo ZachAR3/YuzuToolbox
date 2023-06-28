@@ -34,7 +34,7 @@ public partial class ToolsPage : Control
 		// Clears the install folder, if failed notifies user
 		if (!Tools.Instance.ClearInstallationFolder(Globals.Instance.Settings.SaveDirectory))
 		{
-			Tools.Instance.ErrorPopup("failed to clear installation folder");
+			Tools.Instance.AddError("failed to clear installation folder");
 			_clearInstallFolderButton.Text = "Clear failed!";
 		}
 		else
@@ -56,7 +56,7 @@ public partial class ToolsPage : Control
 		// Clears the shaders, if returned an error notifies user.
 		if (!Tools.Instance.ClearShaders(Globals.Instance.Settings.ShadersLocation))
 		{
-			Tools.Instance.ErrorPopup("failed to clear shaders");
+			Tools.Instance.AddError("failed to clear shaders");
 			_clearShadersToolButton.Text = "Clear failed!";
 		}
 		else
@@ -75,7 +75,7 @@ public partial class ToolsPage : Control
 		}
 		catch (Exception backupError)
 		{ 
-			Tools.Instance.ErrorPopup("failed to create save backup exception:" + backupError);
+			Tools.Instance.AddError("failed to create save backup exception:" + backupError);
 			throw;
 		}
 
@@ -91,7 +91,7 @@ public partial class ToolsPage : Control
 		}
 		catch (Exception restoreError)
 		{
-			Tools.Instance.ErrorPopup("failed to restore saves, exception: " + restoreError);
+			Tools.Instance.AddError("failed to restore saves, exception: " + restoreError);
 			throw;
 		}
 	}

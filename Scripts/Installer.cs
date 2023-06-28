@@ -182,7 +182,7 @@ Categories=Game;Emulator;Qt;
 				catch (Exception shortcutError)
 				{
 					shortcutPath = $@"{Globals.Instance.Settings.SaveDirectory}/{linuxShortcutName}";
-					Tools.Instance.ErrorPopup(
+					Tools.Instance.AddError(
 						$@"Error creating shortcut, creating new at {shortcutPath}. Error:{shortcutError}");
 					File.WriteAllText(shortcutPath, shortcutContent);
 					throw;
@@ -213,7 +213,7 @@ Categories=Game;Emulator;Qt;
 			catch (Exception shortcutError)
 			{
 				yuzuShortcutPath = $@"{Globals.Instance.Settings.SaveDirectory}/{windowsShortcutName}";
-				Tools.Instance.ErrorPopup(
+				Tools.Instance.AddError(
 					$@"cannot create shortcut, ensure app is running as admin. Placing instead at {yuzuShortcutPath}. Exception:{shortcutError}");
 				windowsShortcut.Save(yuzuShortcutPath);
 				throw;
@@ -294,7 +294,7 @@ Categories=Game;Emulator;Qt;
 		// Fall back version grabber
 		catch (RateLimitExceededException)
 		{
-			Tools.Instance.ErrorPopup("Github API rate limit exceeded, falling back to web-scraper. Some sources may not function until requests have reset");
+			Tools.Instance.AddError("Github API rate limit exceeded, falling back to web-scraper. Some sources may not function until requests have reset");
 			
 			var httpClient = new System.Net.Http.HttpClient();
 			var rawVersionData = httpClient.GetAsync(_pineappleLatestUrl).Result.Content.ReadAsStringAsync().Result;

@@ -82,7 +82,7 @@ public partial class StandardModManagement : Node
 		}
 		catch (Exception installError)
 		{
-			Tools.Instance.ErrorPopup($@"failed to install mod:{installError}");
+			Tools.Instance.AddError($@"failed to install mod:{installError}");
 			throw;
 		}
 
@@ -121,7 +121,7 @@ public partial class StandardModManagement : Node
 		}
 		catch (Exception removeError)
 		{
-			Tools.Instance.ErrorPopup("failed to remove mod:" + removeError);
+			Tools.Instance.AddError("failed to remove mod:" + removeError);
 			return false;
 		}
 

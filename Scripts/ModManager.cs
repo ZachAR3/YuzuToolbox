@@ -111,7 +111,7 @@
 				_loadingPanel.Visible = true;
 				if (!Directory.Exists(Globals.Instance.Settings.ModsLocation))
 				{
-					Tools.Instance.ErrorPopup($@"mods location does not exist. Please set a valid location and refresh.");
+					Tools.Instance.AddError($@"mods location does not exist. Please set a valid location and refresh.");
 					_loadingPanel.Visible = false;
 					return;
 				}
@@ -124,7 +124,7 @@
 				// Checks if no titles were found, if they weren't gives error and cancels.
 				if (_titles.Count <= 0)
 				{
-					Tools.Instance.ErrorPopup("failed to retrieve titles list, check connection and try again later.");
+					Tools.Instance.AddError("failed to retrieve titles list, check connection and try again later.");
 					_loadingPanel.Visible = false;
 					return;
 				}
@@ -145,7 +145,7 @@
 					}
 					else
 					{ 
-						Tools.Instance.ErrorPopup($@"could not find associated game title for: {gameId}");
+						Tools.Instance.AddError($@"could not find associated game title for: {gameId}");
 					}
 
 				}
@@ -160,7 +160,7 @@
 			}
 			else
 			{
-				Tools.Instance.ErrorPopup("no installed games found, please ensure your mods directory is set to the correct location.");
+				Tools.Instance.AddError("no installed games found, please ensure your mods directory is set to the correct location.");
 				_loadingPanel.Visible = false;
 			}
 		}
@@ -170,7 +170,7 @@
 		{
 			if (gameId == null && !_installedGames.ContainsKey(gameId))
 			{
-				Tools.Instance.ErrorPopup("game ID invalid. Cancelling...");
+				Tools.Instance.AddError("game ID invalid. Cancelling...");
 				_loadingPanel.Visible = false;
 				return;
 			}
@@ -212,7 +212,7 @@
 			}
 			catch (ArgumentException argumentException)
 			{
-				Tools.Instance.ErrorPopup(
+				Tools.Instance.AddError(
 					$@"Failed to retrieve mod list for ID:{gameId} | Title:{_titles[gameId]}. Exception:{argumentException.Message}");
 				_loadingPanel.Visible = false;
 				return;
@@ -269,7 +269,7 @@
 			}
 			catch (Exception installedError)
 			{
-				Tools.Instance.ErrorPopup($@"cannot find installed mods error: {installedError}");
+				Tools.Instance.AddError($@"cannot find installed mods error: {installedError}");
 				_loadingPanel.Visible = false;
 				throw;
 			}
@@ -318,7 +318,6 @@
 		{
 			if (!_selectedSourceMods.ContainsKey(gameId) && !_installedMods.ContainsKey(gameId))
 			{
-				GD.Print("Cannot find mods for:" + gameId);
 				_loadingPanel.Visible = false;
 				return;
 			}
@@ -356,7 +355,7 @@
 
 			if (gameList.Count < 2)
 			{
-				Tools.Instance.ErrorPopup("cannot retrieve titles");
+				Tools.Instance.AddError("cannot retrieve titles");
 				return;
 			}
 
@@ -371,7 +370,7 @@
 
 				if (gameSplit.Length < 2)
 				{
-					Tools.Instance.ErrorPopup("unable to parse titles list, check connection and try again later.");
+					Tools.Instance.AddError("unable to parse titles list, check connection and try again later.");
 					_loadingPanel.Visible = false;
 					return;
 				}
@@ -400,7 +399,7 @@
 						var modUpdated = await UpdateMod(installedGame.Key, mod, true);
 						if (modUpdated != true)
 						{
-							Tools.Instance.ErrorPopup($@"failed to update:{mod.ModName}");
+							Tools.Instance.AddError($@"failed to update:{mod.ModName}");
 							_loadingPanel.Visible = false;
 							return;
 						}
@@ -435,7 +434,7 @@
 			}
 			catch (Exception updateError)
 			{
-				Tools.Instance.ErrorPopup($@"failed to update mod:{updateError}");
+				Tools.Instance.AddError($@"failed to update mod:{updateError}");
 				throw;
 			}
 
@@ -541,7 +540,7 @@
 			_selectedSource = _sourceNames.IndexOf(_sourcePickerButton.GetItemText(sourceIndex).Trim());
 			if (_selectedSource == -1)
 			{
-				Tools.Instance.ErrorPopup("source not found, please file a bug report. Defaulting back to official");
+				Tools.Instance.AddError("source not found, please file a bug report. Defaulting back to official");
 				_sourcePickerButton.Select(0);
 				return;
 			}

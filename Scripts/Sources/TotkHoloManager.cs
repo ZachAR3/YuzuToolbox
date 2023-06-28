@@ -61,7 +61,7 @@ public class TotkHoloManager
                                 catch (Exception getCompatibleVersionsException)
                                 {
                                     getCompatibleVersions = false;
-                                    GD.Print($@"failed to get compatible versions for totk holo{getCompatibleVersionsException}");
+                                    Tools.Instance.AddError($@"failed to get compatible versions for totk holo{getCompatibleVersionsException}");
                                     compatibleVersions = new List<string> { "NA" };
                                 }
                             }
@@ -81,7 +81,6 @@ public class TotkHoloManager
         }
         catch (RateLimitExceededException)
         {
-            GD.Print("failed to get totk holo mods API limit exceeded");
             throw new ArgumentException("Github API limited exceeded. Please try again later or add an API key in settings");
         }
         
@@ -101,7 +100,7 @@ public class TotkHoloManager
                 var exception = await Tools.Instance.DownloadFolder(RepoOwner, RepoName, mod.ModUrl, installPath);
                 if (exception != null)
                 {
-                    Tools.Instance.ErrorPopup($@"failed to download: {mod.ModName}. Exception: {exception}");
+                    Tools.Instance.AddError($@"failed to download: {mod.ModName}. Exception: {exception}");
                     return;
                 }
                 
@@ -116,7 +115,7 @@ public class TotkHoloManager
         }
         catch (Exception installError)
         {
-            Tools.Instance.ErrorPopup($@"failed to install mod:{installError}");
+            Tools.Instance.AddError($@"failed to install mod:{installError}");
         }
     }
     
@@ -154,7 +153,6 @@ public class TotkHoloManager
             }
         }
 
-        GD.Print("No compatible versions found returning NA");
         return new List<string> { "NA" };
     }
 }

@@ -139,7 +139,7 @@ public partial class Tools : Godot.Node
 	}
 	
 	
-	public async void ErrorPopup(String error)
+	public async void AddError(String error)
 	{
 		_errorConsole.Text += $"\n [{DateTime.Now:h:mm:ss}]	{error}";
 		_errorNotifier.Visible = true;
@@ -161,7 +161,7 @@ public partial class Tools : Godot.Node
 		}
 		catch (Exception gtkError)
 		{
-			ErrorPopup("opening GTK window failed. Ensure you have GTK runtime installed: " + gtkError);
+			AddError("opening GTK window failed. Ensure you have GTK runtime installed: " + gtkError);
 			throw;
 		}
 		_fileChooser = new FileChooserDialog("Select a File", null, FileChooserAction.SelectFolder);
