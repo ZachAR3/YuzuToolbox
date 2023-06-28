@@ -3,14 +3,14 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using Gtk;
-using Octokit;
 using Application = Gtk.Application;
+using ContentType = Octokit.ContentType;
 using HttpClient = System.Net.Http.HttpClient;
 
 public partial class Tools : Godot.Node
 {
-	[Export] private Godot.Label _errorLabel;
-	[Export] private Popup _errorPopup;
+	[Export] private TextEdit _errorConsole;
+	[Export] private RichTextLabel _errorNotifier;
 	[Export] private PopupMenu _confirmationPopup;
 
 	public static Tools Instance;
@@ -72,7 +72,7 @@ public partial class Tools : Godot.Node
 	public static void MoveFilesAndDirs(string sourceDirectory, string targetDirectory)
 	{
 		// Create the target directory if it doesn't exist
-		if (!Directory.Exists(targetDirectory))
+		if (!Directory.Exists(targetDirectory) && !string.IsNullOrEmpty(targetDirectory))
 		{
 			Directory.CreateDirectory(targetDirectory);
 		}
@@ -139,12 +139,16 @@ public partial class Tools : Godot.Node
 	}
 	
 	
-	public void ErrorPopup(String error)
+	public async void ErrorPopup(String error)
 	{
-		_errorLabel.Text = $@"Error:{error}";
-		_errorPopup.Visible = true;
-		_errorPopup.InitialPosition = Godot.Window.WindowInitialPosition.Absolute;
-		_errorPopup.PopupCentered();
+		_errorConsole.Text += $"\n [{DateTime.Now:h:mm:ss}]	{error}";
+		_errorNotifier.Visible = true;
+		await Task.Run(async () =>
+		{
+			await ToSignal(GetTree().CreateTimer(5), "timeout");
+			_errorNotifier.Visible = false;
+		});
+
 	}
 
 	

@@ -39,7 +39,7 @@ border_width_right = 3
 border_width_bottom = 3
 border_color = Color(0.8, 0.8, 0.8, 0)
 
-[node name="Home" type="Control" node_paths=PackedStringArray("_darkBg", "_lightBg", "_downloadWindowApp", "_backgroundAudio", "_muteButton", "_enableLightTheme", "_header", "_headerLabel", "_latestVersionLabel", "_modList", "_modMangerLoadingSprite", "_modManagerLoadingLabel") groups=["Initiate"]]
+[node name="Home" type="Control" node_paths=PackedStringArray("_darkBg", "_lightBg", "_downloadWindowApp", "_backgroundAudio", "_muteButton", "_enableLightTheme", "_header", "_headerLabel", "_latestVersionLabel", "_errorConsole", "_modList", "_modMangerLoadingSprite", "_modManagerLoadingLabel") groups=["Initiate"]]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -62,6 +62,7 @@ _themesSeparator = Array[StyleBoxLine]([ExtResource("5_qxukt"), ExtResource("7_i
 _header = NodePath("Header")
 _headerLabel = NodePath("Header/HeaderLabels/HeaderLabel")
 _latestVersionLabel = NodePath("Header/HeaderLabels/LastestVersion")
+_errorConsole = NodePath("ErrorConsole")
 _modList = NodePath("MainPage/ModManager/ModsList")
 _modMangerLoadingSprite = NodePath("MainPage/ModManager/LoadingWindow/LoadingBarControl/LoadingBarSprite")
 _modManagerLoadingLabel = NodePath("MainPage/ModManager/LoadingWindow/LoadingBarControl/LoadingLabelBox")
@@ -202,30 +203,6 @@ visible = false
 layout_mode = 2
 _modManager = NodePath("../ModManager")
 
-[node name="ErrorPopup" type="PopupPanel" parent="."]
-initial_position = 2
-size = Vector2i(600, 300)
-always_on_top = true
-
-[node name="ErrorLabel" type="Label" parent="ErrorPopup"]
-anchors_preset = -1
-anchor_left = 0.00666667
-anchor_top = 0.0133333
-anchor_right = 0.993333
-anchor_bottom = 0.986667
-offset_left = -1.0
-offset_top = -0.99999
-offset_right = 1.00018
-offset_bottom = 0.999908
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-theme_override_font_sizes/font_size = 20
-text = "Error:"
-autowrap_mode = 3
-metadata/_edit_use_anchors_ = true
-
 [node name="ConfirmPopup" type="PopupMenu" parent="."]
 initial_position = 1
 title = "Are you sure you?"
@@ -242,10 +219,24 @@ item_1/id = 1
 visible = false
 layout_mode = 1
 
-[node name="Tools" type="Node" parent="." node_paths=PackedStringArray("_errorLabel", "_errorPopup", "_confirmationPopup")]
+[node name="ErrorNotifier" type="RichTextLabel" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.589583
+anchor_top = 0.960185
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+bbcode_enabled = true
+text = "[color=#ff0000]Error encountered, press TAB for more info"
+metadata/_edit_use_anchors_ = true
+
+[node name="Tools" type="Node" parent="." node_paths=PackedStringArray("_errorConsole", "_errorNotifier", "_confirmationPopup")]
 script = ExtResource("13_s0bjf")
-_errorLabel = NodePath("../ErrorPopup/ErrorLabel")
-_errorPopup = NodePath("../ErrorPopup")
+_errorConsole = NodePath("../ErrorConsole/ErrorConsole")
+_errorNotifier = NodePath("../ErrorNotifier")
 _confirmationPopup = NodePath("../ConfirmPopup")
 
 [connection signal="toggled" from="Header/Option/LightMode" to="." method="SetTheme"]
@@ -253,3 +244,4 @@ _confirmationPopup = NodePath("../ConfirmPopup")
 
 [editable path="MainPage/Installer"]
 [editable path="MainPage/ModManager"]
+[editable path="ErrorConsole"]
