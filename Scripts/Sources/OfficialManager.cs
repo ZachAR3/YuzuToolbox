@@ -26,7 +26,7 @@ public class OfficialManager
             $@"//h3[contains(., {Quote}{installedGames[gameId].GameName}{Quote})]/following::table[1]//td//a");
        
         // Throws an exception if the mods list is null
-        _ = mods ?? throw new ArgumentException("Failed to retrieve mods for", gameId);
+        _ = mods ?? throw new ArgumentException($@"No mods available");
 
         // Starts at an offset to account for the first example item in the site list
         int titleIndex = 1;

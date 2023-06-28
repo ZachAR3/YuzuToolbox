@@ -6,7 +6,7 @@ using HttpClient = System.Net.Http.HttpClient;
 
 public class BananaManager
 {
-	private readonly HttpClient _httpClient = new HttpClient();
+	private readonly HttpClient _httpClient = new();
 	
 	
 	public async Task<Dictionary<string, List<Mod>>> GetAvailableMods(Dictionary<string, List<Mod>> modList, Dictionary<string, Game> installedGames, string gameId, int sourceId, int page = 1)

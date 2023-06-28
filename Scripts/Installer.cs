@@ -3,7 +3,10 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
+using HtmlAgilityPack;
 using Mono.Unix;
+using Octokit;
 using WindowsShortcutFactory;
 using Label = Godot.Label;
 
@@ -225,12 +228,12 @@ Categories=Game;Emulator;Qt;
 	{
 		try
 		{
-			var gitHubClient = Globals.Instance.LocalGithubClient;
+			var latestVersion = await GetLatestVersion();
+			if (latestVersion == -1)
+			{
+				return;
+			}
 
-			var latestRelease =
-				await gitHubClient.Repository.Release.GetLatest(_repoOwner, _repoName);
-			int latestVersion = latestRelease.TagName.Split("-").Last().ToInt();
-			
 			_customVersionSpinBox.Value = latestVersion;
 			_latestVersionLabel.Text = $"Latest: {latestVersion.ToString()}";
 			
@@ -278,16 +281,28 @@ Categories=Game;Emulator;Qt;
 	}
 
 
-	private int GetLatestVersion(String rawVersionData)
+	private async Task<int> GetLatestVersion()
 	{
-		string searchName = $@"{_osUsed}-{_yuzuBaseString}";
-		int versionIndex = rawVersionData.Find(searchName);
+		// Trys to fetch version using github API if failed, tries to web-scrape it.
+		try
+		{
+			var gitHubClient = Globals.Instance.LocalGithubClient;
 
-		// Using our starting index subtract the index of our extension from it and add 1 to get the length of the version
-		int versionLength = rawVersionData.Find(_yuzuExtensionString) - versionIndex - searchName.Length;
-
-		// Return version by starting at our start index (accounting for our search string) and going the previously determined length
-		return rawVersionData.Substring(versionIndex + searchName.Length, versionLength).ToInt();
+			var latestRelease =
+				await gitHubClient.Repository.Release.GetLatest(_repoOwner, _repoName);
+			return latestRelease.TagName.Split("-").Last().ToInt();
+		}
+		// Fall back version grabber
+		catch (RateLimitExceededException)
+		{
+			_tools.ErrorPopup("Github API rate limit exceeded, falling back to web-scraper. Some sources may not function until requests have reset");
+			
+			var httpClient = new System.Net.Http.HttpClient();
+			var rawVersionData = httpClient.GetAsync(_pineappleLatestUrl).Result.Content.ReadAsStringAsync().Result;
+			
+			return (rawVersionData.Split("EA-").Last()).Split("\"").First().ToInt();
+		}
+		
 	}
 
 

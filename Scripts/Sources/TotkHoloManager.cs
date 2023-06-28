@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Linq;
+using System.Net;
 using Godot;
 using HttpClient = System.Net.Http.HttpClient;
 
@@ -27,46 +28,64 @@ public class TotkHoloManager
     public async Task<Dictionary<string, List<Mod>>> GetAvailableMods(Dictionary<string, List<Mod>> modList,
         string gameId, int sourceId, bool getCompatibleVersions = false)
     {
-        _gitHubClient = Globals.Instance.LocalGithubClient;
-        if (!modList.ContainsKey(gameId))
+        try
         {
-            modList[gameId] = new List<Mod>();
-        }
-        
-        var contentPath = "Mods";
-        var modContents = await _gitHubClient.Repository.Content.GetAllContents(RepoOwner, RepoName, contentPath);
-
-        // Throws an exception if the mods list is null
-        _ = modContents ?? throw new ArgumentException("Failed to retrieve mods for", gameId);
-
-
-        foreach (var modType in modContents)
-        {
-            if (modType.Type == ContentType.Dir)
+            _gitHubClient = Globals.Instance.LocalGithubClient;
+            if (!modList.ContainsKey(gameId))
             {
-                var mods = await _gitHubClient.Repository.Content.GetAllContents(RepoOwner, RepoName, modType.Path);
-                foreach (var mod in mods)
-                {
-                    if (mod.Type == ContentType.Dir)
-                    {
-                        // Gets the compatible versions
-                        var compatibleVersions = getCompatibleVersions
-                            ? await GetCompatibleVersions(mod)
-                            : new List<string> { "NA" };
+                modList[gameId] = new List<Mod>();
+            }
 
-                        var modToAdd = new Mod
+            var contentPath = "Mods";
+            var modContents = await _gitHubClient.Repository.Content.GetAllContents(RepoOwner, RepoName, contentPath);
+            
+            _ = modContents ?? throw new ArgumentException("Failed to retrieve mods for", gameId);
+
+
+            foreach (var modType in modContents)
+            {
+                if (modType.Type == ContentType.Dir)
+                {
+                    var mods = await _gitHubClient.Repository.Content.GetAllContents(RepoOwner, RepoName, modType.Path);
+                    foreach (var mod in mods)
+                    {
+                        if (mod.Type == ContentType.Dir)
                         {
-                            ModName = mod.Name,
-                            ModUrl = mod.Path,
-                            CompatibleVersions = compatibleVersions,
-                            Source = sourceId
-                        };
-                        modList[gameId].Add(modToAdd);
+                            // Gets the compatible versions
+                            var compatibleVersions = new List<string> { "NA" };
+                            if (getCompatibleVersions)
+                            {
+                                try
+                                {
+                                    compatibleVersions = await GetCompatibleVersions(mod);
+                                }
+                                catch (Exception getCompatibleVersionsException)
+                                {
+                                    getCompatibleVersions = false;
+                                    GD.Print($@"failed to get compatible versions for totk holo{getCompatibleVersionsException}");
+                                    compatibleVersions = new List<string> { "NA" };
+                                }
+                            }
+
+                            var modToAdd = new Mod
+                            {
+                                ModName = mod.Name,
+                                ModUrl = mod.Path,
+                                CompatibleVersions = compatibleVersions,
+                                Source = sourceId
+                            };
+                            modList[gameId].Add(modToAdd);
+                        }
                     }
                 }
             }
         }
-
+        catch (RateLimitExceededException)
+        {
+            GD.Print("failed to get totk holo mods API limit exceeded");
+            throw new ArgumentException("Github API limited exceeded. Please try again later or add an API key in settings");
+        }
+        
         return modList;
     }
 
