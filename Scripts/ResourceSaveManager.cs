@@ -40,7 +40,7 @@ public partial class ResourceSaveManager : Resource
             // If the save is from a previous version, reset the settings
             if (lastSave.Version != Version)
             {
-                Tools.Instance.AddError("Save version is incompatible with app, resetting user settings.");
+                Tools.Instance.CallDeferred("AddError", "Save version is incompatible with app, resetting user settings.");
                 _settings = new SettingsResource();
                 WriteSave();
             }

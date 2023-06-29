@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://c7wdbnvnydnxk"]
+[gd_scene load_steps=21 format=3 uid="uid://c7wdbnvnydnxk"]
 
 [ext_resource type="Theme" uid="uid://cnnid0n04kfr7" path="res://Themes/DarkTheme.tres" id="1_c22a4"]
 [ext_resource type="Script" path="res://Scripts/Home.cs" id="1_p51ic"]
@@ -14,6 +14,7 @@
 [ext_resource type="PackedScene" uid="uid://bdihe2bmwmgtp" path="res://Scenes/ModManagerPage.tscn" id="12_3uycp"]
 [ext_resource type="Script" path="res://Scripts/Tools.cs" id="13_s0bjf"]
 [ext_resource type="PackedScene" uid="uid://b52pqn56qpbg2" path="res://Scenes/ErrorConsole.tscn" id="14_1b731"]
+[ext_resource type="Script" path="res://Scripts/Globals.cs" id="15_p1cux"]
 
 [sub_resource type="Gradient" id="Gradient_awkjf"]
 interpolation_mode = 2
@@ -238,6 +239,9 @@ script = ExtResource("13_s0bjf")
 _errorConsole = NodePath("../ErrorConsole/ErrorConsole")
 _errorNotifier = NodePath("../ErrorNotifier")
 _confirmationPopup = NodePath("../ConfirmPopup")
+
+[node name="Globals" type="Node" parent="."]
+script = ExtResource("15_p1cux")
 
 [connection signal="toggled" from="Header/Option/LightMode" to="." method="SetTheme"]
 [connection signal="toggled" from="Header/Option/MuteButton" to="." method="ToggledMusicButton"]

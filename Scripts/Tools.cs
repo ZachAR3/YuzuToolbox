@@ -11,6 +11,7 @@ public partial class Tools : Node
 	[Export] private TextEdit _errorConsole;
 	[Export] private RichTextLabel _errorNotifier;
 	[Export] private PopupMenu _confirmationPopup;
+	public int idk = 5;
 
 	public static Tools Instance;
 	

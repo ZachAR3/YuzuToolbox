@@ -16,7 +16,7 @@ public partial class ToolsPage : Control
 	
 	
 	// Godot Functions
-	public override void _Ready()
+	private void Initiate()
 	{
 		_fromSaveDirectoryButton.Text = Globals.Instance.Settings.FromSaveDirectory;
 		_toSaveDirectoryButton.Text = Globals.Instance.Settings.ToSaveDirectory;

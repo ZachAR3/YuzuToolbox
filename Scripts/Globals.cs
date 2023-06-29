@@ -6,9 +6,8 @@ using Node = Godot.Node;
 
 public partial class Globals : Node
 {
-	private static Globals _instance;
-
-	public static Globals Instance => _instance;
+	//private static Globals _instance;
+	public static Globals Instance;
 	
 	public ResourceSaveManager SaveManager = new();
 	public SettingsResource Settings = new();
@@ -17,6 +16,7 @@ public partial class Globals : Node
 
 	public override void _Ready()
 	{
+		Instance = this;
 		SaveManager.Version = 2.2f;
 		Settings = SaveManager.GetSettings();
 		SetDefaultPaths();
@@ -24,8 +24,7 @@ public partial class Globals : Node
 		{
 			AuthenticateGithubClient();
 		}
-
-		_instance = this;
+		
 
 		GetTree().CallDeferred("call_group", "Initiate", "Initiate");
 	}
