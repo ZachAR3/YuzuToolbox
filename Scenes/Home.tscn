@@ -6,8 +6,8 @@
 [ext_resource type="StyleBox" uid="uid://tcrn2c2voh4i" path="res://Themes/Styleboxes/DarkVSeparator.tres" id="5_qxukt"]
 [ext_resource type="AudioStream" uid="uid://bfqr7fmwq62ku" path="res://Audio/BackgroundAudio.mp3" id="5_v4a5s"]
 [ext_resource type="StyleBox" uid="uid://ct4a4b2lcwimn" path="res://Themes/Styleboxes/LightVSeparator.tres" id="7_iauax"]
-[ext_resource type="Texture2D" uid="uid://dtcak8d8m61be" path="res://ImageAssets/PineappleIconSmall.png" id="7_j5vmn"]
 [ext_resource type="FontFile" uid="uid://bs747wsxnk330" path="res://Fonts/Primary.TTF" id="7_jk62c"]
+[ext_resource type="Texture2D" uid="uid://d0oddknmnkwg" path="res://ImageAssets/Icon.svg" id="7_l0a5h"]
 [ext_resource type="PackedScene" uid="uid://cr3wosequvma8" path="res://Scenes/InstallerPage.tscn" id="10_7mm46"]
 [ext_resource type="PackedScene" uid="uid://cwwmo68jd12gd" path="res://Scenes/ToolsPage.tscn" id="11_27f86"]
 [ext_resource type="PackedScene" uid="uid://deatvphh34eq0" path="res://Scenes/SettingsPage.tscn" id="12_3ds3g"]
@@ -54,7 +54,7 @@ script = ExtResource("1_p51ic")
 _appVersion = 3.2
 _darkBg = NodePath("DarkBG")
 _lightBg = NodePath("LightBG")
-_downloadWindowApp = NodePath("MainPage/Installer/DownloadWindow/Window")
+_downloadWindowApp = NodePath("Pages/Installer/DownloadWindow/Window")
 _backgroundAudio = NodePath("BackgroundAudio")
 _muteButton = NodePath("Header/Option/MuteButton")
 _enableLightTheme = NodePath("Header/Option/LightMode")
@@ -64,9 +64,9 @@ _header = NodePath("Header")
 _headerLabel = NodePath("Header/HeaderLabels/HeaderLabel")
 _latestVersionLabel = NodePath("Header/HeaderLabels/LastestVersion")
 _errorConsole = NodePath("ErrorConsole")
-_modList = NodePath("MainPage/ModManager/ModsList")
-_modMangerLoadingSprite = NodePath("MainPage/ModManager/LoadingWindow/LoadingBarControl/LoadingBarSprite")
-_modManagerLoadingLabel = NodePath("MainPage/ModManager/LoadingWindow/LoadingBarControl/LoadingLabelBox")
+_modList = NodePath("Pages/ModManager/ModsList")
+_modMangerLoadingSprite = NodePath("Pages/ModManager/LoadingWindow/LoadingBarControl/LoadingBarSprite")
+_modManagerLoadingLabel = NodePath("Pages/ModManager/LoadingWindow/LoadingBarControl/LoadingLabelBox")
 metadata/_edit_use_anchors_ = true
 
 [node name="DarkBG" type="TextureRect" parent="."]
@@ -105,15 +105,15 @@ color = Color(0.168627, 0.180392, 0.188235, 1)
 
 [node name="Icon" type="TextureRect" parent="Header"]
 layout_mode = 1
-anchors_preset = 4
-anchor_top = 0.5
-anchor_bottom = 0.5
-offset_left = -15.0
-offset_top = -40.9999
-offset_right = 55.0
-offset_bottom = 29.0001
+anchors_preset = -1
+anchor_left = 0.000520833
+anchor_top = 0.316667
+anchor_right = 0.0182292
+anchor_bottom = 0.683334
 grow_vertical = 2
-texture = ExtResource("7_j5vmn")
+texture = ExtResource("7_l0a5h")
+expand_mode = 1
+metadata/_edit_use_anchors_ = true
 
 [node name="HeaderLabels" type="HBoxContainer" parent="Header"]
 layout_mode = 1
@@ -131,7 +131,7 @@ metadata/_edit_group_ = true
 [node name="HeaderLabel" type="Label" parent="Header/HeaderLabels"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 49
-text = "PineappleEA"
+text = "YuzuToolbox"
 vertical_alignment = 3
 
 [node name="VSeparator" type="VSeparator" parent="Header/HeaderLabels"]
@@ -159,7 +159,7 @@ grow_vertical = 2
 theme_override_constants/separation = 29
 alignment = 1
 
-[node name="LightMode" type="CheckBox" parent="Header/Option"]
+[node name="LightMode" type="CheckButton" parent="Header/Option"]
 layout_mode = 2
 focus_mode = 0
 theme_override_styles/normal = SubResource("StyleBoxFlat_tufja")
@@ -176,7 +176,17 @@ theme_override_styles/pressed = SubResource("StyleBoxFlat_tufja")
 theme_override_styles/hover_pressed = SubResource("StyleBoxFlat_tufja")
 text = "Music"
 
-[node name="MainPage" type="TabContainer" parent="."]
+[node name="OpenConsole" type="Button" parent="Header"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.460938
+anchor_right = 0.539063
+anchor_bottom = 0.35
+grow_horizontal = 2
+text = "Console"
+metadata/_edit_use_anchors_ = true
+
+[node name="Pages" type="TabContainer" parent="."]
 layout_mode = 1
 anchors_preset = -1
 anchor_top = 0.0731481
@@ -187,19 +197,19 @@ grow_vertical = 2
 tab_alignment = 1
 metadata/_edit_use_anchors_ = true
 
-[node name="Installer" parent="MainPage" node_paths=PackedStringArray("_latestVersionLabel") instance=ExtResource("10_7mm46")]
+[node name="Installer" parent="Pages" node_paths=PackedStringArray("_latestVersionLabel") instance=ExtResource("10_7mm46")]
 layout_mode = 2
 _latestVersionLabel = NodePath("../../Header/HeaderLabels/LastestVersion")
 
-[node name="Tools" parent="MainPage" instance=ExtResource("11_27f86")]
+[node name="Tools" parent="Pages" instance=ExtResource("11_27f86")]
 visible = false
 layout_mode = 2
 
-[node name="ModManager" parent="MainPage" instance=ExtResource("12_3uycp")]
+[node name="ModManager" parent="Pages" instance=ExtResource("12_3uycp")]
 visible = false
 layout_mode = 2
 
-[node name="Settings" parent="MainPage" node_paths=PackedStringArray("_modManager") instance=ExtResource("12_3ds3g")]
+[node name="Settings" parent="Pages" node_paths=PackedStringArray("_modManager") instance=ExtResource("12_3ds3g")]
 visible = false
 layout_mode = 2
 _modManager = NodePath("../ModManager")
@@ -234,8 +244,9 @@ bbcode_enabled = true
 text = "[color=#ff0000]Error encountered, press TAB for more info"
 metadata/_edit_use_anchors_ = true
 
-[node name="Tools" type="Node" parent="." node_paths=PackedStringArray("_errorConsole", "_errorNotifier", "_confirmationPopup")]
+[node name="Tools" type="Node" parent="." node_paths=PackedStringArray("_errorConsoleContainer", "_errorConsole", "_errorNotifier", "_confirmationPopup")]
 script = ExtResource("13_s0bjf")
+_errorConsoleContainer = NodePath("../ErrorConsole")
 _errorConsole = NodePath("../ErrorConsole/ErrorConsole")
 _errorNotifier = NodePath("../ErrorNotifier")
 _confirmationPopup = NodePath("../ConfirmPopup")
@@ -245,7 +256,9 @@ script = ExtResource("15_p1cux")
 
 [connection signal="toggled" from="Header/Option/LightMode" to="." method="SetTheme"]
 [connection signal="toggled" from="Header/Option/MuteButton" to="." method="ToggledMusicButton"]
+[connection signal="pressed" from="Header/OpenConsole" to="Tools" method="ToggleConsole"]
+[connection signal="pressed" from="ErrorConsole/ErrorConsole/CloseButton" to="Tools" method="ToggleConsole"]
 
-[editable path="MainPage/Installer"]
-[editable path="MainPage/ModManager"]
+[editable path="Pages/Installer"]
+[editable path="Pages/ModManager"]
 [editable path="ErrorConsole"]

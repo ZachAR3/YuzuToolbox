@@ -13,7 +13,7 @@ public partial class Home : Control
 	[Export()] private ColorRect _downloadWindowApp;
 	[Export()] private AudioStreamPlayer _backgroundAudio;
 	[Export()] private CheckButton _muteButton;
-	[Export()] private CheckBox _enableLightTheme;
+	[Export()] private CheckButton _enableLightTheme;
 	[Export()] private Array<Theme> _themes;
 	[Export()] private Array<StyleBoxLine> _themesSeparator;
 	[Export()] private ColorRect _header;
@@ -48,15 +48,6 @@ public partial class Home : Control
 	}
 
 
-	public override void _Input(InputEvent @event)
-	{
-		if (@event.IsActionPressed("OpenConsole"))
-		{
-			_errorConsole.Visible = !_errorConsole.Visible;
-		}
-	}
-
-
 	// Custom functions
 	private void SetTheme(bool enableLight)
 	{
@@ -72,6 +63,13 @@ public partial class Home : Control
 	}
 
 
+	private void OpenConsole()
+	{
+		_errorConsole.Visible = !_errorConsole.Visible;
+	}
+	
+	
+	// Signal functions
 	private void WindowResized()
 	{
 		float scaleRatio = (((float)GetWindow().Size.X / 1920) + ((float)GetWindow().Size.Y / 1080)) / 2;
@@ -83,8 +81,7 @@ public partial class Home : Control
 		_currentTheme.DefaultFontSize = Mathf.Clamp((int)(scaleRatio * 35), 20, 50);
 	}
 
-
-	// Signal functions
+	
 	private void ToggledMusicButton(bool musicEnabled)
 	{
 		AudioServer.SetBusMute(AudioServer.GetBusIndex("Master"), !musicEnabled);

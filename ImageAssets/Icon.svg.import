@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b3hykj31h1xfo"
-path="res://.godot/imported/PineappleIcon.png-1c835a8af051ddeb86130a5422055dbd.ctex"
+uid="uid://d0oddknmnkwg"
+path="res://.godot/imported/Icon.svg-cf8b5a5f25ed45e8c1233b9303b57d06.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://ImageAssets/PineappleIcon.png"
-dest_files=["res://.godot/imported/PineappleIcon.png-1c835a8af051ddeb86130a5422055dbd.ctex"]
+source_file="res://ImageAssets/Icon.svg"
+dest_files=["res://.godot/imported/Icon.svg-cf8b5a5f25ed45e8c1233b9303b57d06.ctex"]
 
 [params]
 
@@ -32,3 +32,6 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
+svg/scale=1.0
+editor/scale_with_editor_scale=false
+editor/convert_colors_with_editor_theme=false

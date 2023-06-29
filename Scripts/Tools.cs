@@ -8,10 +8,10 @@ using HttpClient = System.Net.Http.HttpClient;
 
 public partial class Tools : Node
 {
+	[Export()] private Control _errorConsoleContainer;
 	[Export] private TextEdit _errorConsole;
 	[Export] private RichTextLabel _errorNotifier;
 	[Export] private PopupMenu _confirmationPopup;
-	public int idk = 5;
 
 	public static Tools Instance;
 	
@@ -23,9 +23,24 @@ public partial class Tools : Node
 	{
 		Instance = this;
 	}
+	
+	
+	public override void _Input(InputEvent @event)
+	{
+		if (@event.IsActionPressed("OpenConsole"))
+		{
+			ToggleConsole();
+		}
+	}
 
 
 	// General functions
+	private void ToggleConsole()
+	{
+		_errorConsoleContainer.Visible = !_errorConsoleContainer.Visible;
+	}
+	
+	
 	public async Task<bool?> ConfirmationPopup(string titleText = "Are you sure?")
 	{
 		// Checks if the confirmationPopup is already connected to the ConfirmationPressed signal, if not, connect it.

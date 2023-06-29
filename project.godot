@@ -16,7 +16,7 @@ config/features=PackedStringArray("4.0", "C#", "Forward Plus")
 boot_splash/bg_color=Color(0.0431373, 0.0470588, 0.0509804, 1)
 boot_splash/image="res://ImageAssets/SplashScreen.png"
 boot_splash/fullsize=false
-config/icon="res://ImageAssets/PineappleIcon.png"
+config/icon="res://ImageAssets/Icon.svg"
 boot_splash/minimum_display_time=3000
 
 [display]
