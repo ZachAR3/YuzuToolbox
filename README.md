@@ -8,8 +8,8 @@ A simple tool to download and update early access builds of yuzu from the [Pinea
 * Mod management (downloading, installing and updating mods from a variety of sources; + ability to uninstall and detect manually installed mods)
 
 # Installing
-To install the program simply go to the [releases page](https://github.com/ZachAR3/YuzuToolbox/releases) and download the zip file for your os. 
-Extract the zip file to its own folder and you're done!
+The recommended method of install is through Itch.io as it provoides updating features and easier launching: https://zachar3.itch.io/yuzutoolbox
+However, if one would still like to install it without Itch one can simply go to [releases page](https://github.com/ZachAR3/YuzuToolbox/releases) and download the zip file for your os and then extract it into its own folder.
 
 # Usage
 Simply launch the program and set your install location, then click download and wait for it to finish.
