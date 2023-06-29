@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://Scripts/Installer.cs" id="1_3lw4p"]
 [ext_resource type="Texture2D" uid="uid://e5vtrghoacs2" path="res://ImageAssets/WarningSign.png" id="1_xly6n"]
-[ext_resource type="Image" uid="uid://dt3aq1jm2e2ds" path="res://ImageAssets/Icon.png" id="2_efmk0"]
+[ext_resource type="Image" uid="uid://bvmy5gufcs58i" path="res://ImageAssets/ShortcutIcon.png" id="2_dhhpw"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7am6t"]
 bg_color = Color(0.168627, 0.180392, 0.188235, 0.529412)
@@ -18,7 +18,7 @@ _pineappleDownloadBaseUrl = "https://github.com/pineappleEA/pineapple-src/releas
 _titlesKeySite = "https://switchbrew.org/w/index.php?title=Title_list/Games&mobileaction=toggle_view_desktop"
 _saveName = "Yuzu"
 _previousVersionsToAdd = 20
-_icon = ExtResource("2_efmk0")
+_icon = ExtResource("2_dhhpw")
 _versionButton = NodePath("ControlsContainer/VersionSelectionButton")
 _createShortcutButton = NodePath("ControlsContainer/CreateShortcutButton")
 _installLocationButton = NodePath("ControlsContainer/LocationButton")

@@ -1,0 +1,14 @@
+[remap]
+
+importer="image"
+type="Image"
+uid="uid://bvmy5gufcs58i"
+path="res://.godot/imported/ShortcutIcon.png-b941d0429959c516a54b10f1a2e89095.image"
+
+[deps]
+
+source_file="res://ImageAssets/ShortcutIcon.png"
+dest_files=["res://.godot/imported/ShortcutIcon.png-b941d0429959c516a54b10f1a2e89095.image"]
+
+[params]
+
