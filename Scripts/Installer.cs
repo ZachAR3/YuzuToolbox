@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
 using Mono.Unix;
+using NativeFileDialogSharp;
 using Octokit;
 using WindowsShortcutFactory;
 using Label = Godot.Label;
@@ -248,12 +249,11 @@ Categories=Game;Emulator;Qt;
 				AddInstalledVersion();
 			}
 			
-
 			_downloadButton.Disabled = false;
 		}
 		catch (Exception versionPullException)
 		{
-			Tools.Instance.CallDeferred("ErrorPopup", "Failed to get latest versions error code: " + versionPullException);
+			Tools.Instance.AddError("Failed to get latest versions error code: " + versionPullException);
 		}
 	}
 
@@ -387,8 +387,7 @@ Categories=Game;Emulator;Qt;
 	// Signal functions
 	private  void OnShadersLocationButtonPressed()
 	{
-		var shadersLocationInput = Tools.Instance
-			.OpenFileChooser(Globals.Instance.Settings.ShadersLocation);
+		var shadersLocationInput = Dialog.FolderPicker(Globals.Instance.Settings.ShadersLocation).Path;
 		if (shadersLocationInput != null)
 		{
 			Globals.Instance.Settings.ShadersLocation = shadersLocationInput;
@@ -401,8 +400,7 @@ Categories=Game;Emulator;Qt;
 	
 	private void OnInstallLocationButtonPressed()
 	{
-		var saveDirectoryLocationInput = Tools.Instance
-			.OpenFileChooser(Globals.Instance.Settings.SaveDirectory);
+		var saveDirectoryLocationInput = Dialog.FolderPicker(Globals.Instance.Settings.SaveDirectory).Path;
 		if (saveDirectoryLocationInput != null)
 		{
 			Globals.Instance.Settings.SaveDirectory = saveDirectoryLocationInput;

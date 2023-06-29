@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using NativeFileDialogSharp;
 
 public partial class ToolsPage : Control
 {
@@ -99,8 +100,7 @@ public partial class ToolsPage : Control
 	
 	private void OnFromSaveDirectoryButtonPressed()
 	{
-		var fromSaveDirectoryInput = Tools.Instance
-			.OpenFileChooser(Globals.Instance.Settings.FromSaveDirectory);
+		var fromSaveDirectoryInput = Dialog.FolderPicker(Globals.Instance.Settings.FromSaveDirectory).Path;
 		if (fromSaveDirectoryInput != null)
 		{
 			Globals.Instance.Settings.FromSaveDirectory = fromSaveDirectoryInput;
@@ -112,8 +112,7 @@ public partial class ToolsPage : Control
 	
 	private void OnToSaveDirectoryButtonPressed()
 	{
-		var toSaveDirectoryInput = Tools.Instance
-			.OpenFileChooser(Globals.Instance.Settings.ToSaveDirectory);
+		var toSaveDirectoryInput = Dialog.FolderPicker(Globals.Instance.Settings.ToSaveDirectory).Path;
 		if (toSaveDirectoryInput != null)
 		{
 			Globals.Instance.Settings.ToSaveDirectory = toSaveDirectoryInput;

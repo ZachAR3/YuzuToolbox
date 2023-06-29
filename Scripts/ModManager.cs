@@ -6,6 +6,7 @@
 	using System.Text;
 	using System.Text.Json;
 	using System.Threading.Tasks;
+	using NativeFileDialogSharp;
 	using YuzuEAUpdateManager.Scripts.Sources;
 	using Button = Godot.Button;
 	using ProgressBar = Godot.ProgressBar;
@@ -711,7 +712,7 @@
 
 		private void ModLocationPressed()
 		{
-			var modLocationInput = Tools.Instance.OpenFileChooser(Globals.Instance.Settings.ModsLocation);
+			var modLocationInput = Dialog.FolderPicker(Globals.Instance.Settings.ModsLocation).Path;
 			if (modLocationInput != null)
 			{
 				Globals.Instance.Settings.ModsLocation = modLocationInput;

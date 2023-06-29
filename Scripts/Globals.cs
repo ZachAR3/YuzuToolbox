@@ -1,6 +1,8 @@
 using Godot;
 using System.IO;
+using System.Linq;
 using Octokit;
+using Node = Godot.Node;
 
 public partial class Globals : Node
 {
@@ -11,6 +13,7 @@ public partial class Globals : Node
 	public ResourceSaveManager SaveManager = new();
 	public SettingsResource Settings = new();
 	public readonly GitHubClient LocalGithubClient = new(new ProductHeaderValue("PineappleEA-GUI"));
+	//public string DllsDirectory;
 
 	public override void _Ready()
 	{
@@ -21,7 +24,7 @@ public partial class Globals : Node
 		{
 			AuthenticateGithubClient();
 		}
-		
+
 		_instance = this;
 
 		GetTree().CallDeferred("call_group", "Initiate", "Initiate");

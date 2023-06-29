@@ -1,13 +1,12 @@
 using Godot;
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
-using Gtk;
-using Application = Gtk.Application;
 using ContentType = Octokit.ContentType;
 using HttpClient = System.Net.Http.HttpClient;
 
-public partial class Tools : Godot.Node
+public partial class Tools : Node
 {
 	[Export] private TextEdit _errorConsole;
 	[Export] private RichTextLabel _errorNotifier;
@@ -17,7 +16,6 @@ public partial class Tools : Godot.Node
 	
 	// Internal variables
 	private bool? _confirmationChoice;
-	private FileChooserDialog _fileChooser;
 
 
 	public override void _Ready()
@@ -151,45 +149,6 @@ public partial class Tools : Godot.Node
 
 	}
 
-	
-	// File chooser functions
-	public string OpenFileChooser(string startingDirectory)
-	{
-		try
-		{
-			Application.Init();
-		}
-		catch (Exception gtkError)
-		{
-			AddError("opening GTK window failed. Ensure you have GTK runtime installed: " + gtkError);
-			throw;
-		}
-		_fileChooser = new FileChooserDialog("Select a File", null, FileChooserAction.SelectFolder);
-
-		// Add a "Cancel" button to the dialog
-		_fileChooser.AddButton("Cancel", ResponseType.Cancel);
-
-		// Add an "Open" button to the dialog
-		_fileChooser.AddButton("Open", ResponseType.Ok);
-
-		// Set the initial directory
-		_fileChooser.SetCurrentFolder(startingDirectory);
-
-		// Connect the response signal, I would like to directly pass in the return object, but this isn't possible 
-		// in a lambda, so we create a temp value to hold it and then assign it to that value after.
-		string returnString = null;
-
-		_fileChooser.Response += (sender, args) => OnFileChooserResponse(sender, args, ref returnString);
-		_fileChooser.FocusOutEvent += (sender, args) => OnFileChooserResponse(sender, null, ref returnString);
-
-		// Show the dialog
-		_fileChooser.Show();
-		Application.Run();
-		
-		// Sets our original object back to be the returned temporary string.
-		return returnString;
-	}
-
 
 	// Signal functions
 	private void ConfirmationPressed(long itemIndex)
@@ -198,21 +157,6 @@ public partial class Tools : Godot.Node
 	}
 
 
-	private void OnFileChooserResponse(object sender, ResponseArgs args, ref string returnObject)
-	{
-		// Ensures response args aren't null, and checks if it was given ok (means a file was selected)
-		if (args is { ResponseId: ResponseType.Ok })
-		{
-			// The user selected a file
-			returnObject = _fileChooser.File.Path;
-		}
-
-		// Clean up resources
-		_fileChooser.Dispose();
-		Application.Quit();
-	}
-	
-	
 	public async Task<Exception> DownloadFolder(string owner, string repo, string folderPath, string destinationPath)
 	{
 		try
