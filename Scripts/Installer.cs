@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using HtmlAgilityPack;
 using Mono.Unix;
 using NativeFileDialogSharp;
 using Octokit;
@@ -310,7 +309,7 @@ Categories=Game;Emulator;Qt;
 		string yuzuPath = $@"{Globals.Instance.Settings.SaveDirectory}/{_saveName}";
 		if (_osUsed == "Linux")
 		{
-			var yuzuFile = new Mono.Unix.UnixFileInfo(yuzuPath)
+			var yuzuFile = new UnixFileInfo(yuzuPath)
 			{
 				FileAccessPermissions = FileAccessPermissions.UserReadWriteExecute
 			};

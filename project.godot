@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="YuzuEAUpdateManager"
+config/name="YuzuToolbox"
 run/main_scene="res://Scenes/Home.tscn"
 config/features=PackedStringArray("4.0", "C#", "Forward Plus")
 boot_splash/bg_color=Color(0.0431373, 0.0470588, 0.0509804, 1)
@@ -27,7 +27,7 @@ window/size/extend_to_title=true
 
 [dotnet]
 
-project/assembly_name="YuzuEAUpdateManager"
+project/assembly_name="YuzuToolbox"
 
 [input]
 
