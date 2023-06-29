@@ -49,7 +49,7 @@ public partial class Home : Control
 	// Custom functions
 	private void SetTheme(bool enableLight)
 	{
-		_lightBg.Visible = enableLight;
+		//_lightBg.Visible = enableLight;
 		_darkBg.Visible = !enableLight;
 		_currentTheme = enableLight ? _themes[1] : _themes[0];
 		_header.Color = enableLight ? new Godot.Color(0.74117648601532f, 0.76470589637756f, 0.78039216995239f) : new Godot.Color(0.16862745583057f, 0.1803921610117f, 0.18823529779911f);
