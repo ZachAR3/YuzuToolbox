@@ -12,7 +12,6 @@ public partial class StandardModManagement : Node
 {
 	public Dictionary<string, List<Mod>> InstalledMods;
 	public Dictionary<string, List<Mod>> SelectedSourceMods;
-	public string InstalledModsPath;
 
 	public HttpRequest DownloadRequester;
     public Timer DownloadUpdateTimer;
@@ -85,8 +84,7 @@ public partial class StandardModManagement : Node
 			Tools.Instance.AddError($@"failed to install mod:{installError}");
 			throw;
 		}
-
-		SaveInstalledMods();
+		
 		return true;
 	}
 	
@@ -124,15 +122,7 @@ public partial class StandardModManagement : Node
 			Tools.Instance.AddError("failed to remove mod:" + removeError);
 			return false;
 		}
-
-		SaveInstalledMods();
+		
 		return true;
-	}
-
-
-	private void SaveInstalledMods()
-	{
-		var serializedMods = JsonSerializer.Serialize(InstalledMods);
-		File.WriteAllText(InstalledModsPath, serializedMods);
 	}
 }

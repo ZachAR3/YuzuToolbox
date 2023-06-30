@@ -428,9 +428,10 @@
 
 			try
 			{
-				var removedMod = await DeleteMod(gameId, mod, _selectedSource, (int)Sources.All);
-				if (removedMod != true)
+				var removedMod = await DeleteMod(gameId, mod, _selectedSource, (int)Sources.All, true);
+				if (!removedMod)
 				{
+					Tools.Instance.AddError($@"failed to update mod, unable to delete old... Returning.");
 					return false;
 				}
 
@@ -577,7 +578,7 @@
 		private async Task InstallMod(string gameId, Mod mod)
 		{
 			UpdateManagers();
-			switch (_selectedSource)
+			switch (mod.Source)
 			{
 				case (int)Sources.TotkHolo:
 					await _totkHoloManager.InstallMod(gameId, mod);
@@ -587,6 +588,8 @@
 					_downloadBar.Value = 100;
 					break;
 			}
+			
+			SaveInstalledMods();
 		}
 
 
@@ -595,13 +598,12 @@
 			UpdateManagers();
 			switch (_selectedSource)
 			{
-				case (int)Sources.TotkHolo:
-					break;
 				default:
-					return await _standardModManager.DeleteMod(gameId, mod, source, sourcesAll, noConfirmation);
+					var successful = await _standardModManager.DeleteMod(gameId, mod, source, sourcesAll, noConfirmation);
+					SaveInstalledMods();
+					return successful;
+					
 			}
-
-			return false;
 		}
 		
 		
@@ -611,7 +613,6 @@
 			{
 				InstalledMods = _installedMods,
 				SelectedSourceMods = _selectedSourceMods,
-				InstalledModsPath = _installedModsPath,
 				DownloadRequester = _downloadRequester,
 				DownloadUpdateTimer = _downloadUpdateTimer,
 				LoadingPanel = _loadingPanel
@@ -696,17 +697,21 @@
 					return;
 				}
 
-				if (_modList.GetItemText(selectedMods[0]).Split(TitleSplitter)[0].Trim() == (mod.ModName))
+				if ((string)_modList.GetItemMetadata(selectedMods.First()) == mod.ModName)
 				{
-					_loadingPanel.Visible = true;
+					DisableInteraction();
 					if (mod.ModUrl != null)
 					{
 						await UpdateMod(_currentGameId, mod);
 					}
+					else
+					{
+						Tools.Instance.AddError("Cannot update local mod...");
+					}
 
 					// Used to update UI with installed icon
 					SelectGame(_gamePickerButton.Selected);
-					_loadingPanel.Visible = false;
+					DisableInteraction(false);
 					return;
 				}
 			}
