@@ -142,7 +142,7 @@
 						{
 							continue;
 						}
-						await GetAvailableMods(gameId, source);
+						await Task.Run(async () => { await GetAvailableMods(gameId, source); });
 					}
 					else
 					{ 
@@ -310,7 +310,7 @@
 			DisableInteraction(false);
 			_loadingPanel.Visible = false;
 
-			SelectGame(_gamePickerButton.GetSelectableItem());
+			SelectGame(_gamePickerButton.Selected);
 		}
 
 
@@ -376,9 +376,12 @@
 					return;
 				}
 
-				// Adds the game to our title list with type Dictionary(string ID, string Title, string modID)
+				// Adds the game to our title list with type (string ID, string Title)
 				_titles[gameSplit[1]] = gameSplit[2];
 			}
+			
+			// TODO remove this once games are added to list (#59)
+			_titles["01001F5010DFA000"] = "Pokémon Legends: Arceus";
 		}
 
 
