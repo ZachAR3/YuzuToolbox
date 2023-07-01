@@ -51,7 +51,7 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 theme = ExtResource("1_c22a4")
 script = ExtResource("1_p51ic")
-_appVersion = 3.2
+_appVersion = 3.4
 _darkBg = NodePath("DarkBG")
 _lightBg = NodePath("LightBG")
 _downloadWindowApp = NodePath("Pages/Installer/DownloadWindow/Window")
@@ -146,18 +146,16 @@ vertical_alignment = 1
 
 [node name="Option" type="HBoxContainer" parent="Header"]
 layout_mode = 1
-anchors_preset = 6
-anchor_left = 1.0
-anchor_top = 0.5
-anchor_right = 1.0
-anchor_bottom = 0.5
-offset_left = -396.0
-offset_top = -20.9444
-offset_bottom = 21.0556
+anchors_preset = -1
+anchor_left = 0.715625
+anchor_top = 0.325
+anchor_right = 0.989062
+anchor_bottom = 0.675001
 grow_horizontal = 0
 grow_vertical = 2
 theme_override_constants/separation = 29
 alignment = 1
+metadata/_edit_use_anchors_ = true
 
 [node name="LightMode" type="CheckButton" parent="Header/Option"]
 layout_mode = 2
@@ -175,6 +173,10 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_tufja")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_tufja")
 theme_override_styles/hover_pressed = SubResource("StyleBoxFlat_tufja")
 text = "Music"
+
+[node name="QuitButton" type="Button" parent="Header/Option"]
+layout_mode = 2
+text = "Quit"
 
 [node name="OpenConsole" type="Button" parent="Header"]
 layout_mode = 1
@@ -256,6 +258,7 @@ script = ExtResource("15_p1cux")
 
 [connection signal="toggled" from="Header/Option/LightMode" to="." method="SetTheme"]
 [connection signal="toggled" from="Header/Option/MuteButton" to="." method="ToggledMusicButton"]
+[connection signal="pressed" from="Header/Option/QuitButton" to="." method="ExitButtonPressed"]
 [connection signal="pressed" from="Header/OpenConsole" to="Tools" method="ToggleConsole"]
 [connection signal="pressed" from="ErrorConsole/ErrorConsole/CloseButton" to="Tools" method="ToggleConsole"]
 

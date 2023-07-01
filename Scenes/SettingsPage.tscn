@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://Scripts/SettingsPage.cs" id="1_angmk"]
 
-[node name="Settings" type="Control" node_paths=PackedStringArray("_githubTokenLineEdit", "_getCompatibleVersionsButton") groups=["Initiate"]]
+[node name="Settings" type="Control" node_paths=PackedStringArray("_githubTokenLineEdit", "_getCompatibleVersionsButton", "_displayModeButton") groups=["Initiate"]]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -12,12 +12,15 @@ grow_vertical = 2
 script = ExtResource("1_angmk")
 _githubTokenLineEdit = NodePath("SettingsContainer/GithubTokenLineEdit")
 _getCompatibleVersionsButton = NodePath("SettingsContainer/GetCompatibleVersions")
+_displayModeButton = NodePath("SettingsContainer/DisplayModeButton")
+metadata/_edit_use_anchors_ = true
 
 [node name="SettingsContainer" type="GridContainer" parent="."]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.252922
-anchor_right = 0.747078
+anchor_left = 0.253125
+anchor_top = 0.037963
+anchor_right = 0.747396
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
@@ -59,7 +62,21 @@ WARNING:WILL LIKELY CAUSE ANANONYMOUS USERS TO EXCEED API LIMIT"
 flat = true
 text_overrun_behavior = 4
 
+[node name="DisplayModeLabel" type="Label" parent="SettingsContainer"]
+layout_mode = 2
+text = "Display mode:"
+
+[node name="DisplayModeButton" type="OptionButton" parent="SettingsContainer"]
+layout_mode = 2
+alignment = 1
+item_count = 2
+popup/item_0/text = "Windowed"
+popup/item_0/id = 0
+popup/item_1/text = "Fullscreen"
+popup/item_1/id = 3
+
 [connection signal="pressed" from="SettingsContainer/ResetSettings" to="." method="ResetSettingsPressed"]
 [connection signal="pressed" from="SettingsContainer/ResetInstalledMods" to="." method="ResetInstalledModsPressed"]
 [connection signal="text_submitted" from="SettingsContainer/GithubTokenLineEdit" to="." method="GithubTokenEntered"]
 [connection signal="toggled" from="SettingsContainer/GetCompatibleVersions" to="." method="GetCompatibleToggled"]
+[connection signal="item_selected" from="SettingsContainer/DisplayModeButton" to="." method="SetDisplayMode"]

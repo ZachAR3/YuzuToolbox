@@ -382,6 +382,13 @@
 			
 			// TODO remove this once games are added to list (#59)
 			_titles["01001F5010DFA000"] = "Pokémon Legends: Arceus";
+			_titles["0100000011D90000"] = "Pokémon Brilliant Diamond";
+			_titles["010018E011D92000"] = "Pokémon Shining Pearl";
+			_titles["01003D200BAA2000"] = "Pokémon Mystery Dungeon: Rescue Team DX";
+			_titles["01004D300C5AE000"] = "Kirby and the Forgotten Land";
+			_titles["01006BB00C6F0000"] = "The Legend of Zelda: Link's Awakening";
+			_titles["010093801237C000"] = "Metroid Dread";
+			_titles["0100A3D008C5C000"] = "Pokémon Scarlet and Violet";
 		}
 
 

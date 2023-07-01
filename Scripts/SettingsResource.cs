@@ -14,4 +14,5 @@ public partial class SettingsResource : Resource
 	[Export()] public string AppDataPath;
 	[Export()] public string GithubApiToken;
 	[Export()] public bool GetCompatibleVersions;
+	[Export()] public int DisplayMode;
 }

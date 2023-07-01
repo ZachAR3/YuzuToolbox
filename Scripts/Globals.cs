@@ -17,7 +17,7 @@ public partial class Globals : Node
 	public override void _Ready()
 	{
 		Instance = this;
-		SaveManager.Version = 2.2f;
+		SaveManager.Version = 2.3f;
 		Settings = SaveManager.GetSettings();
 		SetDefaultPaths();
 		if (!string.IsNullOrEmpty(Settings.GithubApiToken))

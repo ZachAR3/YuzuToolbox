@@ -1,3 +1,4 @@
+using System;
 using Godot;
 using Godot.Collections;
 
@@ -32,8 +33,9 @@ public partial class Home : Control
 	// Godot functions
 	private void Initiate()
 	{
-		// Sets minimum window size to prevent text clipping and UI breaking at smaller scales.
+		// Sets minimum window size and display mode.
 		DisplayServer.WindowSetMinSize(new Vector2I(1024, 576));
+		DisplayServer.WindowSetMode((DisplayServer.WindowMode)Globals.Instance.Settings.DisplayMode);
 
 		// Set the theme
 		SetTheme(Globals.Instance.Settings.LightModeEnabled);
@@ -84,6 +86,12 @@ public partial class Home : Control
 	{
 		AudioServer.SetBusMute(AudioServer.GetBusIndex("Master"), !musicEnabled);
 	}
-	
-	
+
+
+	private void ExitButtonPressed()
+	{
+		GetTree().Quit();
+	}
+
 }
+
