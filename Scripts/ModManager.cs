@@ -389,6 +389,13 @@
 			_titles["01006BB00C6F0000"] = "The Legend of Zelda: Link's Awakening";
 			_titles["010093801237C000"] = "Metroid Dread";
 			_titles["0100A3D008C5C000"] = "Pokémon Scarlet and Violet";
+			_titles["010010A00DA48000"] = "Baldur's Gate and Baldur's Gate II: Enhanced Editions";
+			_titles["010012101468C000"] = "Metroid Prime Remastered";
+			_titles["010028600EBDA000"] = "Super Mario™ 3D World + Bowser’s Fury";
+			_titles["01002B00111A2000"] = "Hyrule Warriors: Age of Calamity";
+			_titles["01002DA013484000"] = "The Legend of Zelda: Skyward Sword HD";
+			_titles["010030B00C316000"] = "Planescape: Torment and Icewind Dale: Enhanced Editions";
+			_titles["010031200E044000"] = "Two Point Hospital";
 		}
 
 
