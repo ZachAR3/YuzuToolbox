@@ -12,7 +12,7 @@ config_version=5
 
 config/name="YuzuToolbox"
 run/main_scene="res://Scenes/Home.tscn"
-config/features=PackedStringArray("4.0", "C#", "Forward Plus")
+config/features=PackedStringArray("4.1", "C#", "Forward Plus")
 boot_splash/bg_color=Color(0.0431373, 0.0470588, 0.0509804, 1)
 boot_splash/image="res://ImageAssets/SplashScreen.png"
 boot_splash/fullsize=false
