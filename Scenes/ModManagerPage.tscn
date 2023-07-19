@@ -254,6 +254,13 @@ text = "Update selected
 "
 metadata/_edit_use_anchors_ = true
 
+[node name="ClearMods" type="Button" parent="SideBar"]
+layout_mode = 2
+tooltip_text = "Clear mods folder (WANRING CLEARS THE ENTIRE MOD FOLDER FOR THE SELECTED GAME)"
+text = "Clear mods folder (WANRING CLEARS THE ENTIRE MOD FOLDER FOR THE SELECTED GAME)"
+text_overrun_behavior = 4
+metadata/_edit_use_anchors_ = true
+
 [node name="VerticalSpacer" type="Control" parent="SideBar"]
 layout_mode = 2
 size_flags_vertical = 3
@@ -354,6 +361,7 @@ metadata/_edit_use_anchors_ = true
 [connection signal="pressed" from="SideBar/RefreshButton" to="." method="RefreshPressed"]
 [connection signal="pressed" from="SideBar/UpdateAll" to="." method="UpdateAll"]
 [connection signal="pressed" from="SideBar/UpdateSelected" to="." method="UpdateSelectedPressed"]
+[connection signal="pressed" from="SideBar/ClearMods" to="." method="ClearModsPressed"]
 [connection signal="pressed" from="SideBar/LoadMore" to="." method="LoadNextPage"]
 [connection signal="text_changed" from="SearchBar" to="." method="SearchUpdated"]
 [connection signal="item_activated" from="ModsList" to="." method="ModClicked"]

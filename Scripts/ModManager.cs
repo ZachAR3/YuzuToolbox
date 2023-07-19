@@ -582,6 +582,32 @@
 		
 		
 		// Helper functions
+		private async void ClearMods(string gameId = "")
+		{
+			// If no game ID is passed uses the current games
+			gameId = string.IsNullOrEmpty(gameId) ? _currentGameId : gameId;
+
+			// Deletes the known installed mods
+			GD.Print(_installedMods[gameId].Count);
+			foreach (var mod in new List<Mod> (_installedMods[gameId]))
+			{
+				GD.Print(gameId);
+				GD.Print(mod.InstalledPath);
+				GD.Print(_selectedSource);
+				await _standardModManager.DeleteMod(gameId, mod, _selectedSource, (int)Sources.All, true);
+			}
+			
+			// Deletes non-known installed mods
+			string modsPath = Path.Join(Globals.Instance.Settings.ModsLocation, gameId);
+			foreach (var modPath in Directory.GetDirectories(modsPath))
+			{
+				GD.Print("custom delete:" + modPath);
+				Tools.DeleteDirectoryContents(modPath);
+				Directory.Delete(modPath);
+			}
+		}
+		
+		
 		private void SaveInstalledMods()
 		{
 			var serializedMods = JsonSerializer.Serialize(_installedMods);
@@ -765,5 +791,15 @@
 		private void SourceSelected(int selectedSource)
 		{
 			SelectSource(selectedSource);
+		}
+
+
+		private async void ClearModsPressed()
+		{
+			if (await Tools.Instance.ConfirmationPopup("Remove all mods for selected title?") != true)
+			{
+				return;
+			}
+			ClearMods();
 		}
 	}
