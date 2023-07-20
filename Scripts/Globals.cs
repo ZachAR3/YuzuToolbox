@@ -25,6 +25,10 @@ public partial class Globals : Node
 			AuthenticateGithubClient();
 		}
 		
+		// Get launch options and update settings accordingly.
+		var launchOptions = OS.GetCmdlineArgs();
+		Settings.LauncherMode = launchOptions.Contains("--launcher");
+		SaveManager.WriteSave();
 
 		GetTree().CallDeferred("call_group", "Initiate", "Initiate");
 	}

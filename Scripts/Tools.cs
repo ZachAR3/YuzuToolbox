@@ -1,7 +1,7 @@
 using Godot;
 using System;
 using System.IO;
-using System.Linq;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using ContentType = Octokit.ContentType;
 using HttpClient = System.Net.Http.HttpClient;
@@ -19,6 +19,7 @@ public partial class Tools : Node
 	private bool? _confirmationChoice;
 
 
+	// Godot functions
 	public override void _Ready()
 	{
 		Instance = this;
@@ -35,6 +36,23 @@ public partial class Tools : Node
 
 
 	// General functions
+	public void LaunchYuzu()
+	{
+		string executablePath = Globals.Instance.Settings.ExecutablePath;
+
+		try
+		{
+			ProcessStartInfo yuzuProcessInfo = new(executablePath);
+
+			Process yuzuProcess = Process.Start(yuzuProcessInfo);
+		}
+		catch (Exception launchException)
+		{
+			AddError("Unable to launch Yuzu: " + launchException.Message);
+		}	
+	}
+	
+	
 	private void ToggleConsole()
 	{
 		_errorConsoleContainer.Visible = !_errorConsoleContainer.Visible;

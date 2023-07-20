@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Godot;
 using Newtonsoft.Json.Linq;
 using HttpClient = System.Net.Http.HttpClient;
 
@@ -16,7 +17,7 @@ public class BananaManager
 			modList[gameId] = new List<Mod>();
 		}
 		
-		int bananaGameId = GetGameModId(installedGames[gameId].GameName);
+		int bananaGameId = GetGameBananaGameId(installedGames[gameId].GameName);
 		if (bananaGameId == -1)
 		{
 			return null;
@@ -52,13 +53,14 @@ public class BananaManager
 	}
 	
 	 
-	private int GetGameModId(string gameName)
+	private int GetGameBananaGameId(string gameName)
 	{
 		// Searches for the game ID using the name from banana mods
 		string searchContent = _httpClient.GetAsync("https://gamebanana.com/apiv11/Util/Game/NameMatch?_sName=" + gameName).Result.Content.ReadAsStringAsync().Result;
+		
 		var jsonContent = JObject.Parse($@"{searchContent}");
 		var modId = jsonContent["_aRecords"]?[0]?["_idRow"]!.ToString();
-		
+
 		// If the return is null replace with our version (-1)
 		int returnValue = modId == null ? -1 : int.Parse(modId);
 		return returnValue;

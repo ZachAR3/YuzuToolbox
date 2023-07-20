@@ -5,6 +5,7 @@ public partial class SettingsResource : Resource
 {
 	[Export] public string SaveDirectory;
 	[Export] public string ExecutableName = "yuzu";
+	[Export] public string ExecutablePath;
 	[Export] public string ShadersLocation;
 	[Export] public string FromSaveDirectory;
 	[Export] public string ToSaveDirectory;
@@ -16,4 +17,5 @@ public partial class SettingsResource : Resource
 	[Export] public string GithubApiToken;
 	[Export] public bool GetCompatibleVersions;
 	[Export] public int DisplayMode;
+	[Export] public bool LauncherMode;
 }

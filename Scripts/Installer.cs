@@ -29,6 +29,7 @@ public partial class Installer : Control
 	[Export] private Image _icon;
 	[Export] private OptionButton _versionButton;
 	[Export] private CheckBox _createShortcutButton;
+	[Export] private CheckBox _autoUpdateButton;
 	[Export] private LineEdit _executableNameLineEdit;
 	[Export] private Button _installLocationButton;
 	[Export] private Button _downloadButton;
@@ -47,11 +48,13 @@ public partial class Installer : Control
 	[Export] private TextureRect _clearShadersWarning;
 
 	// Internal variables
-	private String _osUsed = "Windows"; //OS.GetName();
+	private String _osUsed = OS.GetName();
 	private string _yuzuExtensionString;
 	private string _yuzuExecutableName;
 	private string _executableSaveName;
-	
+	private int _latestRelease;
+	private bool _autoUpdate;
+
 
 	// Godot functions
 	private void Initiate()
@@ -96,27 +99,33 @@ public partial class Installer : Control
 			return;
 		}
 
-		_executableSaveName = _executableSaveName.Insert(0, _yuzuExecutableName);
+		int selectedVersion;
 
-		int version;
+		if (_customVersionCheckBox.ButtonPressed)
+		{
+			selectedVersion = (int)_customVersionSpinBox.Value;
+		}
+		else
+		{
+			int versionIndex = _versionButton.Selected;
+			selectedVersion = _versionButton.GetItemText(versionIndex).ToInt();
+		}
+		InstallVersion(selectedVersion);
+	}
+
+
+
+	private void InstallVersion(int version)
+	{
 		DeleteOldVersion();
-
+		
 		// Set old install (if it exists) to not be disabled anymore.
 		if (Globals.Instance.Settings.InstalledVersion != -1)
 		{
 			_versionButton.SetItemDisabled(_versionButton.GetItemIndex(Globals.Instance.Settings.InstalledVersion), false);
 		}
-
-		if (_customVersionCheckBox.ButtonPressed)
-		{
-			version = (int)_customVersionSpinBox.Value;
-		}
-		else
-		{
-			int versionIndex = _versionButton.Selected;
-			version = _versionButton.GetItemText(versionIndex).ToInt();
-		}
-
+		
+		_executableSaveName = _executableSaveName.Insert(0, _yuzuExecutableName);
 		_customVersionCheckBox.Disabled = true;
 		_versionButton.Disabled = true;
 		_downloadButton.Disabled = true;
@@ -131,7 +140,8 @@ public partial class Installer : Control
 		_downloadUpdateTimer.Start();
 		_downloadLabel.Text = "Downloading...";
 	}
-
+	
+	
 
 	private void UpdateDownloadBar()
 	{
@@ -146,13 +156,30 @@ public partial class Installer : Control
 		String windowsShortcutName = "yuzu-ea.lnk";
 		String iconPath = $@"{Globals.Instance.Settings.SaveDirectory}/Icon.png";
 
+		string executable = "";
+		if (_autoUpdate)
+		{
+			string[] extensions = new[] { ".exe", ".x86_64" };
+			var matchingFiles = Directory.EnumerateFiles(ProjectSettings.GlobalizePath("res://"))
+				.Where(file => extensions.Contains(Path.GetExtension(file)))
+				.Select(Path.GetFullPath);
+
+			executable = matchingFiles.First();
+		}
+		else
+		{
+			GetExistingVersion();
+		}
+
+
+
 		if (_osUsed == "Linux")
 		{
 			_icon.SavePng(iconPath);
 			string shortcutContent = $@"
 [Desktop Entry]
 Comment=Nintendo Switch video game console emulator
-Exec={GetExistingVersion()}
+Exec={executable} --launcher
 GenericName=Switch Emulator
 Icon={iconPath}
 MimeType=
@@ -191,8 +218,11 @@ Categories=Game;Emulator;Qt;
 					Tools.Instance.AddError(
 						$@"Error creating shortcut, creating new at {shortcutPath}. Error:{shortcutError}");
 					File.WriteAllText(shortcutPath, shortcutContent);
-					throw;
 				}
+			}
+			else
+			{
+				Tools.Instance.AddError("Cannot find shortcut directory, please place manually.");
 			}
 		}
 		else if (_osUsed == "Windows")
@@ -203,7 +233,8 @@ Categories=Game;Emulator;Qt;
 			string yuzuShortcutPath = Path.Combine(yuzuStartMenuPath, windowsShortcutName);
 			var windowsShortcut = new WindowsShortcut
 			{
-				Path = GetExistingVersion()
+				Path = executable,
+				Arguments = "--launcher"
 			};
 
 
@@ -233,19 +264,20 @@ Categories=Game;Emulator;Qt;
 	{
 		try
 		{
-			var latestVersion = await GetLatestVersion();
-			if (latestVersion == -1)
+			await GetLatestVersion();
+			if (_latestRelease == -1)
 			{
+				Tools.Instance.AddError("Unable to fetch latest Pineapple release");
 				return;
 			}
 
-			_customVersionSpinBox.Value = latestVersion;
-			_latestVersionLabel.Text = $"Latest: {latestVersion.ToString()}";
+			_customVersionSpinBox.Value = _latestRelease;
+			_latestVersionLabel.Text = $"Latest: {_latestRelease.ToString()}";
 			
 			//Add a version item for the latest and the dictated amount of previous versions.
 			for (int previousIndex = 0; previousIndex < _previousVersionsToAdd; previousIndex++)
 			{
-				_versionButton.AddItem((latestVersion - previousIndex).ToString(), latestVersion - previousIndex);
+				_versionButton.AddItem((_latestRelease - previousIndex).ToString(), _latestRelease - previousIndex);
 			}
 			
 			//Checks if there is already a version installed, and if so adds it.
@@ -255,6 +287,20 @@ Categories=Game;Emulator;Qt;
 			}
 			
 			_downloadButton.Disabled = false;
+			
+			// If running in launcher mode updates and launches yuzu
+			if (Globals.Instance.Settings.LauncherMode)
+			{
+				if (_latestRelease != Globals.Instance.Settings.InstalledVersion)
+				{
+					// Yuzu will be launched inside of the download function when the download is completed.
+					InstallVersion(_latestRelease);
+				}
+				else
+				{
+					Tools.Instance.LaunchYuzu();
+				}
+			}
 		}
 		catch (Exception versionPullException)
 		{
@@ -285,7 +331,7 @@ Categories=Game;Emulator;Qt;
 	}
 
 
-	private async Task<int> GetLatestVersion()
+	private async Task GetLatestVersion()
 	{
 		// Trys to fetch version using github API if failed, tries to web-scrape it.
 		try
@@ -294,7 +340,7 @@ Categories=Game;Emulator;Qt;
 
 			var latestRelease =
 				await gitHubClient.Repository.Release.GetLatest(_repoOwner, _repoName);
-			return latestRelease.TagName.Split("-").Last().ToInt();
+			_latestRelease = latestRelease.TagName.Split("-").Last().ToInt();
 		}
 		// Fall back version grabber
 		catch (RateLimitExceededException)
@@ -304,7 +350,7 @@ Categories=Game;Emulator;Qt;
 			var httpClient = new System.Net.Http.HttpClient();
 			var rawVersionData = httpClient.GetAsync(_pineappleLatestUrl).Result.Content.ReadAsStringAsync().Result;
 			
-			return (rawVersionData.Split("EA-").Last()).Split("\"").First().ToInt();
+			_latestRelease = rawVersionData.Split("EA-").Last().Split("\"").First().ToInt();
 		}
 		
 	}
@@ -466,9 +512,15 @@ Categories=Game;Emulator;Qt;
 			}
 
 			_downloadWindow.Visible = false;
+
+			if (Globals.Instance.Settings.LauncherMode)
+			{
+				Tools.Instance.LaunchYuzu();
+			}
 		}
 		else
 		{
+			Tools.Instance.AddError("Failed to download, error:" + result);
 			_downloadProgressBar.Value = 0;
 		}
 	}
@@ -487,5 +539,14 @@ Categories=Game;Emulator;Qt;
 		Globals.Instance.Settings.ExecutableName = _yuzuExecutableName;
 		Globals.Instance.SaveManager.WriteSave();
 	}
-}
 
+
+	private void AutoUpdateToggled(bool autoUpdate)
+	{
+		if (_createShortcutButton.ButtonPressed || !autoUpdate)
+		{
+			_autoUpdate = autoUpdate;
+		}
+		_autoUpdateButton.ButtonPressed = _autoUpdate;
+	}
+}

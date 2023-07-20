@@ -69,6 +69,12 @@
 		// Godot Functions
 		private async void Initiate()
 		{
+			// Disables initialization if launched as launcher mode
+			if (Globals.Instance.Settings.LauncherMode)
+			{
+				return;
+			}
+			
 			// Converts the given local path to an absolute one upon run time
 			_installedModsPath = ProjectSettings.GlobalizePath(_installedModsPath);
 

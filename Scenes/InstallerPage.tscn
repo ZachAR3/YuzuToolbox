@@ -7,7 +7,7 @@
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7am6t"]
 bg_color = Color(0.168627, 0.180392, 0.188235, 0.529412)
 
-[node name="Installer" type="Control" node_paths=PackedStringArray("_versionButton", "_createShortcutButton", "_executableNameLineEdit", "_installLocationButton", "_downloadButton", "_downloadWindow", "_downloadLabel", "_downloadUpdateTimer", "_downloadProgressBar", "_clearShadersButton", "_shadersLocationButton", "_autoUnpackButton", "_customVersionCheckBox", "_customVersionSpinBox", "_downloadRequester", "_extractWarning", "_downloadWarning", "_clearShadersWarning") groups=["Initiate"]]
+[node name="Installer" type="Control" node_paths=PackedStringArray("_versionButton", "_createShortcutButton", "_autoUpdateButton", "_executableNameLineEdit", "_installLocationButton", "_downloadButton", "_downloadWindow", "_downloadLabel", "_downloadUpdateTimer", "_downloadProgressBar", "_clearShadersButton", "_shadersLocationButton", "_autoUnpackButton", "_customVersionCheckBox", "_customVersionSpinBox", "_downloadRequester", "_extractWarning", "_downloadWarning", "_clearShadersWarning") groups=["Initiate"]]
 layout_mode = 3
 anchors_preset = 0
 script = ExtResource("1_3lw4p")
@@ -20,6 +20,7 @@ _previousVersionsToAdd = 20
 _icon = ExtResource("2_dhhpw")
 _versionButton = NodePath("ControlsContainer/VersionSelectionButton")
 _createShortcutButton = NodePath("ControlsContainer/CreateShortcutButton")
+_autoUpdateButton = NodePath("ControlsContainer/AutoUpdate")
 _executableNameLineEdit = NodePath("ControlsContainer/ExecutableName")
 _installLocationButton = NodePath("ControlsContainer/LocationButton")
 _downloadButton = NodePath("DownloadButton")
@@ -166,6 +167,19 @@ alignment = 1
 text_overrun_behavior = 4
 clip_text = true
 
+[node name="AutoUpdateLabel" type="Label" parent="ControlsContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+text = "Auto update:"
+
+[node name="AutoUpdate" type="CheckBox" parent="ControlsContainer"]
+layout_mode = 2
+tooltip_text = "(Requires create shortcut) Causes shortcut to auto update Yuzu before launching it."
+focus_mode = 0
+text = "Auto update Yuzu at launch."
+alignment = 1
+text_overrun_behavior = 4
+
 [node name="CreateShortcutLabel" type="Label" parent="ControlsContainer"]
 layout_mode = 2
 text = "Create start shortcut:  "
@@ -282,6 +296,7 @@ wait_time = 0.1
 [connection signal="text_changed" from="ControlsContainer/ExecutableName" to="." method="ExecutableNameChanged"]
 [connection signal="toggled" from="ControlsContainer/ExtractButton" to="." method="AutoUnpackToggled"]
 [connection signal="toggled" from="ControlsContainer/ClearShadersButton" to="." method="ClearShadersToggle"]
+[connection signal="toggled" from="ControlsContainer/AutoUpdate" to="." method="AutoUpdateToggled"]
 [connection signal="pressed" from="DownloadButton" to="." method="InstallSelectedVersion"]
 [connection signal="request_completed" from="DownloadRequester" to="." method="VersionDownloadCompleted"]
 [connection signal="timeout" from="DownloadWindow/Window/DownloadProgressUpdater" to="." method="UpdateDownloadBar"]
