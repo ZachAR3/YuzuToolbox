@@ -217,8 +217,8 @@ layout_mode = 2
 _modManager = NodePath("../ModManager")
 
 [node name="ConfirmPopup" type="PopupMenu" parent="."]
-initial_position = 1
 title = "Are you sure you?"
+initial_position = 1
 size = Vector2i(600, 100)
 borderless = false
 always_on_top = true

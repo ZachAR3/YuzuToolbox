@@ -145,7 +145,7 @@ public partial class Tools : Node
 	{
 		if (Directory.Exists(shaderLocation))
 		{
-			Tools.DeleteDirectoryContents(shaderLocation);
+			DeleteDirectoryContents(shaderLocation);
 			return true;
 
 		}
@@ -155,12 +155,16 @@ public partial class Tools : Node
 	
 	public async void AddError(String error)
 	{
-		_errorConsole.Text += $"\n [{DateTime.Now:h:mm:ss}]	{error}";
-		_errorNotifier.Visible = true;
+		Callable.From(() =>
+		{
+			_errorConsole.Text += $"\n [{DateTime.Now:h:mm:ss}]	{error}";
+			_errorNotifier.Visible = true;
+		}).CallDeferred();
+		
 		await Task.Run(async () =>
 		{
 			await ToSignal(GetTree().CreateTimer(5), "timeout");
-			_errorNotifier.Visible = false;
+			_errorNotifier.SetThreadSafe("visible", false);
 		});
 
 	}

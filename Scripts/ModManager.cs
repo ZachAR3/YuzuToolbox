@@ -97,28 +97,34 @@
 		}
 
 
+		// Custom functions
 		public void ResetInstalled()
 		{
 			_installedMods = new Dictionary<string, List<Mod>>();
 			SaveInstalledMods();
 		}
-
-
-		// Custom functions
+		
+		
 		private async Task GetGamesAndMods(int source = (int)Sources.Official, int selectedGame = 0)
 		{
 			await Task.Run(async () =>
 			{
-				_loadingPanel.Visible = true;
-				if (!Directory.Exists(Globals.Instance.Settings.ModsLocation))
+				Callable.From(() =>
 				{
-					Tools.Instance.AddError($@"mods location does not exist. Please set a valid location and refresh.");
-					_loadingPanel.Visible = false;
-					return;
-				}
+					_loadingPanel.Visible = true;
+					if (!Directory.Exists(Globals.Instance.Settings.ModsLocation))
+					{
+						Tools.Instance.AddError($@"mods location does not exist. Please set a valid location and refresh.");
+						_loadingPanel.Visible = false;
+						return;
+					}
 
-				_titleRequester.Request(
-					"https://switchbrew.org/w/index.php?title=Title_list/Games&mobileaction=toggle_view_desktop");
+					_titleRequester.Request(
+						"https://switchbrew.org/w/index.php?title=Title_list/Games&mobileaction=toggle_view_desktop");
+				}).CallDeferred();
+
+				// TODO #65
+				GodotThread.SetThreadSafetyChecksEnabled(false);
 				await ToSignal(_titleRequester,
 					"request_completed"); // Waits for titles to be retrieved before checking installed titles against them.
 
@@ -142,7 +148,10 @@
 						{
 							continue;
 						}
-						await Task.Run(async () => { await GetAvailableMods(gameId, source); });
+						await Task.Run(async () =>
+						{
+							await GetAvailableMods(gameId, source);
+						});
 					}
 					else
 					{ 
@@ -165,7 +174,7 @@
 				_loadingPanel.Visible = false;
 			}
 		}
-
+	
 
 		private async Task GetAvailableMods(string gameId, int source)
 		{
@@ -215,14 +224,14 @@
 			{
 				Tools.Instance.AddError(
 					$@"Failed to retrieve mod list for ID:{gameId} | Title:{_titles[gameId]}. Exception:{argumentException.Message}");
-				_loadingPanel.Visible = false;
+				_loadingPanel.SetThreadSafe("visible", false);
 				return;
 			}
 
-			if (_selectedSourceMods.ContainsKey(gameId))
+			if (_selectedSourceMods.TryGetValue(gameId, out var sourceMod))
 			{
 				var installedModNames = new HashSet<string>(_installedMods[gameId].Select(mod => mod.ModName.ToLower().Trim()));
-				_selectedSourceMods[gameId].RemoveAll(mod => installedModNames.Contains(mod.ModName.ToLower().Trim()));
+				sourceMod.RemoveAll(mod => installedModNames.Contains(mod.ModName.ToLower().Trim()));
 			}
 		}
 
@@ -246,7 +255,7 @@
 
 				// Adds local mods that aren't in the data base
 				foreach (var modDirectory in
-				         Directory.GetDirectories($@"{Globals.Instance.Settings.ModsLocation}/{gameId}"))
+						 Directory.GetDirectories($@"{Globals.Instance.Settings.ModsLocation}/{gameId}"))
 				{
 					if (!modDirectory.GetFile().StartsWith("Managed"))
 					{

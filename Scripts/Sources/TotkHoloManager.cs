@@ -1,15 +1,13 @@
 ﻿using System.IO;
 using System.Linq;
-using System.Net;
-using Godot;
-using HttpClient = System.Net.Http.HttpClient;
-
-namespace YuzuEAUpdateManager.Scripts.Sources;
-
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Octokit;
+using HttpClient = System.Net.Http.HttpClient;
+
+namespace YuzuEAUpdateManager.Scripts.Sources;
+
 
 
 public class TotkHoloManager
