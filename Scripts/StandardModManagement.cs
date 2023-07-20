@@ -15,10 +15,9 @@ public partial class StandardModManagement : Node
 
 	public HttpRequest DownloadRequester;
     public Timer DownloadUpdateTimer;
-    public Panel LoadingPanel;
-    
-    
-	public async Task<bool> InstallMod(string gameId, Mod mod)
+
+
+    public async Task<bool> InstallMod(string gameId, Mod mod)
 	{
 		try
 		{

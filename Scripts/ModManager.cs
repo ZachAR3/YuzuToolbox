@@ -131,7 +131,7 @@
 				// Checks if no titles were found, if they weren't gives error and cancels.
 				if (_titles.Count <= 0)
 				{
-					Tools.Instance.AddError("failed to retrieve titles list, check connection and try again later.");
+					Tools.Instance.AddError("Failed to retrieve titles list, check connection and try again later.");
 					_loadingPanel.Visible = false;
 					return;
 				}
@@ -224,7 +224,6 @@
 			{
 				Tools.Instance.AddError(
 					$@"Failed to retrieve mod list for ID:{gameId} | Title:{_titles[gameId]}. Exception:{argumentException.Message}");
-				_loadingPanel.SetThreadSafe("visible", false);
 				return;
 			}
 
@@ -669,8 +668,6 @@
 				SelectedSourceMods = _selectedSourceMods,
 				DownloadRequester = _downloadRequester,
 				DownloadUpdateTimer = _downloadUpdateTimer,
-				LoadingPanel = _loadingPanel
-
 			};
 
 			_totkHoloManager = new()
