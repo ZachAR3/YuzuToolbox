@@ -14,41 +14,43 @@ public partial class Installer : Control
 {
 	// Exported variables (Primarily for the UI / Interactions)
 	[ExportGroup("General")]
-	[Export()] private Label _latestVersionLabel;
+	[Export] private Label _latestVersionLabel;
 
 	[ExportGroup("Installer")] 
-	[Export()] private string _repoName;
-	[Export()] private string _repoOwner;
-	[Export()] private string _pineappleLatestUrl;
-	[Export()] private string _pineappleDownloadBaseUrl;
-	[Export()] private string _titlesKeySite;
-	[Export()] private string _windowsFolderName = "yuzu-windows-msvc-early-access";
-	[Export()] private string _yuzuBaseString = "Yuzu-EA-";
-	[Export()] private string _saveName;
-	[Export()] private int _previousVersionsToAdd = 10;
-	[Export()] private int _versionsPerPage = 10;
-	[Export()] private Image _icon;
-	[Export()] private OptionButton _versionButton;
-	[Export()] private CheckBox _createShortcutButton;
-	[Export()] private Button _installLocationButton;
-	[Export()] private Button _downloadButton;
-	[Export()] private Panel _downloadWindow;
-	[Export()] private Label _downloadLabel;
-	[Export()] private Timer _downloadUpdateTimer;
-	[Export()] private ProgressBar _downloadProgressBar;
-	[Export()] private CheckBox _clearShadersButton;
-	[Export()] private Button _shadersLocationButton;
-	[Export()] private CheckBox _autoUnpackButton;
-	[Export()] private CheckBox _customVersionCheckBox;
-	[Export()] private SpinBox _customVersionSpinBox;
-	[Export()] private HttpRequest _downloadRequester;
-	[Export()] private TextureRect _extractWarning;
-	[Export()] private TextureRect _downloadWarning;
-	[Export()] private TextureRect _clearShadersWarning;
+	[Export] private string _repoName;
+	[Export] private string _repoOwner;
+	[Export] private string _pineappleLatestUrl;
+	[Export] private string _pineappleDownloadBaseUrl;
+	[Export] private string _titlesKeySite;
+	[Export] private string _windowsFolderName = "yuzu-windows-msvc-early-access";
+	[Export] private string _yuzuBaseString = "Yuzu-EA-";
+	[Export] private int _previousVersionsToAdd = 10;
+	[Export] private int _versionsPerPage = 10;
+	[Export] private Image _icon;
+	[Export] private OptionButton _versionButton;
+	[Export] private CheckBox _createShortcutButton;
+	[Export] private LineEdit _executableNameLineEdit;
+	[Export] private Button _installLocationButton;
+	[Export] private Button _downloadButton;
+	[Export] private Panel _downloadWindow;
+	[Export] private Label _downloadLabel;
+	[Export] private Timer _downloadUpdateTimer;
+	[Export] private ProgressBar _downloadProgressBar;
+	[Export] private CheckBox _clearShadersButton;
+	[Export] private Button _shadersLocationButton;
+	[Export] private CheckBox _autoUnpackButton;
+	[Export] private CheckBox _customVersionCheckBox;
+	[Export] private SpinBox _customVersionSpinBox;
+	[Export] private HttpRequest _downloadRequester;
+	[Export] private TextureRect _extractWarning;
+	[Export] private TextureRect _downloadWarning;
+	[Export] private TextureRect _clearShadersWarning;
 
 	// Internal variables
-	private String _osUsed = OS.GetName();
+	private String _osUsed = "Windows"; //OS.GetName();
 	private string _yuzuExtensionString;
+	private string _yuzuExecutableName;
+	private string _executableSaveName;
 	
 
 	// Godot functions
@@ -56,17 +58,19 @@ public partial class Installer : Control
 	{
 		if (_osUsed == "Linux")
 		{
-			_saveName += ".AppImage";
+			_executableSaveName += ".AppImage";
 			_yuzuExtensionString = ".AppImage";
 			_autoUnpackButton.Disabled = true;
 		}
 		else if (_osUsed == "Windows")
 		{
-			_saveName += ".zip";
+			_executableSaveName += ".zip";
 			_yuzuExtensionString = ".zip";
 			_createShortcutButton.Disabled = true;
 		}
-
+		
+		_yuzuExecutableName = Globals.Instance.Settings.ExecutableName;
+		_executableNameLineEdit.Text = _yuzuExecutableName;
 		_shadersLocationButton.Text = Globals.Instance.Settings.ShadersLocation;
 		_installLocationButton.Text = Globals.Instance.Settings.SaveDirectory;
 		_downloadButton.Disabled = true;
@@ -91,6 +95,8 @@ public partial class Installer : Control
 		{
 			return;
 		}
+
+		_executableSaveName = _executableSaveName.Insert(0, _yuzuExecutableName);
 
 		int version;
 		DeleteOldVersion();
@@ -119,7 +125,7 @@ public partial class Installer : Control
 		_downloadLabel.Text = "Downloading...";
 		_downloadWindow.Visible = true;
 		_downloadLabel.GrabFocus();
-		_downloadRequester.DownloadFile = $@"{Globals.Instance.Settings.SaveDirectory}/{_saveName}";
+		_downloadRequester.DownloadFile = $@"{Globals.Instance.Settings.SaveDirectory}/{_executableSaveName}";
 		_downloadRequester.Request(
 			$@"{_pineappleDownloadBaseUrl}{version}/{_osUsed}-{_yuzuBaseString}{version}{_yuzuExtensionString}");
 		_downloadUpdateTimer.Start();
@@ -306,7 +312,7 @@ Categories=Game;Emulator;Qt;
 
 	private void UnpackAndSetPermissions()
 	{
-		string yuzuPath = $@"{Globals.Instance.Settings.SaveDirectory}/{_saveName}";
+		string yuzuPath = $@"{Globals.Instance.Settings.SaveDirectory}/{_executableSaveName}";
 		if (_osUsed == "Linux")
 		{
 			var yuzuFile = new UnixFileInfo(yuzuPath)
@@ -322,7 +328,17 @@ Categories=Game;Emulator;Qt;
 				String yuzuWindowsDirectory = $@"{Globals.Instance.Settings.SaveDirectory}/{_windowsFolderName}";
 				if (Directory.Exists(yuzuWindowsDirectory))
 				{
+					// Moves the files from the temp folder into the save directory
 					Tools.MoveFilesAndDirs(yuzuWindowsDirectory, Globals.Instance.Settings.SaveDirectory);
+					// Creates the executable path to yuzu.exe (hardcoded, but due to the prevalence of .exe's in the folder no better ways to do it)
+					var currentExecutablePath = Path.Join(Globals.Instance.Settings.SaveDirectory, "yuzu.exe");
+					var newExecutablePath = Path.Join(Globals.Instance.Settings.SaveDirectory,
+						$"{_yuzuExecutableName}.exe");
+					// Essentially renames the .exe into the yuzu executable name
+					if (currentExecutablePath != newExecutablePath)
+					{
+						File.Move(currentExecutablePath, newExecutablePath);
+					}
 				}
 			}
 		}
@@ -337,13 +353,14 @@ Categories=Game;Emulator;Qt;
 
 			foreach (var file in previousSave.GetFiles())
 			{
-				if (file.GetExtension() == "AppImage" || file.GetBaseName() == "yuzu")
+				if (file.GetExtension() == "AppImage" || file.GetBaseName() == _executableSaveName)
 				{
 					return $@"{Globals.Instance.Settings.SaveDirectory}/{file}";
 				}
 			}
 		}
 
+		Tools.Instance.AddError("Unable to find existing version");
 		return "";
 	}
 
@@ -436,7 +453,7 @@ Categories=Game;Emulator;Qt;
 		if (result == (int)HttpRequest.Result.Success)
 		{
 			// Used to save version installed after download.
-			Globals.Instance.SaveManager.WriteSave(Globals.Instance.Settings);
+			Globals.Instance.SaveManager.WriteSave();
 			_downloadProgressBar.Value = 100;
 			_downloadLabel.Text = "Successfully Downloaded!";
 
@@ -462,4 +479,13 @@ Categories=Game;Emulator;Qt;
 		_customVersionSpinBox.Editable = editable;
 		_versionButton.Disabled = editable;
 	}
+
+
+	private void ExecutableNameChanged(string newName)
+	{
+		_yuzuExecutableName = newName;
+		Globals.Instance.Settings.ExecutableName = _yuzuExecutableName;
+		Globals.Instance.SaveManager.WriteSave();
+	}
 }
+
