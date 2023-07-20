@@ -58,7 +58,7 @@
 		private Dictionary<string, Game> _installedGames = new();
 		private Dictionary<string, List<Mod>> _installedMods = new();
 
-		private StandardModManagement _standardModManager;
+		private StandardModManagement _standardModManager = new();
 		private BananaManager _bananaManager = new();
 		private OfficialManager _officialManager = new();
 		private TotkHoloManager _totkHoloManager = new();
@@ -596,24 +596,29 @@
 			// If no game ID is passed uses the current games
 			gameId = string.IsNullOrEmpty(gameId) ? _currentGameId : gameId;
 
-			// Deletes the known installed mods
-			GD.Print(_installedMods[gameId].Count);
-			foreach (var mod in new List<Mod> (_installedMods[gameId]))
+			try
 			{
-				GD.Print(gameId);
-				GD.Print(mod.InstalledPath);
-				GD.Print(_selectedSource);
-				await _standardModManager.DeleteMod(gameId, mod, _selectedSource, (int)Sources.All, true);
+				// Deletes the known installed mods
+				foreach (var mod in new List<Mod>(_installedMods[gameId]))
+				{
+					await DeleteMod(gameId, mod, _selectedSource, (int)Sources.All, true);
+					_installedMods[gameId].Remove(mod);
+				}
+
+				// Deletes non-known installed mods
+				string modsPath = Path.Join(Globals.Instance.Settings.ModsLocation, gameId);
+				foreach (var modPath in Directory.GetDirectories(modsPath))
+				{
+					Tools.DeleteDirectoryContents(modPath);
+					Directory.Delete(modPath);
+				}
 			}
-			
-			// Deletes non-known installed mods
-			string modsPath = Path.Join(Globals.Instance.Settings.ModsLocation, gameId);
-			foreach (var modPath in Directory.GetDirectories(modsPath))
+			catch (Exception deleteError)
 			{
-				GD.Print("custom delete:" + modPath);
-				Tools.DeleteDirectoryContents(modPath);
-				Directory.Delete(modPath);
+				Tools.Instance.AddError($@"failed to delete mod:{deleteError}");
 			}
+
+			SelectGame(_gamePickerButton.Selected);
 		}
 		
 		

@@ -24,6 +24,9 @@ public partial class StandardModManagement : Node
 		{
 			await Task.Run(async () =>
 			{
+				// TODO #65
+				GodotThread.SetThreadSafetyChecksEnabled(false);
+				
 				string downloadPath = Path
 					.Join(Globals.Instance.Settings.ModsLocation, gameId, $@"{mod.ModName.Replace(":", ".")}-Download");
 				string installPath = Path
