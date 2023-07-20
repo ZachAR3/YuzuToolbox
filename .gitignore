@@ -1,6 +1,6 @@
 # Godot 4+ specific ignores
 .godot/
 .idea/
-releases/
+Releases/
 .vs/
 .vscode/
