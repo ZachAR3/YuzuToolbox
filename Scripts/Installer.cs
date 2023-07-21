@@ -156,30 +156,30 @@ public partial class Installer : Control
 		String windowsShortcutName = "yuzu-ea.lnk";
 		String iconPath = $@"{Globals.Instance.Settings.SaveDirectory}/Icon.png";
 
-		string executable = "";
+		string executable = OS.GetExecutablePath();
+		string launcherFlag = null;
 		if (_autoUpdate)
 		{
-			string[] extensions = new[] { ".exe", ".x86_64" };
-			var matchingFiles = Directory.EnumerateFiles(ProjectSettings.GlobalizePath("res://"))
-				.Where(file => extensions.Contains(Path.GetExtension(file)))
-				.Select(Path.GetFullPath);
-
-			executable = matchingFiles.First();
+			launcherFlag = "--launcher";
 		}
 		else
 		{
 			GetExistingVersion();
 		}
 
-
-
+		if (!File.Exists(executable))
+		{
+			Tools.Instance.AddError("No executable path found, shortcut creation failed... Please contact a developer...");
+			return;
+		}
+		
 		if (_osUsed == "Linux")
 		{
 			_icon.SavePng(iconPath);
 			string shortcutContent = $@"
 [Desktop Entry]
 Comment=Nintendo Switch video game console emulator
-Exec={executable} --launcher
+Exec={executable} {launcherFlag}
 GenericName=Switch Emulator
 Icon={iconPath}
 MimeType=
@@ -234,7 +234,7 @@ Categories=Game;Emulator;Qt;
 			var windowsShortcut = new WindowsShortcut
 			{
 				Path = executable,
-				Arguments = "--launcher"
+				Arguments = launcherFlag
 			};
 
 
@@ -365,6 +365,7 @@ Categories=Game;Emulator;Qt;
 			{
 				FileAccessPermissions = FileAccessPermissions.UserReadWriteExecute
 			};
+			Globals.Instance.Settings.ExecutablePath = yuzuPath;
 		}
 		else if (_osUsed == "Windows")
 		{
@@ -384,6 +385,7 @@ Categories=Game;Emulator;Qt;
 					if (currentExecutablePath != newExecutablePath)
 					{
 						File.Move(currentExecutablePath, newExecutablePath);
+						Globals.Instance.Settings.ExecutablePath = newExecutablePath;
 					}
 				}
 			}
@@ -517,6 +519,8 @@ Categories=Game;Emulator;Qt;
 			{
 				Tools.Instance.LaunchYuzu();
 			}
+			
+			Globals.Instance.SaveManager.WriteSave();
 		}
 		else
 		{

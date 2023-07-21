@@ -34,7 +34,6 @@
 
 		private string _currentGameId;
 		private string _osUsed = OS.GetName();
-		private const string TitleSplitter = "||";
 
 
 		// Code for handling sources and their associated names with each

@@ -167,19 +167,6 @@ alignment = 1
 text_overrun_behavior = 4
 clip_text = true
 
-[node name="AutoUpdateLabel" type="Label" parent="ControlsContainer"]
-layout_mode = 2
-size_flags_horizontal = 0
-text = "Auto update:"
-
-[node name="AutoUpdate" type="CheckBox" parent="ControlsContainer"]
-layout_mode = 2
-tooltip_text = "(Requires create shortcut) Causes shortcut to auto update Yuzu before launching it."
-focus_mode = 0
-text = "Auto update Yuzu at launch."
-alignment = 1
-text_overrun_behavior = 4
-
 [node name="CreateShortcutLabel" type="Label" parent="ControlsContainer"]
 layout_mode = 2
 text = "Create start shortcut:  "
@@ -189,6 +176,19 @@ layout_mode = 2
 tooltip_text = "Creates a start menu shortcut for yuzu-ea (requires auto unpack and admin privleges on windows)"
 focus_mode = 0
 text = "Creates a start menu shortcut for yuzu-ea (requires auto unpack and admin privleges on windows)"
+alignment = 1
+text_overrun_behavior = 4
+
+[node name="AutoUpdateLabel" type="Label" parent="ControlsContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+text = "Auto update:"
+
+[node name="AutoUpdate" type="CheckBox" parent="ControlsContainer"]
+layout_mode = 2
+tooltip_text = "(Requires create shortcut) Causes shortcut to auto update Yuzu before launching it."
+focus_mode = 0
+text = "(Requires create shortcut) Auto update Yuzu at launch."
 alignment = 1
 text_overrun_behavior = 4
 

@@ -45,6 +45,7 @@ public partial class Tools : Node
 			ProcessStartInfo yuzuProcessInfo = new(executablePath);
 
 			Process yuzuProcess = Process.Start(yuzuProcessInfo);
+			GetTree().Quit();
 		}
 		catch (Exception launchException)
 		{
