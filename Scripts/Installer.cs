@@ -82,7 +82,7 @@ public partial class Installer : Control
 		_extractWarning.Visible = false;
 		_downloadWarning.Visible = false;
 		_clearShadersWarning.Visible = false;
-		
+
 		_downloadButton.GrabFocus();
 		AddVersions();
 	}
@@ -154,9 +154,9 @@ public partial class Installer : Control
 	{
 		String linuxShortcutName = "yuzu-ea.desktop";
 		String windowsShortcutName = "yuzu-ea.lnk";
-		String iconPath = $@"{Globals.Instance.Settings.SaveDirectory}/Icon.png";
+		String iconPath = Path.Join(Globals.Instance.Settings.SaveDirectory, "Icon.png");
 
-		string executable = OS.GetExecutablePath();
+		string executable = _autoUpdate ? OS.GetExecutablePath() : Globals.Instance.Settings.ExecutablePath;
 		string launcherFlag = null;
 		if (_autoUpdate)
 		{
@@ -234,6 +234,7 @@ Categories=Game;Emulator;Qt;
 			var windowsShortcut = new WindowsShortcut
 			{
 				Path = executable,
+				IconLocation = Globals.Instance.Settings.ExecutablePath,
 				Arguments = launcherFlag
 			};
 
@@ -253,7 +254,6 @@ Categories=Game;Emulator;Qt;
 				Tools.Instance.AddError(
 					$@"cannot create shortcut, ensure app is running as admin. Placing instead at {yuzuShortcutPath}. Exception:{shortcutError}");
 				windowsShortcut.Save(yuzuShortcutPath);
-				throw;
 			}
 
 		}
@@ -369,7 +369,7 @@ Categories=Game;Emulator;Qt;
 		}
 		else if (_osUsed == "Windows")
 		{
-			if (_autoUnpackButton.ButtonPressed)
+			if (_autoUnpackButton.ButtonPressed || _autoUpdate)
 			{
 				System.IO.Compression.ZipFile.ExtractToDirectory(yuzuPath, Globals.Instance.Settings.SaveDirectory);
 				String yuzuWindowsDirectory = $@"{Globals.Instance.Settings.SaveDirectory}/{_windowsFolderName}";
@@ -385,8 +385,8 @@ Categories=Game;Emulator;Qt;
 					if (currentExecutablePath != newExecutablePath)
 					{
 						File.Move(currentExecutablePath, newExecutablePath);
-						Globals.Instance.Settings.ExecutablePath = newExecutablePath;
 					}
+					Globals.Instance.Settings.ExecutablePath = newExecutablePath;
 				}
 			}
 		}
