@@ -12,8 +12,7 @@ The recommended method of install is through Itch.io as it provoides updating fe
 However, if one would still like to install it without Itch one can simply go to [releases page](https://github.com/ZachAR3/YuzuToolbox/releases) and download the zip file for your os and then extract it into its own folder.
 
 # Usage
-Simply launch the program and set your install location, then click download and wait for it to finish.
-For mod management it is quite simple, double click to install or remove, and update selected / all to update your installed mods.
+Simply launch the program and set your install location, then click download and wait for it to finish. Optionally, you can launch the program with --launcher after initially installing Yuzu to automatically check for updates (update if available) and then launch Yuzu closing itself, The recommended method of using this feature is to enable "Auto Updates" with "Create Shortcut" upon installation so the created shortcut leads back to the launcher with this flag.
 
 (WARNING:Most banana mods are meant for the nintendo switch and NOT Yuzu, meaning they will not work if installed. Please do not make issues regarding this)
 
