@@ -1,3 +1,6 @@
+# Notice
+This project is currently pending, as Yuzu has been taken down by Nintendo, and the PineappleEA will no longer be updated and likely be taken down. If this happens I will just remove the installation functionality, but I may be contacted by Nintendo as well, in which case this app will have to be shut down as I do not have anywhere near the amount of time or money to go against them. Hopefully, just the Yuzu repos are shut down and I can leave it up as a mod manager / simple tool though.
+
 # YuzuToolbox
 A simple tool to download and update early access builds of yuzu from the [PineappleEA](https://github.com/pineappleEA/pineapple-src "PineappleEA") Github repo. This tool is currently supports 
 * Cross platform (Windows and Linux)
