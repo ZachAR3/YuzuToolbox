@@ -16,14 +16,8 @@ public partial class Installer : Control
 	[ExportGroup("General")]
 	[Export] private Label _latestVersionLabel;
 
-	[ExportGroup("Installer")] 
-	[Export] private string _repoName;
-	[Export] private string _repoOwner;
-	[Export] private string _pineappleLatestUrl;
-	[Export] private string _pineappleDownloadBaseUrl;
+	[ExportGroup("Installer")]
 	[Export] private string _titlesKeySite;
-	[Export] private string _windowsFolderName = "yuzu-windows-msvc-early-access";
-	[Export] private string _yuzuBaseString = "Yuzu-EA-";
 	[Export] private int _previousVersionsToAdd = 10;
 	[Export] private int _versionsPerPage = 10;
 	[Export] private Image _icon;
@@ -82,8 +76,7 @@ public partial class Installer : Control
 		_extractWarning.Visible = false;
 		_downloadWarning.Visible = false;
 		_clearShadersWarning.Visible = false;
-
-		_downloadButton.GrabFocus();
+		
 		AddVersions();
 	}
 
@@ -135,8 +128,7 @@ public partial class Installer : Control
 		_downloadWindow.Visible = true;
 		_downloadLabel.GrabFocus();
 		_downloadRequester.DownloadFile = $@"{Globals.Instance.Settings.SaveDirectory}/{_executableSaveName}";
-		_downloadRequester.Request(
-			$@"{_pineappleDownloadBaseUrl}{version}/{_osUsed}-{_yuzuBaseString}{version}{_yuzuExtensionString}");
+		_downloadRequester.Request(Globals.Instance.Settings.AppMode.GetDownloadLink(version, _osUsed));
 		_downloadUpdateTimer.Start();
 		_downloadLabel.Text = "Downloading...";
 	}

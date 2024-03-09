@@ -1,4 +1,6 @@
 using Godot;
+using Godot.Collections;
+using YuzuToolbox.Scripts.Modes;
 
 
 public partial class SettingsResource : Resource
@@ -12,6 +14,7 @@ public partial class SettingsResource : Resource
 	[Export] public string ModsLocation;
 	[Export] public int InstalledVersion = -1;
 	[Export] public bool LightModeEnabled;
+	[Export] public Mode AppMode;
 	[Export] public bool Muted = true;
 	[Export] public string AppDataPath;
 	[Export] public string GithubApiToken;

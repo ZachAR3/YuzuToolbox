@@ -1,12 +1,15 @@
 using System.Collections.Generic;
 using Godot;
 using Godot.Collections;
+using YuzuToolbox.Scripts.Modes;
 
 
 public partial class Home : Control
 {
 	[ExportGroup("App")]
 	[Export()] private float _appVersion = 2f;
+	[Export()] private OptionButton _appModesButton;
+	[Export()] private Godot.Collections.Dictionary<int, string> _appModes;
 	[Export()] private TextureRect _darkBg;
 	[Export()] private TextureRect _lightBg;
 	[Export()] private ColorRect _downloadWindowApp;
@@ -63,6 +66,20 @@ public partial class Home : Control
 	}
 
 
+	private void SetMode(int newMode)
+	{
+		switch (_appModes[newMode])
+		{
+			case "yuzu":
+				Globals.Instance.Settings.AppMode = new ModeYuzu();
+				break;
+			case "ryujinx":
+				Globals.Instance.Settings.AppMode = new ModeRyujinx();
+				break;
+		}
+	}
+
+
 	private void OpenConsole()
 	{
 		_errorConsole.Visible = !_errorConsole.Visible;
@@ -79,12 +96,6 @@ public partial class Home : Control
 		_headerLabel.AddThemeFontSizeOverride("font_size", (int)(scaleRatio * 49));
 		_latestVersionLabel.AddThemeFontSizeOverride("font_size", (int)(scaleRatio * 32));
 		_currentTheme.DefaultFontSize = Mathf.Clamp((int)(scaleRatio * 35), 20, 50);
-	}
-
-	
-	private void ToggledMusicButton(bool musicEnabled)
-	{
-		AudioServer.SetBusMute(AudioServer.GetBusIndex("Master"), !musicEnabled);
 	}
 
 
