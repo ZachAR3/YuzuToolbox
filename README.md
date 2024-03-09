@@ -13,11 +13,6 @@ A simple tool to download and update early access builds of yuzu from the [Pinea
 # Donate
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/R5R4NFO8V)
 
-# Development pause
-Due to school starting back up I will be taking a hiatus from the project. I will still try and fix any raised issues from the Github / community, but I don't plan on working on any new features or current refactors / feature requests in the near future. I appreciate the support, and hope you found the tool useful. It should work long into the future unless the sources or PineappleEA Github make large changes, in which case I will try and get a patch out.
-
-Happy emulating!
-
 # Installing
 The recommended method of install is through Itch.io as it provoides updating features and easier launching: https://zachar3.itch.io/yuzutoolbox
 However, if one would still like to install it without Itch one can simply go to [releases page](https://github.com/ZachAR3/YuzuToolbox/releases) and download the zip file for your os and then extract it into its own folder.
