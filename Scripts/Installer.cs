@@ -9,6 +9,7 @@ using NativeFileDialogSharp;
 using Octokit;
 using WindowsShortcutFactory;
 using Label = Godot.Label;
+using GithubDownload;
 
 public partial class Installer : Control
 {
@@ -48,6 +49,11 @@ public partial class Installer : Control
 	private string _executableSaveName;
 	private int _latestRelease;
 	private bool _autoUpdate;
+	private string _repoOwner;
+	private string _repoName;
+	private string _titlesKeyRepo;
+	private string? _pineappleLatestUrl = null;
+	private string _windowsFolderName = "YuzuToolbox";
 
 
 	// Godot functions
@@ -79,8 +85,6 @@ public partial class Installer : Control
 		
 		AddVersionsAsync();
 	}
-
-
 
 	// Custom functions
 	private async void InstallSelectedVersionAsync()
@@ -322,13 +326,13 @@ Categories=Game;Emulator;Qt;
 		_versionButton.SetItemDisabled(selectedIndex, true);
 	}
 
-	
+	[Obsolete("GetLatestVersionAsync is deprecated, please use GetLatest from Octokit instead.")]
 	private async Task GetLatestVersionAsync()
 	{
 		// Trys to fetch version using github API if failed, tries to web-scrape it.
 		try
 		{
-			var gitHubClient = Globals.Instance.LocalGithubClient;
+			var gitHubClient = Globals.LocalGithubClient;
 
 			var latestRelease =
 				await gitHubClient.Repository.Release.GetLatest(_repoOwner, _repoName);
@@ -340,7 +344,7 @@ Categories=Game;Emulator;Qt;
 			Tools.Instance.AddErrorAsync("Github API rate limit exceeded, falling back to web-scraper. Some sources may not function until requests have reset");
 			
 			var httpClient = new System.Net.Http.HttpClient();
-			var rawVersionData = httpClient.GetAsync(_pineappleLatestUrl).Result.Content.ReadAsStringAsync().Result;
+			var rawVersionData = httpClient.GetAsync(_pineappleLatestUrl).Result.Content.ReadAsStringAsync().Result; // DEPRECATED: pineapple page don't work anymore for getting version
 			
 			_latestRelease = rawVersionData.Split("EA-").Last().Split("\"").First().ToInt();
 		}
