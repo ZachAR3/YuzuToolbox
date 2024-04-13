@@ -49,11 +49,13 @@ public partial class Installer : Control
 	private string _executableSaveName;
 	private int _latestRelease;
 	private bool _autoUpdate;
+
+	// TODO: Assign a value to the repo owner and name
 	private string _repoOwner;
 	private string _repoName;
-	private string _titlesKeyRepo;
-	private string? _pineappleLatestUrl = null;
-	private string _windowsFolderName = "YuzuToolbox";
+	private string _titlesKeyRepo; // TODO: Implement titles key
+	private string? _pineappleLatestUrl = null; // DEPRECATED: pineapple page don't work anymore for getting version
+	private string _windowsFolderName = "YuzuToolbox"; // Not sur if this is the correct use
 
 
 	// Godot functions

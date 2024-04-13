@@ -30,7 +30,7 @@ namespace GithubDownload
         /// <returns></returns>
         public async Task<Release?> GetReleaseAsync(string repoOwner, string repoName, string releaseTagName)
         {
-            IReadOnlyList<Release> releases = await this.githubClient.Repository.Release.GetAll(repoOwner, repoName);
+            IReadOnlyList<Release> releases = await githubClient.Repository.Release.GetAll(repoOwner, repoName);
             foreach (Release release in releases)
             {
                 if (release.TagName == releaseTagName)

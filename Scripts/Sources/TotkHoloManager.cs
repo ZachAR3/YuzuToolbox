@@ -27,7 +27,7 @@ public class TotkHoloManager
     {
         try
         {
-            _gitHubClient = Globals.Instance.LocalGithubClient;
+            _gitHubClient = Globals.LocalGithubClient;
             if (!modList.ContainsKey(gameId))
             {
                 modList[gameId] = new List<Mod>();

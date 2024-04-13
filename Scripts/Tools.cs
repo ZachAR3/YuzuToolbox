@@ -201,7 +201,7 @@ public partial class Tools : Node
 		try
 		{
 			HttpClient httpClient = new();
-			var gitHubClient = Globals.Instance.LocalGithubClient;
+			var gitHubClient = Globals.LocalGithubClient;
 
 			// Retrieve the repository content for the specified folder
 			var contents = await gitHubClient.Repository.Content.GetAllContents(owner, repo, folderPath);
