@@ -11,7 +11,7 @@ public class OfficialManager
     private readonly HttpClient _httpClient = new();
 
 
-    public async Task<Dictionary<string, List<Mod>>> GetAvailableMods(Dictionary<string, List<Mod>> modList, Dictionary<string, Game> installedGames, string gameId, int sourceId)
+    public async Task<Dictionary<string, List<Mod>>> GetAvailableModsAsync(Dictionary<string, List<Mod>> modList, Dictionary<string, Game> installedGames, string gameId, int sourceId)
     {
         if (!modList.ContainsKey(gameId))
         {

@@ -18,9 +18,9 @@ public partial class SettingsPage : Node
 	
 	
 	// Signal functions
-	private async void ResetSettingsPressed()
+	private async void ResetSettingsPressedAsync()
 	{
-		var confirm = await Tools.Instance.ConfirmationPopup();
+		var confirm = await Tools.Instance.ConfirmationPopupAsync();
 		if (confirm != true)
 		{
 			return;
@@ -30,9 +30,9 @@ public partial class SettingsPage : Node
 	}
 
 
-	private async void ResetInstalledModsPressed()
+	private async void ResetInstalledModsPressedAsync()
 	{
-		var confirm = await Tools.Instance.ConfirmationPopup();
+		var confirm = await Tools.Instance.ConfirmationPopupAsync();
 		if (confirm != true)
 		{
 			return;

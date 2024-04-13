@@ -49,7 +49,7 @@ public partial class Tools : Node
 		}
 		catch (Exception launchException)
 		{
-			AddError("Unable to launch Yuzu: " + launchException.Message);
+			AddErrorAsync("Unable to launch Yuzu: " + launchException.Message);
 		}	
 	}
 	
@@ -60,7 +60,7 @@ public partial class Tools : Node
 	}
 	
 	
-	public async Task<bool?> ConfirmationPopup(string titleText = "Are you sure?")
+	public async Task<bool?> ConfirmationPopupAsync(string titleText = "Are you sure?")
 	{
 		// Checks if the confirmationPopup is already connected to the ConfirmationPressed signal, if not, connect it.
 		if (!_confirmationPopup.IsConnected("index_pressed", new Callable(this, nameof(ConfirmationPressed))))
@@ -172,7 +172,7 @@ public partial class Tools : Node
 	}
 	
 	
-	public async void AddError(String error)
+	public async void AddErrorAsync(String error)
 	{
 		Callable.From(() =>
 		{
@@ -196,7 +196,7 @@ public partial class Tools : Node
 	}
 
 
-	public async Task<Exception> DownloadFolder(string owner, string repo, string folderPath, string destinationPath)
+	public async Task<Exception> DownloadFolderAsync(string owner, string repo, string folderPath, string destinationPath)
 	{
 		try
 		{
@@ -225,7 +225,8 @@ public partial class Tools : Node
 					var subFolderPath = Path.Combine(destinationPath, content.Name);
 
 					// Recursively download and copy the contents of sub-folders
-					await DownloadFolder(owner, repo, content.Path, subFolderPath);
+					// To avoid recursion, use a loop instead ?
+					await DownloadFolderAsync(owner, repo, content.Path, subFolderPath);
 				}
 			}
 

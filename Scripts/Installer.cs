@@ -77,16 +77,16 @@ public partial class Installer : Control
 		_downloadWarning.Visible = false;
 		_clearShadersWarning.Visible = false;
 		
-		AddVersions();
+		AddVersionsAsync();
 	}
 
 
 
 	// Custom functions
-	private async void InstallSelectedVersion()
+	private async void InstallSelectedVersionAsync()
 	{
 		// Launches confirmation window, and cancels if not confirmed.
-		var confirm = await Tools.Instance.ConfirmationPopup();
+		var confirm = await Tools.Instance.ConfirmationPopupAsync();
 		if (confirm != true)
 		{
 			return;
@@ -161,7 +161,7 @@ public partial class Installer : Control
 
 		if (!File.Exists(executable))
 		{
-			Tools.Instance.AddError("No executable path found, shortcut creation failed... Please contact a developer...");
+			Tools.Instance.AddErrorAsync("No executable path found, shortcut creation failed... Please contact a developer...");
 			return;
 		}
 		
@@ -207,14 +207,14 @@ Categories=Game;Emulator;Qt;
 				catch (Exception shortcutError)
 				{
 					shortcutPath = $@"{Globals.Instance.Settings.SaveDirectory}/{linuxShortcutName}";
-					Tools.Instance.AddError(
+					Tools.Instance.AddErrorAsync(
 						$@"Error creating shortcut, creating new at {shortcutPath}. Error:{shortcutError}");
 					File.WriteAllText(shortcutPath, shortcutContent);
 				}
 			}
 			else
 			{
-				Tools.Instance.AddError("Cannot find shortcut directory, please place manually.");
+				Tools.Instance.AddErrorAsync("Cannot find shortcut directory, please place manually.");
 			}
 		}
 		else if (_osUsed == "Windows")
@@ -243,7 +243,7 @@ Categories=Game;Emulator;Qt;
 			catch (Exception shortcutError)
 			{
 				yuzuShortcutPath = $@"{Globals.Instance.Settings.SaveDirectory}/{windowsShortcutName}";
-				Tools.Instance.AddError(
+				Tools.Instance.AddErrorAsync(
 					$@"cannot create shortcut, ensure app is running as admin. Placing instead at {yuzuShortcutPath}. Exception:{shortcutError}");
 				windowsShortcut.Save(yuzuShortcutPath);
 			}
@@ -252,14 +252,14 @@ Categories=Game;Emulator;Qt;
 	}
 
 
-	private async void AddVersions()
+	private async void AddVersionsAsync()
 	{
 		try
 		{
-			await GetLatestVersion();
+			await GetLatestVersionAsync();
 			if (_latestRelease == -1)
 			{
-				Tools.Instance.AddError("Unable to fetch latest Pineapple release");
+				Tools.Instance.AddErrorAsync("Unable to fetch latest Pineapple release");
 				return;
 			}
 
@@ -296,7 +296,7 @@ Categories=Game;Emulator;Qt;
 		}
 		catch (Exception versionPullException)
 		{
-			Tools.Instance.AddError("Failed to get latest versions error code: " + versionPullException);
+			Tools.Instance.AddErrorAsync("Failed to get latest versions error code: " + versionPullException);
 		}
 	}
 
@@ -322,8 +322,8 @@ Categories=Game;Emulator;Qt;
 		_versionButton.SetItemDisabled(selectedIndex, true);
 	}
 
-
-	private async Task GetLatestVersion()
+	
+	private async Task GetLatestVersionAsync()
 	{
 		// Trys to fetch version using github API if failed, tries to web-scrape it.
 		try
@@ -337,7 +337,7 @@ Categories=Game;Emulator;Qt;
 		// Fall back version grabber
 		catch (RateLimitExceededException)
 		{
-			Tools.Instance.AddError("Github API rate limit exceeded, falling back to web-scraper. Some sources may not function until requests have reset");
+			Tools.Instance.AddErrorAsync("Github API rate limit exceeded, falling back to web-scraper. Some sources may not function until requests have reset");
 			
 			var httpClient = new System.Net.Http.HttpClient();
 			var rawVersionData = httpClient.GetAsync(_pineappleLatestUrl).Result.Content.ReadAsStringAsync().Result;
@@ -400,7 +400,7 @@ Categories=Game;Emulator;Qt;
 			}
 		}
 
-		Tools.Instance.AddError("Unable to find existing version");
+		Tools.Instance.AddErrorAsync("Unable to find existing version");
 		return "";
 	}
 
@@ -516,7 +516,7 @@ Categories=Game;Emulator;Qt;
 		}
 		else
 		{
-			Tools.Instance.AddError("Failed to download, error:" + result);
+			Tools.Instance.AddErrorAsync("Failed to download, error:" + result);
 			_downloadProgressBar.Value = 0;
 		}
 	}
