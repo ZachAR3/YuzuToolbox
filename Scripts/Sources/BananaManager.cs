@@ -10,7 +10,7 @@ public class BananaManager
 	private readonly HttpClient _httpClient = new();
 	
 	
-	public async Task<Dictionary<string, List<Mod>>> GetAvailableMods(Dictionary<string, List<Mod>> modList, Dictionary<string, Game> installedGames, string gameId, int sourceId, int page = 1)
+	public async Task<Dictionary<string, List<Mod>>> GetAvailableModsAsync(Dictionary<string, List<Mod>> modList, Dictionary<string, Game> installedGames, string gameId, int sourceId, int page = 1)
 	{
 		if (!modList.ContainsKey(gameId))
 		{

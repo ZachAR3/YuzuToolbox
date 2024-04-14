@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using Octokit;
 using Node = Godot.Node;
+using GithubDownload;
 
 public partial class Globals : Node
 {
@@ -11,7 +12,9 @@ public partial class Globals : Node
 	
 	public ResourceSaveManager SaveManager = new();
 	public SettingsResource Settings = new();
-	public readonly GitHubClient LocalGithubClient = new(new ProductHeaderValue("PineappleEA-GUI"));
+	private static readonly Credentials _credentials = new Credentials("TOKEN HERE");
+	private static readonly ProductHeaderValue _productHeader = new ProductHeaderValue("YuzuToolbox");
+	public static readonly OctokitGitHubClient LocalGithubClient = new OctokitGitHubClient(_productHeader, _credentials);
 	//public string DllsDirectory;
 
 	public override void _Ready()

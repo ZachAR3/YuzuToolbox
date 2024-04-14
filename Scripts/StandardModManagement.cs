@@ -17,7 +17,7 @@ public partial class StandardModManagement : Node
     public Timer DownloadUpdateTimer;
 
 
-    public async Task<bool> InstallMod(string gameId, Mod mod)
+    public async Task<bool> InstallModAsync(string gameId, Mod mod)
 	{
 		try
 		{
@@ -83,7 +83,7 @@ public partial class StandardModManagement : Node
 		}
 		catch (Exception installError)
 		{
-			Tools.Instance.AddError($@"failed to install mod:{installError}");
+			Tools.Instance.AddErrorAsync($@"failed to install mod:{installError}");
 			throw;
 		}
 		
@@ -97,7 +97,7 @@ public partial class StandardModManagement : Node
 		{
 			if (!noConfirmation)
 			{
-				var confirm = await Tools.Instance.ConfirmationPopup($@"Delete {mod.ModName}?");
+				var confirm = await Tools.Instance.ConfirmationPopupAsync($@"Delete {mod.ModName}?");
 				if (confirm == false)
 				{
 					return false;
@@ -121,7 +121,7 @@ public partial class StandardModManagement : Node
 		}
 		catch (Exception removeError)
 		{
-			Tools.Instance.AddError("failed to remove mod:" + removeError);
+			Tools.Instance.AddErrorAsync("failed to remove mod:" + removeError);
 			return false;
 		}
 		

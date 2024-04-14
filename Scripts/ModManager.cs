@@ -66,7 +66,7 @@
 
 
 		// Godot Functions
-		private async void Initiate()
+		private async Task Initiate() // Change void to Task to enable async like prefered in the C# Docs
 		{
 			// Disables initialization if launched as launcher mode
 			if (Globals.Instance.Settings.LauncherMode)
@@ -91,7 +91,7 @@
 					Globals.Instance.Settings.ModsLocation.Length + _selectionPaddingLeft, ' ');
 
 			AddSources();
-			await GetGamesAndMods();
+			await GetGamesAndModsAsync();
 		}
 
 
@@ -110,7 +110,7 @@
 		}
 		
 		
-		private async Task GetGamesAndMods(int source = (int)Sources.Official, int selectedGame = 0)
+		private async Task GetGamesAndModsAsync(int source = (int)Sources.Official, int selectedGame = 0)
 		{
 			await Task.Run(async () =>
 			{
@@ -119,7 +119,7 @@
 					_loadingPanel.Visible = true;
 					if (!Directory.Exists(Globals.Instance.Settings.ModsLocation))
 					{
-						Tools.Instance.AddError($@"mods location does not exist. Please set a valid location and refresh.");
+						Tools.Instance.AddErrorAsync($@"mods location does not exist. Please set a valid location and refresh.");
 						_loadingPanel.Visible = false;
 						return;
 					}
@@ -136,7 +136,7 @@
 				// Checks if no titles were found, if they weren't gives error and cancels.
 				if (_titles.Count <= 0)
 				{
-					Tools.Instance.AddError("Failed to retrieve titles list, check connection and try again later.");
+					Tools.Instance.AddErrorAsync("Failed to retrieve titles list, check connection and try again later.");
 					_loadingPanel.Visible = false;
 					return;
 				}
@@ -155,12 +155,12 @@
 						}
 						await Task.Run(async () =>
 						{
-							await GetAvailableMods(gameId, source);
+							await GetAvailableModsAsync(gameId, source);
 						});
 					}
 					else
 					{ 
-						Tools.Instance.AddError($@"could not find associated game title for: {gameId}");
+						Tools.Instance.AddErrorAsync($@"could not find associated game title for: {gameId}");
 					}
 
 				}
@@ -175,17 +175,17 @@
 			}
 			else
 			{
-				Tools.Instance.AddError("no installed games found, please ensure your mods directory is set to the correct location.");
+				Tools.Instance.AddErrorAsync("no installed games found, please ensure your mods directory is set to the correct location.");
 				_loadingPanel.Visible = false;
 			}
 		}
 	
 
-		private async Task GetAvailableMods(string gameId, int source)
+		private async Task GetAvailableModsAsync(string gameId, int source)
 		{
 			if (gameId == null && !_installedGames.ContainsKey(gameId))
 			{
-				Tools.Instance.AddError("game ID invalid. Cancelling...");
+				Tools.Instance.AddErrorAsync("game ID invalid. Cancelling...");
 				_loadingPanel.Visible = false;
 				return;
 			}
@@ -196,30 +196,30 @@
 				switch (source)
 				{
 					case (int)Sources.Official:
-						_selectedSourceMods = await _officialManager.GetAvailableMods(_selectedSourceMods, _installedGames,
+						_selectedSourceMods = await _officialManager.GetAvailableModsAsync(_selectedSourceMods, _installedGames,
 							gameId, (int)Sources.Official);
 						break;
 
 						case (int)Sources.Banana:
-							_selectedSourceMods = await _bananaManager.GetAvailableMods(_selectedSourceMods, _installedGames,
+							_selectedSourceMods = await _bananaManager.GetAvailableModsAsync(_selectedSourceMods, _installedGames,
 								gameId, (int)Sources.Banana, _modsPage);
 							break;
 
 						case (int)Sources.TotkHolo:
 							_selectedSourceMods =
-								await _totkHoloManager.GetAvailableMods(_selectedSourceMods, gameId, (int)Sources.TotkHolo,
+								await _totkHoloManager.GetAvailableModsAsync(_selectedSourceMods, gameId, (int)Sources.TotkHolo,
 									Globals.Instance.Settings.GetCompatibleVersions);
 							break;
 
 						case (int)Sources.All:
 							// Adds both official and banana mods the our source list
-							_selectedSourceMods = await _officialManager.GetAvailableMods(_selectedSourceMods, _installedGames,
+							_selectedSourceMods = await _officialManager.GetAvailableModsAsync(_selectedSourceMods, _installedGames,
 								gameId, (int)Sources.Official);
-							_selectedSourceMods = await _bananaManager.GetAvailableMods(_selectedSourceMods, _installedGames,
+							_selectedSourceMods = await _bananaManager.GetAvailableModsAsync(_selectedSourceMods, _installedGames,
 								gameId, (int)Sources.Banana, _modsPage);
 							if (_currentGameId == _gameSpecificSources[(int)Sources.TotkHolo])
 							{
-								_selectedSourceMods = await _totkHoloManager.GetAvailableMods(_selectedSourceMods,
+								_selectedSourceMods = await _totkHoloManager.GetAvailableModsAsync(_selectedSourceMods,
 									gameId, (int)Sources.TotkHolo, Globals.Instance.Settings.GetCompatibleVersions);
 							}
 							break;
@@ -227,7 +227,7 @@
 			}
 			catch (ArgumentException argumentException)
 			{
-				Tools.Instance.AddError(
+				Tools.Instance.AddErrorAsync(
 					$@"Failed to retrieve mod list for ID:{gameId} | Title:{_titles[gameId]}. Exception:{argumentException.Message}");
 				return;
 			}
@@ -283,7 +283,7 @@
 			}
 			catch (Exception installedError)
 			{
-				Tools.Instance.AddError($@"cannot find installed mods error: {installedError}");
+				Tools.Instance.AddErrorAsync($@"cannot find installed mods error: {installedError}");
 				_loadingPanel.Visible = false;
 				throw;
 			}
@@ -304,12 +304,12 @@
 				switch (_selectedSource)
 				{
 					case (int)Sources.Banana:
-						tempModsList = await _bananaManager.GetAvailableMods(_selectedSourceMods, _installedGames,
+						tempModsList = await _bananaManager.GetAvailableModsAsync(_selectedSourceMods, _installedGames,
 							_currentGameId,
 							_selectedSource, _modsPage);
 						break;
 					case (int)Sources.All:
-						tempModsList = await _bananaManager.GetAvailableMods(_selectedSourceMods, _installedGames,
+						tempModsList = await _bananaManager.GetAvailableModsAsync(_selectedSourceMods, _installedGames,
 							_currentGameId,
 							_selectedSource, _modsPage);
 						break;
@@ -369,7 +369,7 @@
 
 			if (gameList.Count < 2)
 			{
-				Tools.Instance.AddError("cannot retrieve titles");
+				Tools.Instance.AddErrorAsync("cannot retrieve titles");
 				return;
 			}
 
@@ -384,7 +384,7 @@
 
 				if (gameSplit.Length < 2)
 				{
-					Tools.Instance.AddError("unable to parse titles list, check connection and try again later.");
+					Tools.Instance.AddErrorAsync("unable to parse titles list, check connection and try again later.");
 					_loadingPanel.Visible = false;
 					return;
 				}
@@ -406,7 +406,7 @@
 
 		private async void UpdateAll()
 		{
-			var confirm = await Tools.Instance.ConfirmationPopup("Update all mods?");
+			var confirm = await Tools.Instance.ConfirmationPopupAsync("Update all mods?");
 			if (confirm == false)
 			{
 				return;
@@ -422,7 +422,7 @@
 						var modUpdated = await UpdateMod(installedGame.Key, mod, true);
 						if (modUpdated != true)
 						{
-							Tools.Instance.AddError($@"failed to update:{mod.ModName}");
+							Tools.Instance.AddErrorAsync($@"failed to update:{mod.ModName}");
 							_loadingPanel.Visible = false;
 							return;
 						}
@@ -438,7 +438,7 @@
 		{
 			if (!noConfirmation)
 			{
-				var confirm = await Tools.Instance.ConfirmationPopup($@"Update {mod.ModName}?");
+				var confirm = await Tools.Instance.ConfirmationPopupAsync($@"Update {mod.ModName}?");
 				if (confirm == false)
 				{
 					return false;
@@ -450,7 +450,7 @@
 				var removedMod = await DeleteMod(gameId, mod, _selectedSource, (int)Sources.All, true);
 				if (!removedMod)
 				{
-					Tools.Instance.AddError($@"failed to update mod, unable to delete old... Returning.");
+					Tools.Instance.AddErrorAsync($@"failed to update mod, unable to delete old... Returning.");
 					return false;
 				}
 
@@ -458,7 +458,7 @@
 			}
 			catch (Exception updateError)
 			{
-				Tools.Instance.AddError($@"failed to update mod:{updateError}");
+				Tools.Instance.AddErrorAsync($@"failed to update mod:{updateError}");
 				throw;
 			}
 
@@ -515,7 +515,7 @@
 			_gamePickerButton.Clear();
 			_selectedSource = source;
 			
-			await GetGamesAndMods(source, selectedGame);
+			await GetGamesAndModsAsync(source, selectedGame);
 		}
 
 
@@ -559,12 +559,12 @@
 		}
 		
 		
-		private async Task SelectSource(int sourceIndex)
+		private async Task SelectSourceAsync(int sourceIndex)
 		{
 			_selectedSource = _sourceNames.IndexOf(_sourcePickerButton.GetItemText(sourceIndex).Trim());
 			if (_selectedSource == -1)
 			{
-				Tools.Instance.AddError("source not found, please file a bug report. Defaulting back to official");
+				Tools.Instance.AddErrorAsync("source not found, please file a bug report. Defaulting back to official");
 				_sourcePickerButton.Select(0);
 				return;
 			}
@@ -611,7 +611,7 @@
 			}
 			catch (Exception deleteError)
 			{
-				Tools.Instance.AddError($@"failed to delete mod:{deleteError}");
+				Tools.Instance.AddErrorAsync($@"failed to delete mod:{deleteError}");
 			}
 
 			SelectGame(_gamePickerButton.Selected);
@@ -631,10 +631,10 @@
 			switch (mod.Source)
 			{
 				case (int)Sources.TotkHolo:
-					await _totkHoloManager.InstallMod(gameId, mod);
+					await _totkHoloManager.InstallModAsync(gameId, mod);
 					break;
 				default:
-					await _standardModManager.InstallMod(gameId, mod);
+					await _standardModManager.InstallModAsync(gameId, mod);
 					_downloadBar.Value = 100;
 					break;
 			}
@@ -754,7 +754,7 @@
 					}
 					else
 					{
-						Tools.Instance.AddError("Cannot update local mod...");
+						Tools.Instance.AddErrorAsync("Cannot update local mod...");
 					}
 
 					// Used to update UI with installed icon
@@ -785,9 +785,9 @@
 		}
 
 
-		private void RefreshPressed()
+		private async Task RefreshPressed()
 		{
-			Refresh(_selectedSource);
+			await Refresh(_selectedSource);
 		}
 
 		private void UpdateDownloadProgress()
@@ -796,15 +796,15 @@
 		}
 
 
-		private void SourceSelected(int selectedSource)
+		private async Task SourceSelected(int selectedSource)
 		{
-			SelectSource(selectedSource);
+			await SelectSourceAsync(selectedSource);
 		}
 
 
 		private async void ClearModsPressed()
 		{
-			if (await Tools.Instance.ConfirmationPopup("Remove all mods for selected title?") != true)
+			if (await Tools.Instance.ConfirmationPopupAsync("Remove all mods for selected title?") != true)
 			{
 				return;
 			}

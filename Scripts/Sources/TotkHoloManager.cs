@@ -22,12 +22,12 @@ public class TotkHoloManager
     private readonly HttpClient _httpClient = new();
 
 
-    public async Task<Dictionary<string, List<Mod>>> GetAvailableMods(Dictionary<string, List<Mod>> modList,
+    public async Task<Dictionary<string, List<Mod>>> GetAvailableModsAsync(Dictionary<string, List<Mod>> modList,
         string gameId, int sourceId, bool getCompatibleVersions = false)
     {
         try
         {
-            _gitHubClient = Globals.Instance.LocalGithubClient;
+            _gitHubClient = Globals.LocalGithubClient;
             if (!modList.ContainsKey(gameId))
             {
                 modList[gameId] = new List<Mod>();
@@ -59,7 +59,7 @@ public class TotkHoloManager
                                 catch (Exception getCompatibleVersionsException)
                                 {
                                     getCompatibleVersions = false;
-                                    Tools.Instance.AddError($@"failed to get compatible versions for totk holo{getCompatibleVersionsException}");
+                                    Tools.Instance.AddErrorAsync($@"failed to get compatible versions for totk holo{getCompatibleVersionsException}");
                                     compatibleVersions = new List<string> { "NA" };
                                 }
                             }
@@ -86,7 +86,7 @@ public class TotkHoloManager
     }
 
 
-    public async Task InstallMod(string gameId, Mod mod)
+    public async Task InstallModAsync(string gameId, Mod mod)
     {
         try
         {
@@ -95,10 +95,10 @@ public class TotkHoloManager
                 string installPath = Path
                     .Join(Globals.Instance.Settings.ModsLocation, gameId, $@"Managed{mod.ModName.Replace(":", ".")}");
 
-                var exception = await Tools.Instance.DownloadFolder(RepoOwner, RepoName, mod.ModUrl, installPath);
+                var exception = await Tools.Instance.DownloadFolderAsync(RepoOwner, RepoName, mod.ModUrl, installPath);
                 if (exception != null)
                 {
-                    Tools.Instance.AddError($@"failed to download: {mod.ModName}. Exception: {exception}");
+                    Tools.Instance.AddErrorAsync($@"failed to download: {mod.ModName}. Exception: {exception}");
                     return;
                 }
                 
@@ -113,7 +113,7 @@ public class TotkHoloManager
         }
         catch (Exception installError)
         {
-            Tools.Instance.AddError($@"failed to install mod:{installError}");
+            Tools.Instance.AddErrorAsync($@"failed to install mod:{installError}");
         }
     }
     

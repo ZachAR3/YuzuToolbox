@@ -9,6 +9,7 @@ using NativeFileDialogSharp;
 using Octokit;
 using WindowsShortcutFactory;
 using Label = Godot.Label;
+using GithubDownload;
 
 public partial class Installer : Control
 {
@@ -49,6 +50,13 @@ public partial class Installer : Control
 	private int _latestRelease;
 	private bool _autoUpdate;
 
+	// TODO: Assign a value to the repo owner and name
+	private string _repoOwner;
+	private string _repoName;
+	private string _titlesKeyRepo; // TODO: Implement titles key
+	private string? _pineappleLatestUrl = null; // DEPRECATED: pineapple page don't work anymore for getting version
+	private string _windowsFolderName = "YuzuToolbox"; // Not sur if this is the correct use
+
 
 	// Godot functions
 	private void Initiate()
@@ -77,16 +85,14 @@ public partial class Installer : Control
 		_downloadWarning.Visible = false;
 		_clearShadersWarning.Visible = false;
 		
-		AddVersions();
+		AddVersionsAsync();
 	}
 
-
-
 	// Custom functions
-	private async void InstallSelectedVersion()
+	private async void InstallSelectedVersionAsync()
 	{
 		// Launches confirmation window, and cancels if not confirmed.
-		var confirm = await Tools.Instance.ConfirmationPopup();
+		var confirm = await Tools.Instance.ConfirmationPopupAsync();
 		if (confirm != true)
 		{
 			return;
@@ -161,7 +167,7 @@ public partial class Installer : Control
 
 		if (!File.Exists(executable))
 		{
-			Tools.Instance.AddError("No executable path found, shortcut creation failed... Please contact a developer...");
+			Tools.Instance.AddErrorAsync("No executable path found, shortcut creation failed... Please contact a developer...");
 			return;
 		}
 		
@@ -207,14 +213,14 @@ Categories=Game;Emulator;Qt;
 				catch (Exception shortcutError)
 				{
 					shortcutPath = $@"{Globals.Instance.Settings.SaveDirectory}/{linuxShortcutName}";
-					Tools.Instance.AddError(
+					Tools.Instance.AddErrorAsync(
 						$@"Error creating shortcut, creating new at {shortcutPath}. Error:{shortcutError}");
 					File.WriteAllText(shortcutPath, shortcutContent);
 				}
 			}
 			else
 			{
-				Tools.Instance.AddError("Cannot find shortcut directory, please place manually.");
+				Tools.Instance.AddErrorAsync("Cannot find shortcut directory, please place manually.");
 			}
 		}
 		else if (_osUsed == "Windows")
@@ -243,7 +249,7 @@ Categories=Game;Emulator;Qt;
 			catch (Exception shortcutError)
 			{
 				yuzuShortcutPath = $@"{Globals.Instance.Settings.SaveDirectory}/{windowsShortcutName}";
-				Tools.Instance.AddError(
+				Tools.Instance.AddErrorAsync(
 					$@"cannot create shortcut, ensure app is running as admin. Placing instead at {yuzuShortcutPath}. Exception:{shortcutError}");
 				windowsShortcut.Save(yuzuShortcutPath);
 			}
@@ -252,14 +258,14 @@ Categories=Game;Emulator;Qt;
 	}
 
 
-	private async void AddVersions()
+	private async void AddVersionsAsync()
 	{
 		try
 		{
-			await GetLatestVersion();
+			await GetLatestVersionAsync();
 			if (_latestRelease == -1)
 			{
-				Tools.Instance.AddError("Unable to fetch latest Pineapple release");
+				Tools.Instance.AddErrorAsync("Unable to fetch latest Pineapple release");
 				return;
 			}
 
@@ -296,7 +302,7 @@ Categories=Game;Emulator;Qt;
 		}
 		catch (Exception versionPullException)
 		{
-			Tools.Instance.AddError("Failed to get latest versions error code: " + versionPullException);
+			Tools.Instance.AddErrorAsync("Failed to get latest versions error code: " + versionPullException);
 		}
 	}
 
@@ -322,13 +328,13 @@ Categories=Game;Emulator;Qt;
 		_versionButton.SetItemDisabled(selectedIndex, true);
 	}
 
-
-	private async Task GetLatestVersion()
+	[Obsolete("GetLatestVersionAsync is deprecated, please use GetLatest from Octokit instead.")]
+	private async Task GetLatestVersionAsync()
 	{
 		// Trys to fetch version using github API if failed, tries to web-scrape it.
 		try
 		{
-			var gitHubClient = Globals.Instance.LocalGithubClient;
+			var gitHubClient = Globals.LocalGithubClient;
 
 			var latestRelease =
 				await gitHubClient.Repository.Release.GetLatest(_repoOwner, _repoName);
@@ -337,10 +343,10 @@ Categories=Game;Emulator;Qt;
 		// Fall back version grabber
 		catch (RateLimitExceededException)
 		{
-			Tools.Instance.AddError("Github API rate limit exceeded, falling back to web-scraper. Some sources may not function until requests have reset");
+			Tools.Instance.AddErrorAsync("Github API rate limit exceeded, falling back to web-scraper. Some sources may not function until requests have reset");
 			
 			var httpClient = new System.Net.Http.HttpClient();
-			var rawVersionData = httpClient.GetAsync(_pineappleLatestUrl).Result.Content.ReadAsStringAsync().Result;
+			var rawVersionData = httpClient.GetAsync(_pineappleLatestUrl).Result.Content.ReadAsStringAsync().Result; // DEPRECATED: pineapple page don't work anymore for getting version
 			
 			_latestRelease = rawVersionData.Split("EA-").Last().Split("\"").First().ToInt();
 		}
@@ -400,7 +406,7 @@ Categories=Game;Emulator;Qt;
 			}
 		}
 
-		Tools.Instance.AddError("Unable to find existing version");
+		Tools.Instance.AddErrorAsync("Unable to find existing version");
 		return "";
 	}
 
@@ -516,7 +522,7 @@ Categories=Game;Emulator;Qt;
 		}
 		else
 		{
-			Tools.Instance.AddError("Failed to download, error:" + result);
+			Tools.Instance.AddErrorAsync("Failed to download, error:" + result);
 			_downloadProgressBar.Value = 0;
 		}
 	}
