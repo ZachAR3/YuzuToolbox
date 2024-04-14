@@ -3,12 +3,19 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Mono.Unix;
 using NativeFileDialogSharp;
 using Octokit;
 using WindowsShortcutFactory;
+using YuzuToolbox.Scripts.Modes;
 using Label = Godot.Label;
+using SharpCompress.Archives;
+using SharpCompress.Common;
+using SharpCompress.Readers;
+
 
 public partial class Installer : Control
 {
@@ -18,7 +25,6 @@ public partial class Installer : Control
 
 	[ExportGroup("Installer")]
 	[Export] private string _titlesKeySite;
-	[Export] private int _previousVersionsToAdd = 10;
 	[Export] private int _versionsPerPage = 10;
 	[Export] private Image _icon;
 	[Export] private OptionButton _versionButton;
@@ -43,40 +49,53 @@ public partial class Installer : Control
 
 	// Internal variables
 	private String _osUsed = OS.GetName();
-	private string _yuzuExtensionString;
-	private string _yuzuExecutableName;
+	// private string _yuzuExtensionString;
+	private string _executableName;
 	private string _executableSaveName;
 	private int _latestRelease;
 	private bool _autoUpdate;
+	private Mode AppMode => Globals.Instance.AppMode;
+	private SettingsResource Settings => Globals.Instance.Settings;
+	
+	private readonly System.Net.Http.HttpClient _httpClient = new();
 
 
 	// Godot functions
 	private void Initiate()
 	{
-		if (_osUsed == "Linux")
-		{
-			_executableSaveName += ".AppImage";
-			_yuzuExtensionString = ".AppImage";
-			_autoUnpackButton.Disabled = true;
-		}
-		else if (_osUsed == "Windows")
-		{
-			_executableSaveName += ".zip";
-			_yuzuExtensionString = ".zip";
-			_createShortcutButton.Disabled = true;
-		}
+		_httpClient.DefaultRequestHeaders.Add("User-Agent", "YuzuToolbox");
+		_createShortcutButton.Disabled = _osUsed == "Windows";
 		
-		_yuzuExecutableName = Globals.Instance.Settings.ExecutableName;
-		_executableNameLineEdit.Text = _yuzuExecutableName;
-		_shadersLocationButton.Text = Globals.Instance.Settings.ShadersLocation;
-		_installLocationButton.Text = Globals.Instance.Settings.SaveDirectory;
+		// TODO
+		if (AppMode.Name == "Yuzu")
+		{
+			if (_osUsed == "Linux")
+			{
+				_executableSaveName = ".AppImage";
+				_autoUnpackButton.Disabled = true;
+			}
+			else if (_osUsed == "Windows")
+			{
+				_executableSaveName = ".zip";
+				_createShortcutButton.Disabled = true;
+			}
+		}
+		else
+		{
+			_executableSaveName = ".tar.gz";
+		}
+
+		_executableName = AppMode.Name;
+		_executableNameLineEdit.Text = _executableName;
+		_shadersLocationButton.Text = Settings.ShadersLocation;
+		_installLocationButton.Text = Settings.SaveDirectory;
 		_downloadButton.Disabled = true;
 		_downloadWindow.Visible = false;
 		_customVersionSpinBox.Editable = false;
 		_extractWarning.Visible = false;
 		_downloadWarning.Visible = false;
 		_clearShadersWarning.Visible = false;
-		
+
 		AddVersions();
 	}
 
@@ -101,7 +120,8 @@ public partial class Installer : Control
 		else
 		{
 			int versionIndex = _versionButton.Selected;
-			selectedVersion = _versionButton.GetItemText(versionIndex).ToInt();
+			var version = _versionButton.GetItemText(versionIndex);
+			selectedVersion = Tools.ToInt(version);
 		}
 		InstallVersion(selectedVersion);
 	}
@@ -113,26 +133,71 @@ public partial class Installer : Control
 		DeleteOldVersion();
 		
 		// Set old install (if it exists) to not be disabled anymore.
-		if (Globals.Instance.Settings.InstalledVersion != -1)
+		if (Globals.Instance.Settings.InstalledVersion >= 0)
 		{
-			_versionButton.SetItemDisabled(_versionButton.GetItemIndex(Globals.Instance.Settings.InstalledVersion), false);
+			_versionButton.SetItemDisabled(_versionButton.GetItemIndex(Settings.InstalledVersion), false);
 		}
 		
-		_executableSaveName = _executableSaveName.Insert(0, _yuzuExecutableName);
+		_executableSaveName = _executableSaveName.Insert(0, _executableName);
 		_customVersionCheckBox.Disabled = true;
 		_versionButton.Disabled = true;
 		_downloadButton.Disabled = true;
 		_installLocationButton.Disabled = true;
-		Globals.Instance.Settings.InstalledVersion = version;
+		Settings.InstalledVersion = version;
 		_downloadLabel.Text = "Downloading...";
 		_downloadWindow.Visible = true;
 		_downloadLabel.GrabFocus();
-		_downloadRequester.DownloadFile = $@"{Globals.Instance.Settings.SaveDirectory}/{_executableSaveName}";
-		_downloadRequester.Request(Globals.Instance.Settings.AppMode.GetDownloadLink(version, _osUsed));
+
+		// Ensures save directory exists
+		if (!Directory.Exists(Settings.SaveDirectory))
+		{
+			Directory.CreateDirectory(Settings.SaveDirectory);
+		}
+		
+		_downloadRequester.DownloadFile = $@"{Settings.SaveDirectory}/{_executableSaveName}";
+		_downloadRequester.Request(AppMode.GetDownloadLink(version, _osUsed));
 		_downloadUpdateTimer.Start();
 		_downloadLabel.Text = "Downloading...";
 	}
 	
+	
+	private void VersionDownloadCompleted(long result, long responseCode, string[] headers, byte[] body)
+	{
+		_downloadUpdateTimer.Stop();
+		_customVersionCheckBox.Disabled = false;
+		_downloadButton.Disabled = false;
+		_installLocationButton.Disabled = false;
+		_versionButton.Disabled = false;
+		if (result == (int)HttpRequest.Result.Success)
+		{
+			// Used to save version installed after download.
+			Globals.Instance.SaveManager.WriteSave();
+			_downloadProgressBar.Value = 100;
+			_downloadLabel.Text = "Successfully Downloaded!";
+
+			AddInstalledVersion();
+			UnpackAndSetPermissions();
+			if (_createShortcutButton.ButtonPressed)
+			{
+				_downloadWindow.Visible = false;
+				CreateShortcut();
+			}
+
+			_downloadWindow.Visible = false;
+
+			if (Settings.LauncherMode)
+			{
+				Tools.Instance.LaunchYuzu();
+			}
+			
+			Globals.Instance.SaveManager.WriteSave();
+		}
+		else
+		{
+			Tools.Instance.AddError("Failed to download, error:" + result);
+			_downloadProgressBar.Value = 0;
+		}
+	}
 	
 
 	private void UpdateDownloadBar()
@@ -146,9 +211,9 @@ public partial class Installer : Control
 	{
 		String linuxShortcutName = "yuzu-ea.desktop";
 		String windowsShortcutName = "yuzu-ea.lnk";
-		String iconPath = Path.Join(Globals.Instance.Settings.SaveDirectory, "Icon.png");
+		String iconPath = Path.Join(Settings.SaveDirectory, "Icon.png");
 
-		string executable = _autoUpdate ? OS.GetExecutablePath() : Globals.Instance.Settings.ExecutablePath;
+		string executable = _autoUpdate ? OS.GetExecutablePath() : Settings.ExecutablePath;
 		string launcherFlag = null;
 		if (_autoUpdate)
 		{
@@ -191,7 +256,7 @@ Categories=Game;Emulator;Qt;
 
 				try
 				{
-					string tempShortcutPath = $@"{Globals.Instance.Settings.SaveDirectory}/{linuxShortcutName}";
+					string tempShortcutPath = $@"{Settings.SaveDirectory}/{linuxShortcutName}";
 					File.WriteAllText(tempShortcutPath, shortcutContent);
 					ProcessStartInfo startInfo = new ProcessStartInfo
 					{
@@ -206,7 +271,7 @@ Categories=Game;Emulator;Qt;
 				}
 				catch (Exception shortcutError)
 				{
-					shortcutPath = $@"{Globals.Instance.Settings.SaveDirectory}/{linuxShortcutName}";
+					shortcutPath = $@"{Settings.SaveDirectory}/{linuxShortcutName}";
 					Tools.Instance.AddError(
 						$@"Error creating shortcut, creating new at {shortcutPath}. Error:{shortcutError}");
 					File.WriteAllText(shortcutPath, shortcutContent);
@@ -226,7 +291,7 @@ Categories=Game;Emulator;Qt;
 			var windowsShortcut = new WindowsShortcut
 			{
 				Path = executable,
-				IconLocation = Globals.Instance.Settings.ExecutablePath,
+				IconLocation = Settings.ExecutablePath,
 				Arguments = launcherFlag
 			};
 
@@ -242,7 +307,7 @@ Categories=Game;Emulator;Qt;
 			}
 			catch (Exception shortcutError)
 			{
-				yuzuShortcutPath = $@"{Globals.Instance.Settings.SaveDirectory}/{windowsShortcutName}";
+				yuzuShortcutPath = $@"{Settings.SaveDirectory}/{windowsShortcutName}";
 				Tools.Instance.AddError(
 					$@"cannot create shortcut, ensure app is running as admin. Placing instead at {yuzuShortcutPath}. Exception:{shortcutError}");
 				windowsShortcut.Save(yuzuShortcutPath);
@@ -259,21 +324,27 @@ Categories=Game;Emulator;Qt;
 			await GetLatestVersion();
 			if (_latestRelease == -1)
 			{
-				Tools.Instance.AddError("Unable to fetch latest Pineapple release");
+				Tools.Instance.AddError("Unable to fetch latest emulator release");
 				return;
 			}
 
-			_customVersionSpinBox.Value = _latestRelease;
-			_latestVersionLabel.Text = $"Latest: {_latestRelease.ToString()}";
+			// TODO Deprecate or fix custom versions
+			//_customVersionSpinBox.Value = _latestRelease;
 			
-			//Add a version item for the latest and the dictated amount of previous versions.
-			for (int previousIndex = 0; previousIndex < _previousVersionsToAdd; previousIndex++)
+			_latestVersionLabel.Text = $"Latest: {(AppMode.Name == "Yuzu" ? _latestRelease : Tools.FromInt(_latestRelease))}";
+
+			HttpResponseMessage releasesResponse = await _httpClient.GetAsync(AppMode.ReleasesUrl);
+			var releasesContent = await releasesResponse.Content.ReadAsStringAsync();
+			MatchCollection releasesMatches = Regex.Matches(releasesContent, @"<h2 class=""sr-only"".*?>(.*?)<\/h2>");
+			foreach (Match match in releasesMatches)
 			{
-				_versionButton.AddItem((_latestRelease - previousIndex).ToString(), _latestRelease - previousIndex);
+				string version = match.Groups[1].Value.Trim();
+				_versionButton.AddItem(version, Tools.ToInt(version));
 			}
-			
+
+		
 			//Checks if there is already a version installed, and if so adds it.
-			if (Globals.Instance.Settings.InstalledVersion != -1)
+			if (Settings.InstalledVersion >= 0)
 			{
 				AddInstalledVersion();
 			}
@@ -281,9 +352,9 @@ Categories=Game;Emulator;Qt;
 			_downloadButton.Disabled = false;
 			
 			// If running in launcher mode updates and launches yuzu
-			if (Globals.Instance.Settings.LauncherMode)
+			if (Settings.LauncherMode)
 			{
-				if (_latestRelease != Globals.Instance.Settings.InstalledVersion)
+				if (_latestRelease != Settings.InstalledVersion)
 				{
 					// Yuzu will be launched inside of the download function when the download is completed.
 					InstallVersion(_latestRelease);
@@ -303,7 +374,7 @@ Categories=Game;Emulator;Qt;
 
 	private void AddInstalledVersion()
 	{
-		var installedVersion = Globals.Instance.Settings.InstalledVersion;
+		var installedVersion = Settings.InstalledVersion;
 		var selectedIndex = _versionButton.GetItemIndex(installedVersion);
 		_customVersionSpinBox.Value = installedVersion;
 
@@ -329,18 +400,19 @@ Categories=Game;Emulator;Qt;
 		try
 		{
 			var gitHubClient = Globals.Instance.LocalGithubClient;
-
 			var latestRelease =
-				await gitHubClient.Repository.Release.GetLatest(_repoOwner, _repoName);
-			_latestRelease = latestRelease.TagName.Split("-").Last().ToInt();
+				await gitHubClient.Repository.Release.GetLatest(AppMode.RepoOwner, AppMode.RepoName);
+
+			string release = latestRelease.TagName.Split("-").Last();
+			_latestRelease = Tools.ToInt(release);
 		}
+		// TODO update for ryujinx
 		// Fall back version grabber
 		catch (RateLimitExceededException)
 		{
 			Tools.Instance.AddError("Github API rate limit exceeded, falling back to web-scraper. Some sources may not function until requests have reset");
 			
-			var httpClient = new System.Net.Http.HttpClient();
-			var rawVersionData = httpClient.GetAsync(_pineappleLatestUrl).Result.Content.ReadAsStringAsync().Result;
+			var rawVersionData = _httpClient.GetAsync(AppMode.LatestDownloadUrl).Result.Content.ReadAsStringAsync().Result;
 			
 			_latestRelease = rawVersionData.Split("EA-").Last().Split("\"").First().ToInt();
 		}
@@ -350,35 +422,50 @@ Categories=Game;Emulator;Qt;
 
 	private void UnpackAndSetPermissions()
 	{
-		string yuzuPath = $@"{Globals.Instance.Settings.SaveDirectory}/{_executableSaveName}";
-		if (_osUsed == "Linux")
+		string executablePath = $@"{Settings.SaveDirectory}/{_executableSaveName}";
+		if (_osUsed == "Linux" && Settings.AppMode == "Yuzu")
 		{
-			var yuzuFile = new UnixFileInfo(yuzuPath)
+			var executableFile = new UnixFileInfo(executablePath)
 			{
 				FileAccessPermissions = FileAccessPermissions.UserReadWriteExecute
 			};
-			Globals.Instance.Settings.ExecutablePath = yuzuPath;
+			Settings.ExecutablePath = executablePath;
 		}
-		else if (_osUsed == "Windows")
+		else
 		{
 			if (_autoUnpackButton.ButtonPressed || _autoUpdate)
 			{
-				System.IO.Compression.ZipFile.ExtractToDirectory(yuzuPath, Globals.Instance.Settings.SaveDirectory);
-				String yuzuWindowsDirectory = $@"{Globals.Instance.Settings.SaveDirectory}/{_windowsFolderName}";
+				using Stream stream = File.OpenRead(executablePath);
+				var reader = ReaderFactory.Open(stream);
+				while (reader.MoveToNextEntry())
+				{
+					if (!reader.Entry.IsDirectory)
+					{
+						ExtractionOptions opt = new ExtractionOptions
+						{
+							ExtractFullPath = true,
+							Overwrite = true
+						};
+						reader.WriteEntryToDirectory(Settings.SaveDirectory, opt);
+					}
+				}
+
+				String yuzuWindowsDirectory = $@"{Settings.SaveDirectory}/{AppMode.WindowsFolderName}";
 				if (Directory.Exists(yuzuWindowsDirectory))
 				{
 					// Moves the files from the temp folder into the save directory
-					Tools.MoveFilesAndDirs(yuzuWindowsDirectory, Globals.Instance.Settings.SaveDirectory);
+					Tools.MoveFilesAndDirs(yuzuWindowsDirectory, Settings.SaveDirectory);
 					// Creates the executable path to yuzu.exe (hardcoded, but due to the prevalence of .exe's in the folder no better ways to do it)
-					var currentExecutablePath = Path.Join(Globals.Instance.Settings.SaveDirectory, "yuzu.exe");
-					var newExecutablePath = Path.Join(Globals.Instance.Settings.SaveDirectory,
-						$"{_yuzuExecutableName}.exe");
+					var currentExecutablePath = Path.Join(Settings.SaveDirectory, "yuzu.exe");
+					var newExecutablePath = Path.Join(Settings.SaveDirectory,
+						$"{_executableName}.exe");
 					// Essentially renames the .exe into the yuzu executable name
 					if (currentExecutablePath != newExecutablePath)
 					{
 						File.Move(currentExecutablePath, newExecutablePath);
 					}
-					Globals.Instance.Settings.ExecutablePath = newExecutablePath;
+
+					Settings.ExecutablePath = newExecutablePath;
 				}
 			}
 		}
@@ -387,15 +474,15 @@ Categories=Game;Emulator;Qt;
 
 	private String GetExistingVersion()
 	{
-		if (DirAccess.DirExistsAbsolute(Globals.Instance.Settings.SaveDirectory))
+		if (DirAccess.DirExistsAbsolute(Settings.SaveDirectory))
 		{
-			var previousSave = DirAccess.Open(Globals.Instance.Settings.SaveDirectory);
+			var previousSave = DirAccess.Open(Settings.SaveDirectory);
 
 			foreach (var file in previousSave.GetFiles())
 			{
 				if (file.GetExtension() == "AppImage" || file.GetBaseName() == _executableSaveName)
 				{
-					return $@"{Globals.Instance.Settings.SaveDirectory}/{file}";
+					return $@"{Settings.SaveDirectory}/{file}";
 				}
 			}
 		}
@@ -421,7 +508,7 @@ Categories=Game;Emulator;Qt;
 		{
 			if (_autoUnpackButton.ButtonPressed)
 			{
-				Tools.DeleteDirectoryContents(Globals.Instance.Settings.SaveDirectory);
+				Tools.DeleteDirectoryContents(Settings.SaveDirectory);
 			}
 			else
 			{
@@ -434,7 +521,7 @@ Categories=Game;Emulator;Qt;
 
 		if (_clearShadersButton.ButtonPressed)
 		{
-			Tools.Instance.ClearShaders(Globals.Instance.Settings.ShadersLocation);
+			Tools.Instance.ClearShaders(Settings.ShadersLocation);
 			;
 		}
 	}
@@ -443,26 +530,26 @@ Categories=Game;Emulator;Qt;
 	// Signal functions
 	private  void OnShadersLocationButtonPressed()
 	{
-		var shadersLocationInput = Dialog.FolderPicker(Globals.Instance.Settings.ShadersLocation).Path;
+		var shadersLocationInput = Dialog.FolderPicker(Settings.ShadersLocation).Path;
 		if (shadersLocationInput != null)
 		{
-			Globals.Instance.Settings.ShadersLocation = shadersLocationInput;
+			Settings.ShadersLocation = shadersLocationInput;
 		}
 
-		_shadersLocationButton.Text = Globals.Instance.Settings.ShadersLocation;	
-		Globals.Instance.SaveManager.WriteSave(Globals.Instance.Settings);
+		_shadersLocationButton.Text = Settings.ShadersLocation;	
+		Globals.Instance.SaveManager.WriteSave(Settings);
 	}
 	
 	
 	private void OnInstallLocationButtonPressed()
 	{
-		var saveDirectoryLocationInput = Dialog.FolderPicker(Globals.Instance.Settings.SaveDirectory).Path;
+		var saveDirectoryLocationInput = Dialog.FolderPicker(Settings.SaveDirectory).Path;
 		if (saveDirectoryLocationInput != null)
 		{
-			Globals.Instance.Settings.SaveDirectory = saveDirectoryLocationInput;
+			Settings.SaveDirectory = saveDirectoryLocationInput;
 		}
 		
-		_installLocationButton.Text = Globals.Instance.Settings.SaveDirectory;
+		_installLocationButton.Text = Settings.SaveDirectory;
 		Globals.Instance.SaveManager.WriteSave(Globals.Instance.Settings);
 	}
 
@@ -481,47 +568,8 @@ Categories=Game;Emulator;Qt;
 		_clearShadersWarning.Visible = clearEnabled;
 		_downloadWarning.Visible = _extractWarning.Visible || clearEnabled;
 	}
-	
-	
-	private void VersionDownloadCompleted(long result, long responseCode, string[] headers, byte[] body)
-	{
-		_downloadUpdateTimer.Stop();
-		_customVersionCheckBox.Disabled = false;
-		_downloadButton.Disabled = false;
-		_installLocationButton.Disabled = false;
-		_versionButton.Disabled = false;
-		if (result == (int)HttpRequest.Result.Success)
-		{
-			// Used to save version installed after download.
-			Globals.Instance.SaveManager.WriteSave();
-			_downloadProgressBar.Value = 100;
-			_downloadLabel.Text = "Successfully Downloaded!";
 
-			AddInstalledVersion();
-			UnpackAndSetPermissions();
-			if (_createShortcutButton.ButtonPressed)
-			{
-				_downloadWindow.Visible = false;
-				CreateShortcut();
-			}
 
-			_downloadWindow.Visible = false;
-
-			if (Globals.Instance.Settings.LauncherMode)
-			{
-				Tools.Instance.LaunchYuzu();
-			}
-			
-			Globals.Instance.SaveManager.WriteSave();
-		}
-		else
-		{
-			Tools.Instance.AddError("Failed to download, error:" + result);
-			_downloadProgressBar.Value = 0;
-		}
-	}
-	
-	
 	private void CustomVersionSpinBoxEditable(bool editable)
 	{
 		_customVersionSpinBox.Editable = editable;
@@ -531,8 +579,9 @@ Categories=Game;Emulator;Qt;
 
 	private void ExecutableNameChanged(string newName)
 	{
-		_yuzuExecutableName = newName;
-		Globals.Instance.Settings.ExecutableName = _yuzuExecutableName;
+		_executableName = newName;
+		// TODO check if necessary
+		//AppMode.Name = newName;
 		Globals.Instance.SaveManager.WriteSave();
 	}
 

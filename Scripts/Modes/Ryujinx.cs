@@ -1,20 +1,25 @@
+using Godot;
+
 namespace YuzuToolbox.Scripts.Modes;
 
 public class ModeRyujinx : Mode
 {
     public ModeRyujinx()
     {
+        Name = "Ryujinx";
         RepoName = "release-channel-master";
         RepoOwner = "Ryujinx";
         LatestDownloadUrl = "https://github.com/Ryujinx/release-channel-master/releases/latest";
         DownloadBaseUrl = "https://github.com/Ryujinx/release-channel-master/releases/download";
+        ReleasesUrl = "https://github.com/Ryujinx/release-channel-master/releases";
         WindowsFolderName = "yuzu-windows-msvc-early-access";
         BaseString = "ryujinx-";
     }
 
-    
-    public string GetDownloadLink(int version, string os)
+
+    public override string GetDownloadLink(int version, string os)
     {
+        string versionString = Tools.FromInt(version);
         string extension;
         string osPrefix;
         if (os == "Windows")
@@ -32,7 +37,7 @@ public class ModeRyujinx : Mode
             osPrefix = "macos_universal.app";
             extension = "tar.gz";
         }
-        
-        return $@"{DownloadBaseUrl}/{version}/{BaseString}{version}-{osPrefix}.{extension}";
+
+        return $@"{DownloadBaseUrl}/{versionString}/{BaseString}{versionString}-{osPrefix}.{extension}";
     }
 }

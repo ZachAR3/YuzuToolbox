@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 using Godot.Collections;
 using YuzuToolbox.Scripts.Modes;
@@ -31,6 +32,7 @@ public partial class Home : Control
 
 	// Internal variables
 	private Theme _currentTheme;
+	private SettingsResource Settings => Globals.Instance.Settings;
 
 
 	// Godot functions
@@ -38,10 +40,11 @@ public partial class Home : Control
 	{
 		// Sets minimum window size and display mode.
 		DisplayServer.WindowSetMinSize(new Vector2I(1024, 576));
-		DisplayServer.WindowSetMode((DisplayServer.WindowMode)Globals.Instance.Settings.DisplayMode);
+		DisplayServer.WindowSetMode((DisplayServer.WindowMode)Settings.DisplayMode);
 
 		// Set the theme
-		SetTheme(Globals.Instance.Settings.LightModeEnabled);
+		SetTheme(Settings.LightModeEnabled);
+		SetMode(0, Settings.AppMode);
 
 		// Sets scaling (Called manually to hopefully fix #31
 		WindowResized();
@@ -60,25 +63,44 @@ public partial class Home : Control
 		_header.Color = enableLight ? new Godot.Color(0.74117648601532f, 0.76470589637756f, 0.78039216995239f) : new Godot.Color(0.16862745583057f, 0.1803921610117f, 0.18823529779911f);
 		_downloadWindowApp.Color = enableLight ? new Godot.Color(0.74117648601532f, 0.76470589637756f, 0.78039216995239f) : new Godot.Color(0.16862745583057f, 0.1803921610117f, 0.18823529779911f);
 		_enableLightTheme.ButtonPressed = enableLight;
-		Globals.Instance.Settings.LightModeEnabled = enableLight;
-		Globals.Instance.SaveManager.WriteSave(Globals.Instance.Settings);
+		Settings.LightModeEnabled = enableLight;
+		Globals.Instance.SaveManager.WriteSave(Settings);
 		Theme = _currentTheme;
 	}
 
 
-	private void SetMode(int newMode)
+	private void SetMode(int newMode, string forcedMode = "")
 	{
-		switch (_appModes[newMode])
+		string mode;
+		// if manually setting a mode set it to that, otherwise for the button event updates use the indexed mode given
+		if (forcedMode != "")
 		{
-			case "yuzu":
-				Globals.Instance.Settings.AppMode = new ModeYuzu();
+			mode = forcedMode;
+			// TODO
+			//_appModesButton.Selected = _appModes != null ? _appModes.FirstOrDefault(x => x.Value == forcedMode).Key : 0;
+		}
+		else
+		{
+			mode = _appModes[newMode];
+		}
+		
+		switch (mode)
+		{
+			case "Yuzu":
+				Globals.Instance.AppMode = new ModeYuzu();
 				break;
-			case "ryujinx":
-				Globals.Instance.Settings.AppMode = new ModeRyujinx();
+			case "Ryujinx":
+				Globals.Instance.AppMode = new ModeRyujinx();
 				break;
 		}
 	}
 
+
+	private void ModeChanged(int newModeIndex)
+	{
+		SetMode(newModeIndex);
+	}
+	
 
 	private void OpenConsole()
 	{

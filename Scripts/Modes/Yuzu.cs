@@ -7,6 +7,7 @@ public class ModeYuzu : Mode
 {
     public ModeYuzu()
     {
+        Name = "Yuzu";
         RepoName = "pineapple-src";
         RepoOwner = "pineappleEA";
         LatestDownloadUrl = "https://github.com/pineappleEA/pineapple-src/releases/latest";
@@ -16,7 +17,7 @@ public class ModeYuzu : Mode
     }
     
     
-    public string GetDownloadLink(int version, string os)
+    public override string GetDownloadLink(int version, string os)
     {
         string extension = os == "Windows" ? "zip" : "tar.gz";
 

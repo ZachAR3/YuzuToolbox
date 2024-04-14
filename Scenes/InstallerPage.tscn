@@ -11,12 +11,7 @@ bg_color = Color(0.168627, 0.180392, 0.188235, 0.529412)
 layout_mode = 3
 anchors_preset = 0
 script = ExtResource("1_3lw4p")
-_repoName = "pineapple-src"
-_repoOwner = "pineappleEA"
-_pineappleLatestUrl = "https://github.com/pineappleEA/pineapple-src/releases/latest"
-_pineappleDownloadBaseUrl = "https://github.com/pineappleEA/pineapple-src/releases/download/EA-"
 _titlesKeySite = "https://switchbrew.org/w/index.php?title=Title_list/Games&mobileaction=toggle_view_desktop"
-_previousVersionsToAdd = 20
 _icon = ExtResource("2_dhhpw")
 _versionButton = NodePath("ControlsContainer/VersionSelectionButton")
 _createShortcutButton = NodePath("ControlsContainer/CreateShortcutButton")

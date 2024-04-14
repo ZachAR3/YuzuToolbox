@@ -2,16 +2,20 @@ using Godot;
 using System.IO;
 using System.Linq;
 using Octokit;
+using YuzuToolbox.Scripts.Modes;
 using Node = Godot.Node;
 
 public partial class Globals : Node
 {
 	//private static Globals _instance;
 	public static Globals Instance;
-	
+
+	public Mode AppMode = new ModeRyujinx();
 	public ResourceSaveManager SaveManager = new();
 	public SettingsResource Settings = new();
-	public readonly GitHubClient LocalGithubClient = new(new ProductHeaderValue("PineappleEA-GUI"));
+	
+	// TODO replace header with finalized project name
+	public readonly GitHubClient LocalGithubClient = new(new ProductHeaderValue("EmulationToolbox"));
 	//public string DllsDirectory;
 
 	public override void _Ready()
@@ -60,7 +64,7 @@ public partial class Globals : Node
 		{
 			Settings.FromSaveDirectory = Path.Join(Settings.AppDataPath, "nand", "user", "save");
 		}
-		
+
 		SaveManager.WriteSave(Settings);
 	}
 

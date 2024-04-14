@@ -52,6 +52,32 @@ public partial class Tools : Node
 			AddError("Unable to launch Yuzu: " + launchException.Message);
 		}	
 	}
+
+	
+	// Bit math I don't understand to convert to and from an int for indexing
+	public static int ToInt(string version)
+	{
+		// Override of sorts so this function can be used on both ints and strings
+		if (int.TryParse(version, out _))
+		{
+			return version.ToInt();
+		}
+		
+		string[] versionParts = version.Split('.');
+		int major = int.Parse(versionParts[0]);
+		int minor = int.Parse(versionParts[1]);
+		int build = int.Parse(versionParts[2]);
+		return (major << 22) | (minor << 12) | build;
+	}
+
+
+	public static string FromInt(int version)
+	{
+		int major = (version >> 22) & 0x3FF;
+		int minor = (version >> 12) & 0x3FF;
+		int build = version & 0xFFF;
+		return @$"{major}.{minor}.{build}";
+	}
 	
 	
 	private void ToggleConsole()

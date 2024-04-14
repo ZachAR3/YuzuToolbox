@@ -41,7 +41,7 @@ public partial class StandardModManagement : Node
 				await using (var stream = File.OpenRead(downloadPath))
 				{
 					var reader = ArchiveFactory.Open(stream);
-    
+
 					Directory.CreateDirectory(installPath + "-temp");
     
 					foreach (var entry in reader.Entries)

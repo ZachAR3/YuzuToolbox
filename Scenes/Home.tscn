@@ -39,7 +39,7 @@ border_width_right = 3
 border_width_bottom = 3
 border_color = Color(0.8, 0.8, 0.8, 0)
 
-[node name="Home" type="Control" node_paths=PackedStringArray("_darkBg", "_lightBg", "_downloadWindowApp", "_backgroundAudio", "_muteButton", "_enableLightTheme", "_header", "_headerLabel", "_latestVersionLabel", "_errorConsole", "_modList", "_modMangerLoadingSprite", "_modManagerLoadingLabel") groups=["Initiate"]]
+[node name="Home" type="Control" node_paths=PackedStringArray("_darkBg", "_lightBg", "_downloadWindowApp", "_enableLightTheme", "_header", "_headerLabel", "_latestVersionLabel", "_errorConsole", "_modList", "_modMangerLoadingSprite", "_modManagerLoadingLabel") groups=["Initiate"]]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -58,8 +58,6 @@ _appModes = {
 _darkBg = NodePath("DarkBG")
 _lightBg = NodePath("LightBG")
 _downloadWindowApp = NodePath("Pages/Installer/DownloadWindow/Window")
-_backgroundAudio = NodePath("")
-_muteButton = NodePath("")
 _enableLightTheme = NodePath("Header/Option/LightMode")
 _themes = Array[Theme]([ExtResource("1_c22a4"), ExtResource("3_a1ctt")])
 _themesSeparator = Array[StyleBoxLine]([ExtResource("5_qxukt"), ExtResource("7_iauax")])
@@ -200,6 +198,9 @@ metadata/_edit_use_anchors_ = true
 [node name="Installer" parent="Pages" node_paths=PackedStringArray("_latestVersionLabel") instance=ExtResource("10_7mm46")]
 layout_mode = 2
 _latestVersionLabel = NodePath("../../Header/HeaderLabels/LastestVersion")
+
+[node name="CustomVersionCheckBox" parent="Pages/Installer/ControlsContainer/CustomVersion" index="0"]
+disabled = true
 
 [node name="Tools" parent="Pages" instance=ExtResource("11_27f86")]
 visible = false
