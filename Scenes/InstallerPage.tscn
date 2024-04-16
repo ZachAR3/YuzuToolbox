@@ -7,7 +7,7 @@
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7am6t"]
 bg_color = Color(0.168627, 0.180392, 0.188235, 0.529412)
 
-[node name="Installer" type="Control" node_paths=PackedStringArray("_versionButton", "_createShortcutButton", "_autoUpdateButton", "_executableNameLineEdit", "_installLocationButton", "_downloadButton", "_downloadWindow", "_downloadLabel", "_downloadUpdateTimer", "_downloadProgressBar", "_clearShadersButton", "_shadersLocationButton", "_autoUnpackButton", "_customVersionCheckBox", "_downloadRequester", "_extractWarning", "_downloadWarning", "_clearShadersWarning") groups=["Initiate"]]
+[node name="Installer" type="Control" node_paths=PackedStringArray("_versionButton", "_createShortcutButton", "_autoUpdateButton", "_executableNameLineEdit", "_installLocationButton", "_downloadButton", "_downloadWindow", "_downloadLabel", "_downloadUpdateTimer", "_downloadProgressBar", "_autoUnpackButton", "_customVersionCheckBox", "_downloadRequester", "_extractWarning", "_downloadWarning") groups=["Initiate"]]
 layout_mode = 3
 anchors_preset = 0
 script = ExtResource("1_3lw4p")
@@ -23,14 +23,11 @@ _downloadWindow = NodePath("DownloadWindow")
 _downloadLabel = NodePath("DownloadWindow/Window/DownloadLabelBox")
 _downloadUpdateTimer = NodePath("DownloadWindow/Window/DownloadProgressUpdater")
 _downloadProgressBar = NodePath("DownloadWindow/Window/DownloadProgress")
-_clearShadersButton = NodePath("ControlsContainer/ClearShadersButton")
-_shadersLocationButton = NodePath("ControlsContainer/ShaderLocationButton")
 _autoUnpackButton = NodePath("ControlsContainer/ExtractButton")
 _customVersionCheckBox = NodePath("ControlsContainer/CustomVersion/CustomVersionCheckBox")
 _downloadRequester = NodePath("DownloadRequester")
 _extractWarning = NodePath("ControlsContainer/ExtractLabel/ExtractWarning")
 _downloadWarning = NodePath("DownloadButton/DownloadWarning")
-_clearShadersWarning = NodePath("ControlsContainer/ClearShadersLabel/ClearShadersWarning")
 metadata/_edit_use_anchors_ = true
 
 [node name="ControlsContainer" type="GridContainer" parent="."]
@@ -83,16 +80,6 @@ layout_mode = 2
 size_flags_horizontal = 3
 tooltip_text = "Location to intall Yuzu"
 
-[node name="ShaderLocationLabel" type="Label" parent="ControlsContainer"]
-layout_mode = 2
-text = "Shaders location:"
-
-[node name="ShaderLocationButton" type="Button" parent="ControlsContainer"]
-custom_minimum_size = Vector2(100, 0)
-layout_mode = 2
-size_flags_horizontal = 3
-tooltip_text = "Yuzu shaders location"
-
 [node name="ExecutableNameLabel" type="Label" parent="ControlsContainer"]
 layout_mode = 2
 tooltip_text = "Set a custom executable name, e.g yuzu (turns into yuzu.exe or yuzu.appimage)"
@@ -129,33 +116,6 @@ focus_mode = 0
 text = "Windows only:WARNING WILL DELETE ALL DATA IN INSTALL LOCATION"
 alignment = 1
 text_overrun_behavior = 4
-
-[node name="ClearShadersLabel" type="Label" parent="ControlsContainer"]
-layout_mode = 2
-text = "Clear shaders"
-autowrap_mode = 3
-
-[node name="ClearShadersWarning" type="TextureRect" parent="ControlsContainer/ClearShadersLabel"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.696742
-anchor_top = 0.230769
-anchor_right = 0.774436
-anchor_bottom = 0.897436
-grow_horizontal = 2
-grow_vertical = 2
-texture = ExtResource("1_xly6n")
-expand_mode = 1
-stretch_mode = 4
-metadata/_edit_use_anchors_ = true
-
-[node name="ClearShadersButton" type="CheckBox" parent="ControlsContainer"]
-layout_mode = 2
-tooltip_text = "Clears shaders on install (WARNING DELETES ALL DATA IN SELECTED LOCATION)"
-text = "Clear shaders on install (WARNING DELETES ALL DATA IN SELECTED LOCATION)"
-alignment = 1
-text_overrun_behavior = 4
-clip_text = true
 
 [node name="CreateShortcutLabel" type="Label" parent="ControlsContainer"]
 layout_mode = 2
@@ -282,10 +242,8 @@ wait_time = 0.1
 
 [connection signal="toggled" from="ControlsContainer/CustomVersion/CustomVersionCheckBox" to="." method="CustomVersionSpinBoxEditable"]
 [connection signal="pressed" from="ControlsContainer/LocationButton" to="." method="OnInstallLocationButtonPressed"]
-[connection signal="pressed" from="ControlsContainer/ShaderLocationButton" to="." method="OnShadersLocationButtonPressed"]
 [connection signal="text_changed" from="ControlsContainer/ExecutableName" to="." method="ExecutableNameChanged"]
 [connection signal="toggled" from="ControlsContainer/ExtractButton" to="." method="AutoUnpackToggled"]
-[connection signal="toggled" from="ControlsContainer/ClearShadersButton" to="." method="ClearShadersToggle"]
 [connection signal="toggled" from="ControlsContainer/AutoUpdate" to="." method="AutoUpdateToggled"]
 [connection signal="pressed" from="DownloadButton" to="." method="InstallSelectedVersion"]
 [connection signal="request_completed" from="DownloadRequester" to="." method="VersionDownloadCompleted"]

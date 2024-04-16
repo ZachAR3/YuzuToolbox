@@ -7,7 +7,6 @@ public partial class SettingsResource : Resource
 {
 	[Export] public string SaveDirectory;
 	[Export] public string ExecutablePath;
-	[Export] public string ShadersLocation;
 	[Export] public string FromSaveDirectory;
 	[Export] public string ToSaveDirectory;
 	[Export] public string ModsLocation;

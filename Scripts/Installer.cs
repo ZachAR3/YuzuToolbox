@@ -36,15 +36,12 @@ public partial class Installer : Control
 	[Export] private Label _downloadLabel;
 	[Export] private Timer _downloadUpdateTimer;
 	[Export] private ProgressBar _downloadProgressBar;
-	[Export] private CheckBox _clearShadersButton;
-	[Export] private Button _shadersLocationButton;
 	[Export] private CheckBox _autoUnpackButton;
 	[Export] private CheckBox _customVersionCheckBox;
 	[Export] private LineEdit _customVersionLineEdit;
 	[Export] private HttpRequest _downloadRequester;
 	[Export] private TextureRect _extractWarning;
 	[Export] private TextureRect _downloadWarning;
-	[Export] private TextureRect _clearShadersWarning;
 
 	// Internal variables
 	private String _osUsed = OS.GetName();
@@ -86,14 +83,12 @@ public partial class Installer : Control
 
 		_executableName = AppMode.Name;
 		_executableNameLineEdit.Text = _executableName;
-		_shadersLocationButton.Text = Settings.ShadersLocation;
 		_installLocationButton.Text = Settings.SaveDirectory;
 		_downloadButton.Disabled = true;
 		_downloadWindow.Visible = false;
 		_customVersionLineEdit.Editable = false;
 		_extractWarning.Visible = false;
 		_downloadWarning.Visible = false;
-		_clearShadersWarning.Visible = false;
 
 		AddVersions();
 	}
@@ -437,44 +432,49 @@ Categories=Game;Emulator;Qt;
 			};
 			Settings.ExecutablePath = executablePath;
 		}
-		else
+		else if (_autoUnpackButton.ButtonPressed || _autoUpdate)
 		{
-			if (_autoUnpackButton.ButtonPressed || _autoUpdate)
+			using Stream stream = File.OpenRead(executablePath);
+			var reader = ReaderFactory.Open(stream);
+			while (reader.MoveToNextEntry())
 			{
-				using Stream stream = File.OpenRead(executablePath);
-				var reader = ReaderFactory.Open(stream);
-				while (reader.MoveToNextEntry())
+				if (!reader.Entry.IsDirectory)
 				{
-					if (!reader.Entry.IsDirectory)
+					ExtractionOptions opt = new ExtractionOptions
 					{
-						ExtractionOptions opt = new ExtractionOptions
-						{
-							ExtractFullPath = true,
-							Overwrite = true
-						};
-						reader.WriteEntryToDirectory(Settings.SaveDirectory, opt);
-					}
-				}
-
-				String yuzuWindowsDirectory = $@"{Settings.SaveDirectory}/{AppMode.WindowsFolderName}";
-				if (Directory.Exists(yuzuWindowsDirectory))
-				{
-					// Moves the files from the temp folder into the save directory
-					Tools.MoveFilesAndDirs(yuzuWindowsDirectory, Settings.SaveDirectory);
-					// Creates the executable path to yuzu.exe (hardcoded, but due to the prevalence of .exe's in the folder no better ways to do it)
-					var currentExecutablePath = Path.Join(Settings.SaveDirectory, "yuzu.exe");
-					var newExecutablePath = Path.Join(Settings.SaveDirectory,
-						$"{_executableName}.exe");
-					// Essentially renames the .exe into the yuzu executable name
-					if (currentExecutablePath != newExecutablePath)
-					{
-						File.Move(currentExecutablePath, newExecutablePath);
-					}
-
-					Settings.ExecutablePath = newExecutablePath;
+						ExtractFullPath = true,
+						Overwrite = true
+					};
+					reader.WriteEntryToDirectory(Settings.SaveDirectory, opt);
 				}
 			}
+
+			// Moves the files from the publish folder Ryujinx uses to the save directory
+			if (AppMode.Name == "Ryujinx")
+			{
+				Tools.MoveFilesAndDirs(@$"{Settings.SaveDirectory}/publish", Settings.SaveDirectory);
+			}
+
+			// TODO
+			String yuzuWindowsDirectory = $@"{Settings.SaveDirectory}/{AppMode.WindowsFolderName}";
+			if (Directory.Exists(yuzuWindowsDirectory))
+			{
+				// Moves the files from the temp folder into the save directory
+				Tools.MoveFilesAndDirs(yuzuWindowsDirectory, Settings.SaveDirectory);
+				// Creates the executable path to yuzu.exe (hardcoded, but due to the prevalence of .exe's in the folder no better ways to do it)
+				var currentExecutablePath = Path.Join(Settings.SaveDirectory, "yuzu.exe");
+				var newExecutablePath = Path.Join(Settings.SaveDirectory,
+					$"{_executableName}.exe");
+				// Essentially renames the .exe into the yuzu executable name
+				if (currentExecutablePath != newExecutablePath)
+				{
+					File.Move(currentExecutablePath, newExecutablePath);
+				}
+
+				Settings.ExecutablePath = newExecutablePath;
+			}
 		}
+		
 	}
 
 
@@ -498,55 +498,7 @@ Categories=Game;Emulator;Qt;
 	}
 
 
-	private void DeleteOldVersion()
-	{
-		var oldVersion = GetExistingVersion();
-
-		if (_osUsed == "Linux")
-		{
-			if (oldVersion != "")
-			{
-				File.Delete(oldVersion);
-			}
-		}
-
-		else if (_osUsed == "Windows")
-		{
-			if (_autoUnpackButton.ButtonPressed)
-			{
-				Tools.DeleteDirectoryContents(Settings.SaveDirectory);
-			}
-			else
-			{
-				if (oldVersion != "")
-				{
-					File.Delete(oldVersion);
-				}
-			}
-		}
-
-		if (_clearShadersButton.ButtonPressed)
-		{
-			Tools.Instance.ClearShaders(Settings.ShadersLocation);
-			;
-		}
-	}
-
-
 	// Signal functions
-	private  void OnShadersLocationButtonPressed()
-	{
-		var shadersLocationInput = Dialog.FolderPicker(Settings.ShadersLocation).Path;
-		if (shadersLocationInput != null)
-		{
-			Settings.ShadersLocation = shadersLocationInput;
-		}
-
-		_shadersLocationButton.Text = Settings.ShadersLocation;	
-		Globals.Instance.SaveManager.WriteSave(Settings);
-	}
-	
-	
 	private void OnInstallLocationButtonPressed()
 	{
 		var saveDirectoryLocationInput = Dialog.FolderPicker(Settings.SaveDirectory).Path;
@@ -567,12 +519,6 @@ Categories=Game;Emulator;Qt;
 		_createShortcutButton.Disabled = !unpackEnabled;
 		_downloadWarning.Visible = _extractWarning.Visible || unpackEnabled;
 		_extractWarning.Visible = unpackEnabled;
-	}
-
-	private void ClearShadersToggle(bool clearEnabled)
-	{
-		_clearShadersWarning.Visible = clearEnabled;
-		_downloadWarning.Visible = _extractWarning.Visible || clearEnabled;
 	}
 
 

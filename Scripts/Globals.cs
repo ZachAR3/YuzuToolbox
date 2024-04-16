@@ -48,13 +48,7 @@ public partial class Globals : Node
 				: Path.Join(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData),
 					"yuzu");
 		}
-		
-		// Sets shaders location default for first startup
-		if (string.IsNullOrEmpty(Settings.ShadersLocation))
-		{
-			Settings.ShadersLocation = Path.Join(Settings.AppDataPath, "shader");
-		}
-		
+
 		if (string.IsNullOrEmpty(Settings.ModsLocation))
 		{
 			Settings.ModsLocation = Path.Join(Settings.AppDataPath, "load");

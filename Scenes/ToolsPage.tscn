@@ -8,7 +8,7 @@ layout_mode = 3
 anchors_preset = 0
 script = ExtResource("1_1ei58")
 _clearInstallFolderButton = NodePath("Tools/ClearInstallFolderButton")
-_clearShadersToolButton = NodePath("Tools/ClearShaders")
+_clearShadersToolButton = NodePath("")
 _backupSavesButton = NodePath("Tools/BackupSavesButton")
 _restoreSavesButton = NodePath("Tools/RestoreSavesButton")
 _fromSaveDirectoryButton = NodePath("Tools/SaveContainer/FromButton")
@@ -41,29 +41,6 @@ anchor_left = -0.0434028
 anchor_top = 0.310127
 anchor_right = -0.0144676
 anchor_bottom = 0.626582
-grow_horizontal = 2
-grow_vertical = 2
-texture = ExtResource("1_pfmpv")
-expand_mode = 5
-stretch_mode = 4
-metadata/_edit_use_anchors_ = true
-
-[node name="ClearShaders" type="Button" parent="Tools"]
-custom_minimum_size = Vector2(100, 0)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-tooltip_text = "Clears the shader folder of all files / previous shaders"
-focus_mode = 0
-text = "Clear Shaders"
-
-[node name="ClearShadersManualWarning" type="TextureRect" parent="Tools/ClearShaders"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = -0.0416667
-anchor_top = 0.329114
-anchor_right = -0.0127315
-anchor_bottom = 0.64557
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("1_pfmpv")
@@ -125,7 +102,6 @@ tooltip_text = "Location to store saves when backing up, and retrieve saves from
 focus_mode = 0
 
 [connection signal="pressed" from="Tools/ClearInstallFolderButton" to="." method="ClearInstallFolderButtonPressed"]
-[connection signal="pressed" from="Tools/ClearShaders" to="." method="ClearShaderButtonPressed"]
 [connection signal="pressed" from="Tools/BackupSavesButton" to="." method="OnBackupSavesButtonPressed"]
 [connection signal="pressed" from="Tools/RestoreSavesButton" to="." method="OnRestoreSavesPressed"]
 [connection signal="pressed" from="Tools/SaveContainer/FromButton" to="." method="OnFromSaveDirectoryButtonPressed"]

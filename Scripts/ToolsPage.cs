@@ -6,7 +6,6 @@ public partial class ToolsPage : Control
 {
 	[ExportGroup("Tools")] 
 	[Export()] private Button _clearInstallFolderButton;
-	[Export()] private Button _clearShadersToolButton;
 	[Export()] private Button _backupSavesButton;
 	[Export()] private Button _restoreSavesButton;
 	[Export()] private Button _fromSaveDirectoryButton;
@@ -41,28 +40,6 @@ public partial class ToolsPage : Control
 		else
 		{
 			_clearInstallFolderButton.Text = "Cleared successfully!";
-		}
-	}
-	
-	
-	
-	private async void ClearShaderButtonPressed()
-	{
-		var confirm = await Tools.Instance.ConfirmationPopup();
-		if (confirm == false)
-		{
-			return;
-		}
-		
-		// Clears the shaders, if returned an error notifies user.
-		if (!Tools.Instance.ClearShaders(Globals.Instance.Settings.ShadersLocation))
-		{
-			Tools.Instance.AddError("failed to clear shaders");
-			_clearShadersToolButton.Text = "Clear failed!";
-		}
-		else
-		{
-			_clearShadersToolButton.Text = "Cleared successfully!";
 		}
 	}
 	

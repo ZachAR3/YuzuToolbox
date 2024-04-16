@@ -13,7 +13,6 @@ public abstract class Mode
     public string WindowsFolderName;
     public string BaseString;
     public string InstallDirectory;
-    public string ShaderDirectory;
     public string ModsDirectory;
     public string SaveDirectory;
 

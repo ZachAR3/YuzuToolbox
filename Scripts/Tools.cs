@@ -145,7 +145,7 @@ public partial class Tools : Node
 		{
 			string fileName = Path.GetFileName(file);
 			string targetPath = Path.Combine(targetDirectory, fileName);
-			File.Move(file, targetPath);
+			File.Move(file, targetPath, true);
 		}
 
 		// Move directories to the target directory
@@ -153,7 +153,10 @@ public partial class Tools : Node
 		{
 			string directoryName = Path.GetFileName(directory);
 			string targetPath = Path.Combine(targetDirectory, directoryName);
-			Directory.Move(directory, targetPath);
+			if (!Directory.Exists(targetPath))
+			{
+				Directory.Move(directory, targetPath);
+			}
 		}
 
 		// Remove the source directory if it is empty
@@ -184,20 +187,8 @@ public partial class Tools : Node
 			File.Copy(filePath, newFilePath, overwriteFiles);
 		}
 	}
-	
-	
-	public bool ClearShaders(string shaderLocation)
-	{
-		if (Directory.Exists(shaderLocation))
-		{
-			DeleteDirectoryContents(shaderLocation);
-			return true;
 
-		}
-		return false;
-	}
-	
-	
+
 	public async void AddError(String error)
 	{
 		Callable.From(() =>
