@@ -7,7 +7,7 @@
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7am6t"]
 bg_color = Color(0.168627, 0.180392, 0.188235, 0.529412)
 
-[node name="Installer" type="Control" node_paths=PackedStringArray("_versionButton", "_createShortcutButton", "_autoUpdateButton", "_executableNameLineEdit", "_installLocationButton", "_downloadButton", "_downloadWindow", "_downloadLabel", "_downloadUpdateTimer", "_downloadProgressBar", "_clearShadersButton", "_shadersLocationButton", "_autoUnpackButton", "_customVersionCheckBox", "_customVersionSpinBox", "_downloadRequester", "_extractWarning", "_downloadWarning", "_clearShadersWarning") groups=["Initiate"]]
+[node name="Installer" type="Control" node_paths=PackedStringArray("_versionButton", "_createShortcutButton", "_autoUpdateButton", "_executableNameLineEdit", "_installLocationButton", "_downloadButton", "_downloadWindow", "_downloadLabel", "_downloadUpdateTimer", "_downloadProgressBar", "_clearShadersButton", "_shadersLocationButton", "_autoUnpackButton", "_customVersionCheckBox", "_downloadRequester", "_extractWarning", "_downloadWarning", "_clearShadersWarning") groups=["Initiate"]]
 layout_mode = 3
 anchors_preset = 0
 script = ExtResource("1_3lw4p")
@@ -27,7 +27,6 @@ _clearShadersButton = NodePath("ControlsContainer/ClearShadersButton")
 _shadersLocationButton = NodePath("ControlsContainer/ShaderLocationButton")
 _autoUnpackButton = NodePath("ControlsContainer/ExtractButton")
 _customVersionCheckBox = NodePath("ControlsContainer/CustomVersion/CustomVersionCheckBox")
-_customVersionSpinBox = NodePath("ControlsContainer/CustomVersion/CustomVersionSpinBox")
 _downloadRequester = NodePath("DownloadRequester")
 _extractWarning = NodePath("ControlsContainer/ExtractLabel/ExtractWarning")
 _downloadWarning = NodePath("DownloadButton/DownloadWarning")
@@ -70,13 +69,9 @@ layout_mode = 2
 focus_mode = 0
 flat = true
 
-[node name="CustomVersionSpinBox" type="SpinBox" parent="ControlsContainer/CustomVersion"]
+[node name="CustomVersionLineEdit" type="LineEdit" parent="ControlsContainer/CustomVersion"]
 layout_mode = 2
 size_flags_horizontal = 3
-min_value = 3090.0
-max_value = 99999.0
-value = 3090.0
-rounded = true
 
 [node name="LocationLabel" type="Label" parent="ControlsContainer"]
 layout_mode = 2

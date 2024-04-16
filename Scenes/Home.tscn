@@ -195,12 +195,10 @@ grow_vertical = 2
 tab_alignment = 1
 metadata/_edit_use_anchors_ = true
 
-[node name="Installer" parent="Pages" node_paths=PackedStringArray("_latestVersionLabel") instance=ExtResource("10_7mm46")]
+[node name="Installer" parent="Pages" node_paths=PackedStringArray("_latestVersionLabel", "_customVersionLineEdit") instance=ExtResource("10_7mm46")]
 layout_mode = 2
 _latestVersionLabel = NodePath("../../Header/HeaderLabels/LastestVersion")
-
-[node name="CustomVersionCheckBox" parent="Pages/Installer/ControlsContainer/CustomVersion" index="0"]
-disabled = true
+_customVersionLineEdit = NodePath("ControlsContainer/CustomVersion/CustomVersionLineEdit")
 
 [node name="Tools" parent="Pages" instance=ExtResource("11_27f86")]
 visible = false
@@ -254,6 +252,8 @@ _confirmationPopup = NodePath("../ConfirmPopup")
 
 [node name="Globals" type="Node" parent="."]
 script = ExtResource("15_p1cux")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
 
 [connection signal="item_selected" from="Header/Option/OptionButton" to="." method="ModeChanged"]
 [connection signal="toggled" from="Header/Option/LightMode" to="." method="SetTheme"]

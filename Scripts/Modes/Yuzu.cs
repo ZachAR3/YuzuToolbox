@@ -12,6 +12,7 @@ public class ModeYuzu : Mode
         RepoOwner = "pineappleEA";
         LatestDownloadUrl = "https://github.com/pineappleEA/pineapple-src/releases/latest";
         DownloadBaseUrl = "https://github.com/pineappleEA/pineapple-src/releases/download/EA-";
+        ReleasesUrl = "https://github.com/pineappleEA/pineapple-src/releases";
         WindowsFolderName = "yuzu-windows-msvc-early-access";
         BaseString = "Yuzu-EA-";
     }

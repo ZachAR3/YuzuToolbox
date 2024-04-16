@@ -12,7 +12,6 @@ using Octokit;
 using WindowsShortcutFactory;
 using YuzuToolbox.Scripts.Modes;
 using Label = Godot.Label;
-using SharpCompress.Archives;
 using SharpCompress.Common;
 using SharpCompress.Readers;
 
@@ -41,7 +40,7 @@ public partial class Installer : Control
 	[Export] private Button _shadersLocationButton;
 	[Export] private CheckBox _autoUnpackButton;
 	[Export] private CheckBox _customVersionCheckBox;
-	[Export] private SpinBox _customVersionSpinBox;
+	[Export] private LineEdit _customVersionLineEdit;
 	[Export] private HttpRequest _downloadRequester;
 	[Export] private TextureRect _extractWarning;
 	[Export] private TextureRect _downloadWarning;
@@ -91,7 +90,7 @@ public partial class Installer : Control
 		_installLocationButton.Text = Settings.SaveDirectory;
 		_downloadButton.Disabled = true;
 		_downloadWindow.Visible = false;
-		_customVersionSpinBox.Editable = false;
+		_customVersionLineEdit.Editable = false;
 		_extractWarning.Visible = false;
 		_downloadWarning.Visible = false;
 		_clearShadersWarning.Visible = false;
@@ -115,7 +114,12 @@ public partial class Installer : Control
 
 		if (_customVersionCheckBox.ButtonPressed)
 		{
-			selectedVersion = (int)_customVersionSpinBox.Value;
+			if (Regex.IsMatch(_customVersionLineEdit.Text, @"[^0-9.]"))
+			{
+				Tools.Instance.AddError("Invalid version selected, please enter a valid version number.");
+				return;
+			}
+			selectedVersion = Tools.ToInt(_customVersionLineEdit.Text.Trim());
 		}
 		else
 		{
@@ -374,9 +378,11 @@ Categories=Game;Emulator;Qt;
 
 	private void AddInstalledVersion()
 	{
-		var installedVersion = Settings.InstalledVersion;
-		var selectedIndex = _versionButton.GetItemIndex(installedVersion);
-		_customVersionSpinBox.Value = installedVersion;
+		var installedVersionInt = Settings.InstalledVersion;
+		var installedVersion = AppMode.Name == "Yuzu" ? installedVersionInt.ToString() : Tools.FromInt(installedVersionInt);
+		var selectedIndex = _versionButton.GetItemIndex(installedVersionInt);
+		// Set the custom version to default of the currently installed one
+		_customVersionLineEdit.Text = installedVersion;
 
 		// Checks if the item was already added, if so sets it as current, otherwise adds a new item entry for it.
 		if (selectedIndex >= 0)
@@ -385,8 +391,8 @@ Categories=Game;Emulator;Qt;
 		}
 		else
 		{
-			_versionButton.AddItem(installedVersion.ToString(), installedVersion);
-			selectedIndex = _versionButton.GetItemIndex(installedVersion);
+			_versionButton.AddItem(installedVersion, installedVersionInt);
+			selectedIndex = _versionButton.GetItemIndex(installedVersionInt);
 			_versionButton.Selected = selectedIndex;
 		}
 
@@ -572,7 +578,7 @@ Categories=Game;Emulator;Qt;
 
 	private void CustomVersionSpinBoxEditable(bool editable)
 	{
-		_customVersionSpinBox.Editable = editable;
+		_customVersionLineEdit.Editable = editable;
 		_versionButton.Disabled = editable;
 	}
 
