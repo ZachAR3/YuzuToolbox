@@ -1,5 +1,5 @@
 # Notice
-This project is currently undergoing a large rework to add Ryujinx and MacOS support. Expect master branch to be broken, please download a release directly or from the Itch store page.
+This project is currently dead as the code base is a mess and I don't have time to rewrite everything right now. Furthermore Ryujinx and Yuzu were both DMCA'd so downloads would have to be from forks which dissapear alot. I may come back in the future and gut the project but for the time being all active development has been halted. 
 
 # YuzuToolbox
 A simple tool to download and update early access builds of yuzu from the [PineappleEA](https://github.com/pineappleEA/pineapple-src "PineappleEA") Github repo. This tool is currently supports 
