@@ -1,3 +1,6 @@
+# Notice
+This project is currently dead as the code base is a mess and I don't have time to rewrite everything right now. Furthermore Ryujinx and Yuzu were both DMCA'd so downloads would have to be from forks which dissapear alot. I may come back in the future and gut the project but for the time being all active development has been halted. 
+
 # YuzuToolbox
 A simple tool to download and update early access builds of yuzu from the [PineappleEA](https://github.com/pineappleEA/pineapple-src "PineappleEA") Github repo. This tool is currently supports 
 * Cross platform (Windows and Linux)
@@ -6,6 +9,9 @@ A simple tool to download and update early access builds of yuzu from the [Pinea
 * Shortcut creation and automatic unpacking
 * Basic backup tool (allows save directory to be duplicated into another directory and then restored when desired)
 * Mod management (downloading, installing and updating mods from a variety of sources; + ability to uninstall and detect manually installed mods)
+
+# Donate
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/R5R4NFO8V)
 
 # Installing
 The recommended method of install is through Itch.io as it provoides updating features and easier launching: https://zachar3.itch.io/yuzutoolbox
