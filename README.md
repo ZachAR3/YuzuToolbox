@@ -1,5 +1,5 @@
 # Notice
-This project is currently dead as the code base is a mess and I don't have time to rewrite everything right now. Furthermore Ryujinx and Yuzu were both DMCA'd so downloads would have to be from forks which dissapear alot. I may come back in the future and gut the project but for the time being all active development has been halted. 
+This project is not actively supported anymore after Yuzu and Ryujinx were shut-down. A partial re-write to support any emulator was in-progress but due to time constraints all development has been halted on the porject indefinitely. I may come back and rewrite it at somepoint but as is while some features may still work such as the mod manager if xcode paths haven't changed the main features for installing and updating Yuzu are broken.
 
 # YuzuToolbox
 A simple tool to download and update early access builds of yuzu from the [PineappleEA](https://github.com/pineappleEA/pineapple-src "PineappleEA") Github repo. This tool is currently supports 
